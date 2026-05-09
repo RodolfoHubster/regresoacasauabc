@@ -1,178 +1,112 @@
-/* ==========================================================
-   ADMIN.JS — Lógica del panel administrador
-   ========================================================== */
+/* admin.js – Lógica del panel de administración */
 
-// ---- Navegación entre secciones ----
-const SECTION_TITLES = {
+// ─── NAVEGACIÓN ENTRE SECCIONES ───
+const sectionTitles = {
   dashboard:  'Dashboard',
   eventos:    'Gestión de Eventos',
   registros:  'Asistentes Registrados',
   faq:        'Preguntas Frecuentes',
-  qr:         'Validar QR',
+  qr:         'Validar QR de Acceso'
 };
 
-function showSection(id) {
-  // Ocultar todas
+function showSection(name) {
   document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
 
-  // Mostrar la seleccionada
-  const section = document.getElementById('section-' + id);
-  if (section) section.classList.add('active');
+  const sec = document.getElementById('section-' + name);
+  if (sec) sec.classList.add('active');
 
-  // Marcar link activo
-  const link = document.querySelector(`.sidebar-link[data-section="${id}"]`);
+  const link = document.querySelector('[data-section="' + name + '"]');
   if (link) link.classList.add('active');
 
-  // Actualizar título en topbar
-  const topbarTitle = document.getElementById('topbar-title');
-  if (topbarTitle) topbarTitle.textContent = SECTION_TITLES[id] || id;
+  const title = document.getElementById('topbar-title');
+  if (title) title.textContent = sectionTitles[name] || name;
 
-  // Cerrar sidebar en mobile tras navegar
-  if (window.innerWidth <= 900) closeSidebar();
+  // Cerrar sidebar en móvil
+  document.getElementById('admin-sidebar').classList.remove('open');
+  // Scroll al inicio
+  const main = document.getElementById('admin-main');
+  if (main) main.scrollTop = 0;
 }
 
-// ---- Sidebar toggle (mobile) ----
 function toggleSidebar() {
-  const sidebar  = document.getElementById('admin-sidebar');
-  const overlay  = document.getElementById('sidebar-overlay');
-  const isOpen   = sidebar.classList.contains('is-open');
-  if (isOpen) {
-    closeSidebar();
-  } else {
-    sidebar.classList.add('is-open');
-    sidebar.classList.remove('is-closed');
-    if (overlay) overlay.classList.add('active');
-  }
+  document.getElementById('admin-sidebar').classList.toggle('open');
 }
 
-function closeSidebar() {
-  const sidebar = document.getElementById('admin-sidebar');
-  const overlay = document.getElementById('sidebar-overlay');
-  sidebar.classList.remove('is-open');
-  sidebar.classList.add('is-closed');
-  if (overlay) overlay.classList.remove('active');
-}
-
-// ---- Modals ----
+// ─── MODALES ADMIN ───
 function openAdminModal(id) {
-  const modal = document.getElementById(id);
-  if (!modal) return;
-  modal.removeAttribute('hidden');
-  // Focus al primer input del modal
-  setTimeout(() => {
-    const first = modal.querySelector('input, textarea, select, button');
-    if (first) first.focus();
-  }, 100);
+  const overlay = document.getElementById(id);
+  if (!overlay) return;
+  overlay.hidden = false;
+  document.body.style.overflow = 'hidden';
+  overlay._esc = (e) => { if (e.key === 'Escape') closeAdminModal(id); };
+  overlay._click = (e) => { if (e.target === overlay) closeAdminModal(id); };
+  document.addEventListener('keydown', overlay._esc);
+  overlay.addEventListener('click', overlay._click);
+  const firstFocusable = overlay.querySelector('input, select, textarea, button:not(.modal-close)');
+  if (firstFocusable) setTimeout(() => firstFocusable.focus(), 100);
 }
 
 function closeAdminModal(id) {
-  const modal = document.getElementById(id);
-  if (modal) modal.setAttribute('hidden', '');
+  const overlay = document.getElementById(id);
+  if (!overlay) return;
+  overlay.hidden = true;
+  document.body.style.overflow = '';
+  if (overlay._esc) document.removeEventListener('keydown', overlay._esc);
+  if (overlay._click) overlay.removeEventListener('click', overlay._click);
 }
 
-// Cerrar modal con Escape o click en overlay
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    document.querySelectorAll('.modal-overlay:not([hidden])').forEach(m => {
-      m.setAttribute('hidden', '');
-    });
-  }
-});
-
-document.addEventListener('click', (e) => {
-  if (e.target.classList.contains('modal-overlay')) {
-    e.target.setAttribute('hidden', '');
-  }
-});
-
-// ---- Modal Evento ----
 function openModalEvento(nombre) {
   const title = document.getElementById('modal-evento-title');
   if (title) title.textContent = nombre ? 'Editar Evento: ' + nombre : 'Nuevo Evento';
   openAdminModal('modal-evento');
 }
 
-document.getElementById('form-evento')?.addEventListener('submit', (e) => {
-  e.preventDefault();
-  // TODO: enviar datos al backend PHP via fetch
-  alert('Evento guardado (requiere backend PHP)');
-  closeAdminModal('modal-evento');
-});
-
-// ---- Modal Recordatorio ----
-function openModalRecordatorio(eventoNombre) {
-  const span = document.getElementById('modal-rec-evento');
-  if (span) span.textContent = eventoNombre;
+function openModalRecordatorio(evento) {
+  const label = document.getElementById('modal-rec-evento');
+  if (label) label.textContent = '📅 ' + evento;
   openAdminModal('modal-recordatorio');
 }
 
-// ---- Modal Asistente ----
 function openModalAsistente(nombre) {
-  // TODO: cargar datos reales desde PHP
-  const el = document.getElementById('asi-nombre');
-  if (el) el.textContent = nombre;
+  // TODO: cargar datos reales desde API PHP
+  const nameEl = document.getElementById('asi-nombre');
+  if (nameEl) nameEl.textContent = nombre;
   openAdminModal('modal-asistente');
 }
 
-// ---- Modal FAQ ----
-function openModalFaq(id) {
+function openModalFaq(key) {
   const title = document.getElementById('modal-faq-title');
-  if (title) title.textContent = id ? 'Editar Pregunta' : 'Nueva Pregunta Frecuente';
+  if (title) title.textContent = key ? 'Editar Pregunta' : 'Nueva Pregunta Frecuente';
   openAdminModal('modal-faq');
 }
 
-document.getElementById('form-faq')?.addEventListener('submit', (e) => {
-  e.preventDefault();
-  // TODO: guardar FAQ en BD via PHP
-  alert('Pregunta guardada (requiere backend PHP)');
-  closeAdminModal('modal-faq');
-});
-
-// ---- Confirmar eliminar FAQ ----
 function confirmarEliminarFaq(id) {
-  if (confirm('¿Eliminar esta pregunta frecuente?')) {
-    // TODO: DELETE via PHP fetch
-    alert('FAQ #' + id + ' eliminada (requiere backend PHP)');
+  if (confirm('¿Eliminar esta pregunta frecuente? Esta acción no se puede deshacer.')) {
+    // TODO: fetch DELETE a api/faq.php
+    alert('Pregunta #' + id + ' eliminada (simulación). Requiere backend PHP.');
   }
 }
 
-// ---- QR Validator ----
-function validarQR() {
-  const input  = document.getElementById('qr-input');
-  const result = document.getElementById('qr-result');
-  const card   = document.getElementById('qr-result-content');
-  const name   = document.getElementById('qr-result-name');
-  const detail = document.getElementById('qr-result-detail');
-
-  if (!input || !input.value.trim()) return;
-
-  // TODO: validar contra BD PHP via fetch('/api/validar-qr?code=' + input.value)
-  // Por ahora simulamos respuesta de ejemplo
-  const codigo = input.value.trim().toUpperCase();
-  const esValido = codigo.startsWith('UABC-') || codigo.length > 5;
-
-  result.removeAttribute('hidden');
-  if (esValido) {
-    card.className = 'qr-result-card qr-result-card--ok';
-    if (name)   name.textContent   = 'Asistente Registrado';
-    if (detail) detail.textContent = 'Registro válido · ' + codigo;
-  } else {
-    card.className = 'qr-result-card qr-result-card--error';
-    if (name)   name.textContent   = 'Código no encontrado';
-    if (detail) detail.textContent = 'Verifica el código e inténtalo de nuevo';
-  }
-}
-
-// Enter en el input de QR dispara validación automática
-document.getElementById('qr-input')?.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter') validarQR();
-});
-
-// ---- Overlay sidebar click ----
-document.getElementById('sidebar-overlay')?.addEventListener('click', closeSidebar);
-
-// ---- Init ----
+// ─── FORMULARIOS ───
 document.addEventListener('DOMContentLoaded', () => {
-  showSection('dashboard');
+  const formEvento = document.getElementById('form-evento');
+  if (formEvento) {
+    formEvento.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // TODO: fetch POST a api/eventos.php
+      alert('Evento guardado (simulación). Requiere backend PHP.');
+      closeAdminModal('modal-evento');
+    });
+  }
+
+  const formFaq = document.getElementById('form-faq');
+  if (formFaq) {
+    formFaq.addEventListener('submit', (e) => {
+      e.preventDefault();
+      // TODO: fetch POST a api/faq.php
+      alert('Pregunta guardada (simulación). Requiere backend PHP.');
+      closeAdminModal('modal-faq');
+    });
+  }
 });
