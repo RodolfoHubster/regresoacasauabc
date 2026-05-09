@@ -19,19 +19,23 @@
   <!-- ===== HEADER ===== -->
   <header class="site-header">
     <div class="header-inner">
-      <!-- Logo pegado a la izquierda -->
-      <a href="index.html" class="header-logo" aria-label="Regresa a Casa UABC – Inicio">
-        <img src="assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="64" height="64" loading="eager" class="header-logo-img">
-      </a>
 
-      <!-- Centro del header -->
+      <!-- Columna izquierda: logo + subtítulo -->
+      <div class="header-left">
+        <a href="index.html" class="header-logo" aria-label="Regresa a Casa UABC – Inicio">
+          <img src="assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="64" height="64" loading="eager" class="header-logo-img">
+        </a>
+        <span class="header-alumni-label">ALUMNI</span>
+      </div>
+
+      <!-- Columna central: nombre de la universidad -->
       <div class="header-center">
         <p class="header-university">Universidad Autónoma de Baja California</p>
         <p class="header-dept">Comunidad de egresadas y egresados de la UABC</p>
       </div>
 
-      <!-- Acciones -->
-      <div class="header-actions">
+      <!-- Columna derecha: botón admin -->
+      <div class="header-right">
         <a href="admin/index.html" class="btn-header-admin">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           Admin
@@ -162,9 +166,7 @@
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                   Información
                 </button>
-                <button class="btn btn-secondary" disabled>
-                  Próximamente
-                </button>
+                <button class="btn btn-secondary" disabled>Próximamente</button>
               </div>
             </div>
           </article>
@@ -191,9 +193,7 @@
           <h2 class="section-title">Preguntas Frecuentes</h2>
           <p class="section-desc">Resolvemos tus dudas sobre los eventos.</p>
         </div>
-
         <div class="faq-list" id="faq-list">
-
           <div class="faq-item">
             <button class="faq-trigger" aria-expanded="false" aria-controls="faq-1">
               <span>¿Hay estacionamiento disponible?</span>
@@ -203,7 +203,6 @@
               <p>Sí, contamos con estacionamiento gratuito para egresados registrados. Se habilitará una zona especial con acceso desde la entrada principal del campus.</p>
             </div>
           </div>
-
           <div class="faq-item">
             <button class="faq-trigger" aria-expanded="false" aria-controls="faq-2">
               <span>¿A qué hora puedo ingresar al evento?</span>
@@ -213,7 +212,6 @@
               <p>Las puertas abren 30 minutos antes del horario oficial. Te recomendamos llegar con anticipación para agilizar el registro en entrada con tu código QR.</p>
             </div>
           </div>
-
           <div class="faq-item">
             <button class="faq-trigger" aria-expanded="false" aria-controls="faq-3">
               <span>¿Cuál es el código de vestimenta?</span>
@@ -223,7 +221,6 @@
               <p>El evento es semiformal. Se recomienda vestimenta casual elegante. No se permite ropa de playa ni deportiva. Los colores institucionales UABC siempre son bienvenidos.</p>
             </div>
           </div>
-
           <div class="faq-item">
             <button class="faq-trigger" aria-expanded="false" aria-controls="faq-4">
               <span>¿Cómo recibo mi QR de acceso?</span>
@@ -233,7 +230,6 @@
               <p>Al completar tu registro recibirás un correo de confirmación con tu código QR único. Puedes mostrarlo desde tu celular, tablet o impreso en papel.</p>
             </div>
           </div>
-
           <div class="faq-item">
             <button class="faq-trigger" aria-expanded="false" aria-controls="faq-5">
               <span>¿Puedo registrar a un acompañante?</span>
@@ -243,7 +239,6 @@
               <p>El registro es individual y exclusivo para egresados UABC. Cada asistente debe completar su propio formulario con sus datos académicos.</p>
             </div>
           </div>
-
         </div>
       </div>
     </section>
