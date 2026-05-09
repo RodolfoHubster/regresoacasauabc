@@ -1,0 +1,128 @@
+/* =============================================================
+   style.css — Tokens de diseño y estilos globales
+   Proyecto: Regresa a Casa UABC
+   Paleta: Azul marino UABC + Dorado UABC + neutros cálidos
+   ============================================================= */
+
+/* --- Fuentes --- */
+/* TODO: Cargar fuentes vía Google Fonts / Fontshare */
+/* --font-display: 'Nombre', sans-serif; */
+/* --font-body:    'Nombre', sans-serif; */
+
+/* --- Tokens de diseño --- */
+:root, [data-theme="light"] {
+
+  /* Tipografía fluida */
+  --text-xs:   clamp(0.75rem,  0.7rem  + 0.25vw, 0.875rem);
+  --text-sm:   clamp(0.875rem, 0.8rem  + 0.35vw, 1rem);
+  --text-base: clamp(1rem,     0.95rem + 0.25vw, 1.125rem);
+  --text-lg:   clamp(1.125rem, 1rem    + 0.75vw, 1.5rem);
+  --text-xl:   clamp(1.5rem,   1.2rem  + 1.25vw, 2.25rem);
+  --text-2xl:  clamp(2rem,     1.2rem  + 2.5vw,  3.5rem);
+
+  /* Espaciado (base 4px) */
+  --space-1:  0.25rem;
+  --space-2:  0.5rem;
+  --space-3:  0.75rem;
+  --space-4:  1rem;
+  --space-5:  1.25rem;
+  --space-6:  1.5rem;
+  --space-8:  2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* Anchos de contenido */
+  --content-narrow:  640px;
+  --content-default: 960px;
+  --content-wide:    1200px;
+
+  /* Radios */
+  --radius-sm:   0.375rem;
+  --radius-md:   0.5rem;
+  --radius-lg:   0.75rem;
+  --radius-xl:   1rem;
+  --radius-full: 9999px;
+
+  /* Transiciones */
+  --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ---- PALETA UABC ---- */
+  /* Azul marino UABC: #002855  Dorado UABC: #C8972B */
+
+  /* Superficies */
+  --color-bg:              #f4f6f9;
+  --color-surface:         #ffffff;
+  --color-surface-2:       #f8f9fc;
+  --color-surface-offset:  #edf0f5;
+  --color-divider:         #d8dde6;
+  --color-border:          #c8cdd8;
+
+  /* Texto */
+  --color-text:            #0d1b2e;
+  --color-text-muted:      #4a5568;
+  --color-text-faint:      #9aa3b0;
+  --color-text-inverse:    #f4f6f9;
+
+  /* Primario — Azul marino UABC */
+  --color-primary:         #002855;
+  --color-primary-hover:   #001e42;
+  --color-primary-active:  #00132b;
+  --color-primary-highlight: #ccd5e3;
+
+  /* Acento — Dorado UABC */
+  --color-accent:          #C8972B;
+  --color-accent-hover:    #a87a20;
+  --color-accent-active:   #8a6018;
+  --color-accent-highlight: #f5e9d0;
+
+  /* Éxito / Error / Advertencia */
+  --color-success:         #2e7d32;
+  --color-success-highlight: #d4edda;
+  --color-error:           #c62828;
+  --color-error-highlight: #fde8e8;
+  --color-warning:         #e65100;
+  --color-warning-highlight: #fff3e0;
+
+  /* Sombras */
+  --shadow-sm: 0 1px 3px oklch(0.2 0.02 240 / 0.08);
+  --shadow-md: 0 4px 12px oklch(0.2 0.02 240 / 0.10);
+  --shadow-lg: 0 12px 32px oklch(0.2 0.02 240 / 0.14);
+}
+
+/* --- Modo oscuro --- */
+[data-theme="dark"] {
+  --color-bg:              #0d1521;
+  --color-surface:         #132035;
+  --color-surface-2:       #192843;
+  --color-surface-offset:  #0b1219;
+  --color-divider:         #243450;
+  --color-border:          #2e4060;
+
+  --color-text:            #dde4ef;
+  --color-text-muted:      #8796ab;
+  --color-text-faint:      #475872;
+  --color-text-inverse:    #0d1521;
+
+  --color-primary:         #4a7fbd;
+  --color-primary-hover:   #3a6da8;
+  --color-primary-active:  #2b5a8e;
+  --color-primary-highlight: #1a2d45;
+
+  --color-accent:          #e6b44f;
+  --color-accent-hover:    #cf9f3a;
+  --color-accent-active:   #b08228;
+  --color-accent-highlight: #3a2d10;
+
+  --shadow-sm: 0 1px 3px oklch(0 0 0 / 0.25);
+  --shadow-md: 0 4px 12px oklch(0 0 0 / 0.35);
+  --shadow-lg: 0 12px 32px oklch(0 0 0 / 0.45);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    /* Copiar variables de [data-theme="dark"] al implementar */
+  }
+}

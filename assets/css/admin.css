@@ -1,0 +1,43 @@
+/* =============================================================
+   admin.css — Estilos exclusivos del panel de administración
+   Proyecto: Regresa a Casa UABC
+   ============================================================= */
+
+/* --- Layout Admin (sidebar + main) --- */
+/* .admin-layout { } */
+/* .admin-sidebar { } */
+/* .admin-sidebar-logo { } */
+/* .admin-sidebar-nav { } */
+/* .admin-main { } */
+
+/* --- Topbar Admin --- */
+/* .admin-topbar { } */
+/* .admin-topbar-title { } */
+/* .admin-topbar-actions { } */
+
+/* --- KPI Cards (dashboard) --- */
+/* .kpi-card { } */
+/* .kpi-card-value { } */
+/* .kpi-card-label { } */
+/* .kpi-card-icon { } */
+
+/* --- Tabla de asistentes / eventos --- */
+/* .admin-table { } */
+/* .admin-table th { } */
+/* .admin-table td { } */
+/* .admin-table-actions { } */
+
+/* --- Botón exportar Excel (placeholder) --- */
+/* .btn-export { } */
+
+/* --- Botón enviar recordatorio (placeholder) --- */
+/* .btn-reminder { } */
+
+/* --- Validador QR --- */
+/* .qr-scanner-container { } */
+/* .qr-result-card { } */
+
+/* --- Estados vacíos --- */
+/* .empty-state { } */
+/* .empty-state-icon { } */
+/* .empty-state-message { } */

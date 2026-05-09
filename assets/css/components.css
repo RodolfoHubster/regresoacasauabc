@@ -1,0 +1,67 @@
+/* =============================================================
+   components.css — Navbar, Cards, Modals, Botones, Badges,
+                    Formularios, Footer, etc.
+   Proyecto: Regresa a Casa UABC
+   ============================================================= */
+
+/* --- Navbar --- */
+/* .navbar { } */
+/* .navbar-logo { } */
+/* .navbar-links { } */
+/* .navbar-cta { } */
+
+/* --- Hero de página pública --- */
+/* .hero { } */
+/* .hero-title { } */
+/* .hero-subtitle { } */
+
+/* --- Cards de Eventos --- */
+/* .event-card { } */
+/* .event-card-image { } */
+/* .event-card-body { } */
+/* .event-card-date { } */
+/* .event-card-location { } */
+/* .event-card-cta { } */
+
+/* --- Botones --- */
+/* .btn { } */
+/* .btn-primary { } */
+/* .btn-secondary { } */
+/* .btn-ghost { } */
+/* .btn-danger { } */
+
+/* --- Badges / Chips --- */
+/* .badge { } */
+/* .badge-accent { } */
+
+/* --- Modals --- */
+/* .modal { } */
+/* .modal-backdrop { } */
+/* .modal-container { } */
+/* .modal-header { } */
+/* .modal-body { } */
+/* .modal-footer { } */
+
+/* --- Formulario de Registro --- */
+/* .form-group { } */
+/* .form-label { } */
+/* .form-input { } */
+/* .form-select { } */
+/* .form-hint { } */
+/* .form-error { } */
+
+/* --- Accordion / FAQ --- */
+/* .faq-item { } */
+/* .faq-question { } */
+/* .faq-answer { } */
+
+/* --- Footer --- */
+/* .footer { } */
+/* .footer-logo { } */
+/* .footer-links { } */
+
+/* --- Alertas / Toasts --- */
+/* .alert { } */
+/* .alert-success { } */
+/* .alert-error { } */
+/* .toast { } */

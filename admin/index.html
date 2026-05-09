@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Regresa a Casa UABC</title>
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
+</head>
+<body>
+
+  <!-- SIDEBAR ADMIN -->
+  <aside id="admin-sidebar"></aside>
+
+  <!-- CONTENIDO PRINCIPAL ADMIN -->
+  <main id="admin-main">
+
+    <!-- SECCIÓN: Dashboard / Estadísticas -->
+    <section id="admin-dashboard">
+      <!-- KPIs, gráficas por evento -->
+      <!-- Botón: Exportar Excel (placeholder) -->
+    </section>
+
+    <!-- SECCIÓN: Gestión de Eventos -->
+    <section id="admin-eventos">
+      <!-- Tabla de eventos -->
+      <!-- Botón: Nuevo evento -->
+      <!-- Botón: Editar evento -->
+    </section>
+
+    <!-- SECCIÓN: Registros / Asistentes -->
+    <section id="admin-registros">
+      <!-- Tabla de asistentes por evento -->
+      <!-- Botón: Exportar Excel -->
+      <!-- Botón: Enviar recordatorio -->
+    </section>
+
+    <!-- SECCIÓN: Preguntas Frecuentes -->
+    <section id="admin-faq">
+      <!-- CRUD de preguntas frecuentes por evento -->
+    </section>
+
+    <!-- SECCIÓN: Validar QR -->
+    <section id="admin-qr">
+      <!-- Interfaz para escanear / verificar QR -->
+    </section>
+
+  </main>
+
+  <!-- MODAL: Crear / Editar Evento -->
+  <div id="modal-evento" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-evento-title"></div>
+
+  <!-- MODAL: Ver detalle de asistente -->
+  <div id="modal-asistente" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-asistente-title"></div>
+
+  <script src="../assets/js/main.js"></script>
+  <script src="../assets/js/admin.js"></script>
+  <script src="../assets/js/qr-scanner.js"></script>
+</body>
+</html>
