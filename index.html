@@ -13,39 +13,28 @@
 </head>
 <body>
 
-  <!-- SKIP LINK -->
   <a href="#main-content" class="skip-link">Saltar al contenido</a>
 
   <!-- ===== HEADER ===== -->
   <header class="site-header">
     <div class="header-inner">
 
-      <!--
-        Estructura:
-        [ header-brand (logo + ALUMNI + título + subtítulo) ]  [ header-right (Admin) ]
-        El header-brand usa flex-row con el logo a la izquierda y el texto al centro.
-        header-right está fijo a la derecha con el mismo ancho que el botón.
-        Un div wrapper centrado (.header-brand-wrap) centra el bloque en el espacio
-        restante, generando simetría perfecta.
-      -->
-
-      <!-- Bloque de marca centrado (logo + textos institucionales) -->
-      <div class="header-brand-wrap">
-        <div class="header-brand">
-          <!-- Logo -->
-          <a href="index.html" class="header-logo" aria-label="Regresa a Casa UABC – Inicio">
-            <img src="assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="64" height="64" loading="eager" class="header-logo-img">
-          </a>
-          <!-- Textos -->
-          <div class="header-brand-text">
-            <span class="header-alumni-label">ALUMNI</span>
-            <p class="header-university">Universidad Autónoma de Baja California</p>
-            <p class="header-dept">Comunidad de egresadas y egresados de la UABC</p>
-          </div>
+      <!-- Izquierda: Logo + texto -->
+      <div class="header-left">
+        <a href="index.html" class="header-logo" aria-label="Regresa a Casa UABC – Inicio">
+          <img src="assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="64" height="64" loading="eager" class="header-logo-img">
+        </a>
+        <div class="header-left-text">
+          <p class="header-dept">Comunidad de egresadas y egresados de la UABC</p>
         </div>
       </div>
 
-      <!-- Botón Admin alineado a la derecha -->
+      <!-- Centro: Nombre de la universidad -->
+      <div class="header-center">
+        <p class="header-university">Universidad Autónoma de Baja California</p>
+      </div>
+
+      <!-- Derecha: Botón Admin -->
       <div class="header-right">
         <a href="admin/index.html" class="btn-header-admin">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -55,26 +44,23 @@
 
     </div>
 
-    <!-- Línea dorada separadora -->
+    <!-- Línea dorada -->
     <div class="header-gold-line" aria-hidden="true"></div>
 
     <!-- NAV -->
     <nav class="site-nav" aria-label="Navegación principal">
-      <div class="nav-inner">
-        <ul role="list" class="nav-list">
-          <li><a href="#inicio" class="nav-link active">Inicio</a></li>
-          <li><a href="#eventos" class="nav-link">Eventos</a></li>
-          <li><a href="#faq" class="nav-link">Preguntas Frecuentes</a></li>
-          <li><a href="#contacto" class="nav-link">Contacto</a></li>
-        </ul>
-      </div>
+      <ul role="list" class="nav-list">
+        <li><a href="#inicio" class="nav-link active">Inicio</a></li>
+        <li><a href="#eventos" class="nav-link">Eventos</a></li>
+        <li><a href="#faq" class="nav-link">Preguntas Frecuentes</a></li>
+        <li><a href="#contacto" class="nav-link">Contacto</a></li>
+      </ul>
     </nav>
   </header>
 
   <!-- ===== MAIN ===== -->
   <main id="main-content">
 
-    <!-- HERO / BIENVENIDA -->
     <section id="inicio" class="hero-section">
       <div class="container">
         <div class="hero-card">
@@ -85,17 +71,14 @@
       </div>
     </section>
 
-    <!-- EVENTOS DISPONIBLES -->
     <section id="eventos" class="section">
       <div class="container">
         <div class="section-header">
           <h2 class="section-title">Eventos Disponibles</h2>
           <p class="section-desc">Selecciona el evento al que deseas asistir y regístrate en minutos.</p>
         </div>
-
         <div class="events-grid" id="events-grid">
 
-          <!-- Card Evento 1 -->
           <article class="event-card">
             <div class="event-card-img" style="background-image: url('assets/images/486642144_1054752733356249_5093856031880116704_n.jpg');" role="img" aria-label="Foto del evento Regresa a Casa Tijuana 2025">
               <span class="event-badge">Disponible</span>
@@ -103,29 +86,17 @@
             <div class="event-card-body">
               <h3 class="event-card-title">Regresa a Casa – Tijuana 2025</h3>
               <ul role="list" class="event-meta">
-                <li>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                  <span>15 de Agosto, 2025 · 10:00 AM</span>
-                </li>
-                <li>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                  <span>Campus Tijuana – Auditorio Central</span>
-                </li>
+                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>15 de Agosto, 2025 · 10:00 AM</span></li>
+                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>Campus Tijuana – Auditorio Central</span></li>
               </ul>
               <p class="event-card-desc">Reencuentro de egresados de todas las generaciones en el campus Tijuana. Ponencias, networking y celebración.</p>
               <div class="event-card-actions">
-                <button class="btn btn-outline-primary" onclick="openModalInfo('info-tijuana')">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  Información
-                </button>
-                <button class="btn btn-primary" onclick="openModal('modal-registro', 'Regresa a Casa – Tijuana 2025', 'assets/images/486642144_1054752733356249_5093856031880116704_n.jpg')">
-                  Registrarme
-                </button>
+                <button class="btn btn-outline-primary" onclick="openModalInfo('info-tijuana')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Información</button>
+                <button class="btn btn-primary" onclick="openModal('modal-registro', 'Regresa a Casa – Tijuana 2025', 'assets/images/486642144_1054752733356249_5093856031880116704_n.jpg')">Registrarme</button>
               </div>
             </div>
           </article>
 
-          <!-- Card Evento 2 -->
           <article class="event-card">
             <div class="event-card-img" style="background-image: url('assets/images/egresados-tijuana2.jpg');" role="img" aria-label="Foto del evento Regresa a Casa Mexicali 2025">
               <span class="event-badge">Disponible</span>
@@ -133,29 +104,17 @@
             <div class="event-card-body">
               <h3 class="event-card-title">Regresa a Casa – Mexicali 2025</h3>
               <ul role="list" class="event-meta">
-                <li>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                  <span>22 de Octubre, 2025 · 9:00 AM</span>
-                </li>
-                <li>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                  <span>Campus Mexicali – Centro de Convenciones</span>
-                </li>
+                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>22 de Octubre, 2025 · 9:00 AM</span></li>
+                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>Campus Mexicali – Centro de Convenciones</span></li>
               </ul>
               <p class="event-card-desc">Celebración anual de egresados en el campus Mexicali. Talleres, conferencias y actividades de integración.</p>
               <div class="event-card-actions">
-                <button class="btn btn-outline-primary" onclick="openModalInfo('info-mexicali')">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  Información
-                </button>
-                <button class="btn btn-primary" onclick="openModal('modal-registro', 'Regresa a Casa – Mexicali 2025', 'assets/images/egresados-tijuana2.jpg')">
-                  Registrarme
-                </button>
+                <button class="btn btn-outline-primary" onclick="openModalInfo('info-mexicali')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Información</button>
+                <button class="btn btn-primary" onclick="openModal('modal-registro', 'Regresa a Casa – Mexicali 2025', 'assets/images/egresados-tijuana2.jpg')">Registrarme</button>
               </div>
             </div>
           </article>
 
-          <!-- Card Evento 3 -->
           <article class="event-card">
             <div class="event-card-img" style="background-image: url('assets/images/download.jpg');" role="img" aria-label="Foto del evento Regresa a Casa Ensenada 2025">
               <span class="event-badge event-badge--pronto">Próximamente</span>
@@ -163,21 +122,12 @@
             <div class="event-card-body">
               <h3 class="event-card-title">Regresa a Casa – Ensenada 2025</h3>
               <ul role="list" class="event-meta">
-                <li>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                  <span>Diciembre 2025 · Por confirmar</span>
-                </li>
-                <li>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                  <span>Campus Ensenada – Por confirmar</span>
-                </li>
+                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span>Diciembre 2025 · Por confirmar</span></li>
+                <li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span>Campus Ensenada – Por confirmar</span></li>
               </ul>
               <p class="event-card-desc">Próximo evento de egresados en el campus Ensenada. Manténte atento a la fecha oficial.</p>
               <div class="event-card-actions">
-                <button class="btn btn-outline-primary" disabled>
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  Información
-                </button>
+                <button class="btn btn-outline-primary" disabled><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Información</button>
                 <button class="btn btn-secondary" disabled>Próximamente</button>
               </div>
             </div>
@@ -185,20 +135,15 @@
 
         </div>
 
-        <!-- EMPTY STATE -->
         <div class="events-empty" id="events-empty" hidden>
-          <div class="events-empty-icon" aria-hidden="true">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          </div>
+          <div class="events-empty-icon" aria-hidden="true"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
           <h3 class="events-empty-title">No hay eventos disponibles por el momento</h3>
           <p class="events-empty-desc">Estamos preparando los próximos eventos del año. Regresa pronto o contáctanos para más información.</p>
           <a href="#contacto" class="btn btn-primary">Contactar</a>
         </div>
-
       </div>
     </section>
 
-    <!-- FAQ -->
     <section id="faq" class="section section--alt">
       <div class="container container--narrow">
         <div class="section-header">
@@ -207,61 +152,33 @@
         </div>
         <div class="faq-list" id="faq-list">
           <div class="faq-item">
-            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-1">
-              <span>¿Hay estacionamiento disponible?</span>
-              <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="faq-answer" id="faq-1" hidden>
-              <p>Sí, contamos con estacionamiento gratuito para egresados registrados. Se habilitará una zona especial con acceso desde la entrada principal del campus.</p>
-            </div>
+            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-1"><span>¿Hay estacionamiento disponible?</span><svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="faq-answer" id="faq-1" hidden><p>Sí, contamos con estacionamiento gratuito para egresados registrados. Se habilitará una zona especial con acceso desde la entrada principal del campus.</p></div>
           </div>
           <div class="faq-item">
-            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-2">
-              <span>¿A qué hora puedo ingresar al evento?</span>
-              <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="faq-answer" id="faq-2" hidden>
-              <p>Las puertas abren 30 minutos antes del horario oficial. Te recomendamos llegar con anticipación para agilizar el registro en entrada con tu código QR.</p>
-            </div>
+            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-2"><span>¿A qué hora puedo ingresar al evento?</span><svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="faq-answer" id="faq-2" hidden><p>Las puertas abren 30 minutos antes del horario oficial. Te recomendamos llegar con anticipación para agilizar el registro con tu código QR.</p></div>
           </div>
           <div class="faq-item">
-            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-3">
-              <span>¿Cuál es el código de vestimenta?</span>
-              <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="faq-answer" id="faq-3" hidden>
-              <p>El evento es semiformal. Se recomienda vestimenta casual elegante. No se permite ropa de playa ni deportiva. Los colores institucionales UABC siempre son bienvenidos.</p>
-            </div>
+            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-3"><span>¿Cuál es el código de vestimenta?</span><svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="faq-answer" id="faq-3" hidden><p>El evento es semiformal. Se recomienda vestimenta casual elegante. No se permite ropa de playa ni deportiva. Los colores institucionales UABC siempre son bienvenidos.</p></div>
           </div>
           <div class="faq-item">
-            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-4">
-              <span>¿Cómo recibo mi QR de acceso?</span>
-              <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="faq-answer" id="faq-4" hidden>
-              <p>Al completar tu registro recibirás un correo de confirmación con tu código QR único. Puedes mostrarlo desde tu celular, tablet o impreso en papel.</p>
-            </div>
+            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-4"><span>¿Cómo recibo mi QR de acceso?</span><svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="faq-answer" id="faq-4" hidden><p>Al completar tu registro recibirás un correo de confirmación con tu código QR único. Puedes mostrarlo desde tu celular, tablet o impreso en papel.</p></div>
           </div>
           <div class="faq-item">
-            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-5">
-              <span>¿Puedo registrar a un acompañante?</span>
-              <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="faq-answer" id="faq-5" hidden>
-              <p>El registro es individual y exclusivo para egresados UABC. Cada asistente debe completar su propio formulario con sus datos académicos.</p>
-            </div>
+            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-5"><span>¿Puedo registrar a un acompañante?</span><svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
+            <div class="faq-answer" id="faq-5" hidden><p>El registro es individual y exclusivo para egresados UABC. Cada asistente debe completar su propio formulario con sus datos académicos.</p></div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- CONTACTO -->
     <section id="contacto" class="section">
       <div class="container container--narrow">
         <div class="contact-card">
-          <div class="contact-icon" aria-hidden="true">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-          </div>
+          <div class="contact-icon" aria-hidden="true"><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
           <h2 class="contact-title">¿Tienes dudas?</h2>
           <p class="contact-desc">Contáctanos y con gusto te ayudaremos con cualquier pregunta sobre los eventos o tu registro.</p>
           <a href="mailto:egresados@uabc.edu.mx" class="btn btn-primary">Enviar correo</a>
@@ -271,7 +188,6 @@
 
   </main>
 
-  <!-- ===== FOOTER ===== -->
   <footer class="site-footer">
     <div class="container">
       <div class="footer-inner">
@@ -281,14 +197,12 @@
     </div>
   </footer>
 
-  <!-- ===== MODAL REGISTRO ===== -->
+  <!-- MODAL REGISTRO -->
   <div class="modal-overlay" id="modal-registro" role="dialog" aria-modal="true" aria-labelledby="modal-registro-title" hidden>
     <div class="modal">
       <div class="modal-header">
         <h2 class="modal-title" id="modal-registro-title">Formulario de Registro</h2>
-        <button class="modal-close" onclick="closeModal('modal-registro')" aria-label="Cerrar modal">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+        <button class="modal-close" onclick="closeModal('modal-registro')" aria-label="Cerrar modal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="modal-body">
         <div class="modal-event-banner" id="modal-event-banner" aria-hidden="true"></div>
@@ -296,66 +210,17 @@
         <form id="form-registro" novalidate>
           <input type="hidden" id="field-evento" name="evento">
           <div class="form-row">
-            <div class="form-group">
-              <label for="field-nombre" class="form-label">Nombre <span class="required" aria-hidden="true">*</span></label>
-              <input type="text" id="field-nombre" name="nombre" class="form-input" placeholder="Tu nombre" required autocomplete="given-name">
-              <span class="form-error" id="error-nombre" aria-live="polite"></span>
-            </div>
-            <div class="form-group">
-              <label for="field-apellidos" class="form-label">Apellidos <span class="required" aria-hidden="true">*</span></label>
-              <input type="text" id="field-apellidos" name="apellidos" class="form-input" placeholder="Tus apellidos" required autocomplete="family-name">
-              <span class="form-error" id="error-apellidos" aria-live="polite"></span>
-            </div>
+            <div class="form-group"><label for="field-nombre" class="form-label">Nombre <span class="required" aria-hidden="true">*</span></label><input type="text" id="field-nombre" name="nombre" class="form-input" placeholder="Tu nombre" required autocomplete="given-name"><span class="form-error" id="error-nombre" aria-live="polite"></span></div>
+            <div class="form-group"><label for="field-apellidos" class="form-label">Apellidos <span class="required" aria-hidden="true">*</span></label><input type="text" id="field-apellidos" name="apellidos" class="form-input" placeholder="Tus apellidos" required autocomplete="family-name"><span class="form-error" id="error-apellidos" aria-live="polite"></span></div>
           </div>
-          <div class="form-group">
-            <label for="field-email" class="form-label">Correo electrónico <span class="required" aria-hidden="true">*</span></label>
-            <input type="email" id="field-email" name="email" class="form-input" placeholder="correo@ejemplo.com" required autocomplete="email">
-            <span class="form-error" id="error-email" aria-live="polite"></span>
-          </div>
-          <div class="form-group">
-            <label for="field-telefono" class="form-label">Número de teléfono <span class="optional">(opcional)</span></label>
-            <input type="tel" id="field-telefono" name="telefono" class="form-input" placeholder="664 000 0000" autocomplete="tel">
-          </div>
-          <div class="form-group">
-            <label for="field-campus" class="form-label">Campus de egreso <span class="required" aria-hidden="true">*</span></label>
-            <select id="field-campus" name="campus" class="form-select" required>
-              <option value="">Selecciona tu campus</option>
-              <option value="tijuana">Tijuana</option>
-              <option value="mexicali">Mexicali</option>
-              <option value="ensenada">Ensenada</option>
-              <option value="tecate">Tecate</option>
-              <option value="san-quintin">San Quintín</option>
-            </select>
-            <span class="form-error" id="error-campus" aria-live="polite"></span>
-          </div>
-          <div class="form-group">
-            <label for="field-facultad" class="form-label">Facultad o unidad académica <span class="required" aria-hidden="true">*</span></label>
-            <input type="text" id="field-facultad" name="facultad" class="form-input" placeholder="Ej. FCITEC, FCA, FCE..." required>
-            <span class="form-error" id="error-facultad" aria-live="polite"></span>
-          </div>
-          <div class="form-group">
-            <label for="field-carrera" class="form-label">Carrera o programa académico <span class="required" aria-hidden="true">*</span></label>
-            <input type="text" id="field-carrera" name="carrera" class="form-input" placeholder="Ej. Ingeniería en Sistemas, Administración..." required>
-            <span class="form-error" id="error-carrera" aria-live="polite"></span>
-          </div>
+          <div class="form-group"><label for="field-email" class="form-label">Correo electrónico <span class="required" aria-hidden="true">*</span></label><input type="email" id="field-email" name="email" class="form-input" placeholder="correo@ejemplo.com" required autocomplete="email"><span class="form-error" id="error-email" aria-live="polite"></span></div>
+          <div class="form-group"><label for="field-telefono" class="form-label">Número de teléfono <span class="optional">(opcional)</span></label><input type="tel" id="field-telefono" name="telefono" class="form-input" placeholder="664 000 0000" autocomplete="tel"></div>
+          <div class="form-group"><label for="field-campus" class="form-label">Campus de egreso <span class="required" aria-hidden="true">*</span></label><select id="field-campus" name="campus" class="form-select" required><option value="">Selecciona tu campus</option><option value="tijuana">Tijuana</option><option value="mexicali">Mexicali</option><option value="ensenada">Ensenada</option><option value="tecate">Tecate</option><option value="san-quintin">San Quintín</option></select><span class="form-error" id="error-campus" aria-live="polite"></span></div>
+          <div class="form-group"><label for="field-facultad" class="form-label">Facultad o unidad académica <span class="required" aria-hidden="true">*</span></label><input type="text" id="field-facultad" name="facultad" class="form-input" placeholder="Ej. FCITEC, FCA, FCE..." required><span class="form-error" id="error-facultad" aria-live="polite"></span></div>
+          <div class="form-group"><label for="field-carrera" class="form-label">Carrera o programa académico <span class="required" aria-hidden="true">*</span></label><input type="text" id="field-carrera" name="carrera" class="form-input" placeholder="Ej. Ingeniería en Sistemas, Administración..." required><span class="form-error" id="error-carrera" aria-live="polite"></span></div>
           <div class="form-row">
-            <div class="form-group">
-              <label for="field-generacion" class="form-label">Generación <span class="required" aria-hidden="true">*</span></label>
-              <input type="text" id="field-generacion" name="generacion" class="form-input" placeholder="Ej. 2015-2020" required>
-              <span class="form-error" id="error-generacion" aria-live="polite"></span>
-            </div>
-            <div class="form-group">
-              <label for="field-tipo" class="form-label">Tipo de asistente <span class="required" aria-hidden="true">*</span></label>
-              <select id="field-tipo" name="tipo" class="form-select" required>
-                <option value="">Selecciona...</option>
-                <option value="egresado">Egresado</option>
-                <option value="estudiante">Estudiante</option>
-                <option value="docente">Docente</option>
-                <option value="administrativo">Administrativo</option>
-                <option value="invitado">Invitado especial</option>
-              </select>
-              <span class="form-error" id="error-tipo" aria-live="polite"></span>
-            </div>
+            <div class="form-group"><label for="field-generacion" class="form-label">Generación <span class="required" aria-hidden="true">*</span></label><input type="text" id="field-generacion" name="generacion" class="form-input" placeholder="Ej. 2015-2020" required><span class="form-error" id="error-generacion" aria-live="polite"></span></div>
+            <div class="form-group"><label for="field-tipo" class="form-label">Tipo de asistente <span class="required" aria-hidden="true">*</span></label><select id="field-tipo" name="tipo" class="form-select" required><option value="">Selecciona...</option><option value="egresado">Egresado</option><option value="estudiante">Estudiante</option><option value="docente">Docente</option><option value="administrativo">Administrativo</option><option value="invitado">Invitado especial</option></select><span class="form-error" id="error-tipo" aria-live="polite"></span></div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-ghost" onclick="closeModal('modal-registro')">Cancelar</button>
@@ -366,156 +231,76 @@
     </div>
   </div>
 
-  <!-- ===== MODAL CONFIRMACIÓN ===== -->
+  <!-- MODAL CONFIRMACIÓN -->
   <div class="modal-overlay" id="modal-confirmacion" role="dialog" aria-modal="true" aria-labelledby="modal-confirm-title" hidden>
     <div class="modal modal--sm">
       <div class="modal-header">
         <h2 class="modal-title" id="modal-confirm-title">Registro Exitoso</h2>
-        <button class="modal-close" onclick="closeModal('modal-confirmacion')" aria-label="Cerrar">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+        <button class="modal-close" onclick="closeModal('modal-confirmacion')" aria-label="Cerrar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="modal-body modal-body--center">
-        <div class="confirm-icon" aria-hidden="true">
-          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        </div>
+        <div class="confirm-icon" aria-hidden="true"><svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
         <p class="confirm-msg">Tu registro fue recibido. En breve recibirás un correo con tu código QR de acceso y los detalles del evento.</p>
         <button class="btn btn-primary" onclick="closeModal('modal-confirmacion')">Entendido</button>
       </div>
     </div>
   </div>
 
-  <!-- ===== MODALES DE INFORMACIÓN POR EVENTO ===== -->
-
-  <!-- Info Tijuana -->
+  <!-- MODAL INFO TIJUANA -->
   <div class="modal-overlay" id="info-tijuana" role="dialog" aria-modal="true" aria-labelledby="info-tijuana-title" hidden>
     <div class="modal modal--info">
       <div class="modal-header">
         <h2 class="modal-title" id="info-tijuana-title">Regresa a Casa – Tijuana 2025</h2>
-        <button class="modal-close" onclick="closeModal('info-tijuana')" aria-label="Cerrar">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+        <button class="modal-close" onclick="closeModal('info-tijuana')" aria-label="Cerrar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="modal-body">
         <img src="assets/images/486642144_1054752733356249_5093856031880116704_n.jpg" alt="Banner Tijuana 2025" class="info-banner" loading="lazy">
         <div class="info-highlights">
-          <div class="info-highlight-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <div>
-              <span class="info-highlight-label">Fecha y hora</span>
-              <span class="info-highlight-value">15 de Agosto, 2025 · 10:00 AM</span>
-            </div>
-          </div>
-          <div class="info-highlight-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            <div>
-              <span class="info-highlight-label">Ubicación</span>
-              <span class="info-highlight-value">Campus Tijuana – Auditorio Central</span>
-            </div>
-          </div>
-          <div class="info-highlight-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <div>
-              <span class="info-highlight-label">Acceso</span>
-              <span class="info-highlight-value">Puertas abren a las 9:30 AM</span>
-            </div>
-          </div>
-          <div class="info-highlight-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-            <div>
-              <span class="info-highlight-label">Estacionamiento</span>
-              <span class="info-highlight-value">Gratuito para egresados registrados</span>
-            </div>
-          </div>
+          <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><div><span class="info-highlight-label">Fecha y hora</span><span class="info-highlight-value">15 de Agosto, 2025 · 10:00 AM</span></div></div>
+          <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><div><span class="info-highlight-label">Ubicación</span><span class="info-highlight-value">Campus Tijuana – Auditorio Central</span></div></div>
+          <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><div><span class="info-highlight-label">Acceso</span><span class="info-highlight-value">Puertas abren a las 9:30 AM</span></div></div>
+          <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg><div><span class="info-highlight-label">Estacionamiento</span><span class="info-highlight-value">Gratuito para egresados registrados</span></div></div>
         </div>
         <div class="info-rich-content">
           <h3>Acerca del evento</h3>
-          <p>El evento <strong>Regresa a Casa</strong> es el reencuentro oficial de egresados UABC del campus Tijuana. Un espacio para reconectarse con antiguos compañeros, académicos y la institución que los formó.</p>
+          <p>El evento <strong>Regresa a Casa</strong> es el reencuentro oficial de egresados UABC del campus Tijuana.</p>
           <h3>Programa destacado</h3>
-          <ul>
-            <li>Bienvenida institucional por el Rector</li>
-            <li>Panel de egresados exitosos</li>
-            <li>Networking y convivio</li>
-            <li>Reconocimientos a generaciones especiales</li>
-          </ul>
-          <h3>Acreditación</h3>
-          <p>Presenta tu código QR recibido por correo en los módulos de acreditación ubicados en la entrada principal. El proceso toma menos de un minuto.</p>
-          <div class="info-callout">
-            <strong>Vestimenta recomendada:</strong> Semiformal. Los colores institucionales (verde y dorado) son bienvenidos.
-          </div>
+          <ul><li>Bienvenida institucional por el Rector</li><li>Panel de egresados exitosos</li><li>Networking y convivio</li><li>Reconocimientos a generaciones especiales</li></ul>
+          <div class="info-callout"><strong>Vestimenta recomendada:</strong> Semiformal. Los colores institucionales (verde y dorado) son bienvenidos.</div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-ghost" onclick="closeModal('info-tijuana')">Cerrar</button>
-          <button class="btn btn-primary" onclick="closeModal('info-tijuana'); openModal('modal-registro', 'Regresa a Casa – Tijuana 2025', 'assets/images/486642144_1054752733356249_5093856031880116704_n.jpg')">
-            Registrarme a este evento
-          </button>
+          <button class="btn btn-primary" onclick="closeModal('info-tijuana'); openModal('modal-registro', 'Regresa a Casa – Tijuana 2025', 'assets/images/486642144_1054752733356249_5093856031880116704_n.jpg')">Registrarme a este evento</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Info Mexicali -->
+  <!-- MODAL INFO MEXICALI -->
   <div class="modal-overlay" id="info-mexicali" role="dialog" aria-modal="true" aria-labelledby="info-mexicali-title" hidden>
     <div class="modal modal--info">
       <div class="modal-header">
         <h2 class="modal-title" id="info-mexicali-title">Regresa a Casa – Mexicali 2025</h2>
-        <button class="modal-close" onclick="closeModal('info-mexicali')" aria-label="Cerrar">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+        <button class="modal-close" onclick="closeModal('info-mexicali')" aria-label="Cerrar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="modal-body">
         <img src="assets/images/egresados-tijuana2.jpg" alt="Banner Mexicali 2025" class="info-banner" loading="lazy">
         <div class="info-highlights">
-          <div class="info-highlight-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <div>
-              <span class="info-highlight-label">Fecha y hora</span>
-              <span class="info-highlight-value">22 de Octubre, 2025 · 9:00 AM</span>
-            </div>
-          </div>
-          <div class="info-highlight-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            <div>
-              <span class="info-highlight-label">Ubicación</span>
-              <span class="info-highlight-value">Campus Mexicali – Centro de Convenciones</span>
-            </div>
-          </div>
-          <div class="info-highlight-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <div>
-              <span class="info-highlight-label">Acceso</span>
-              <span class="info-highlight-value">Puertas abren a las 8:30 AM</span>
-            </div>
-          </div>
-          <div class="info-highlight-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-            <div>
-              <span class="info-highlight-label">Estacionamiento</span>
-              <span class="info-highlight-value">Gratuito para egresados registrados</span>
-            </div>
-          </div>
+          <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><div><span class="info-highlight-label">Fecha y hora</span><span class="info-highlight-value">22 de Octubre, 2025 · 9:00 AM</span></div></div>
+          <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><div><span class="info-highlight-label">Ubicación</span><span class="info-highlight-value">Campus Mexicali – Centro de Convenciones</span></div></div>
+          <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><div><span class="info-highlight-label">Acceso</span><span class="info-highlight-value">Puertas abren a las 8:30 AM</span></div></div>
+          <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg><div><span class="info-highlight-label">Estacionamiento</span><span class="info-highlight-value">Gratuito para egresados registrados</span></div></div>
         </div>
         <div class="info-rich-content">
           <h3>Acerca del evento</h3>
-          <p>Celebración anual de egresados en el campus Mexicali. Talleres, conferencias y actividades de integración para reconectar a la comunidad alumni con su alma máter.</p>
+          <p>Celebración anual de egresados en el campus Mexicali. Talleres, conferencias y actividades de integración.</p>
           <h3>Programa destacado</h3>
-          <ul>
-            <li>Talleres de desarrollo profesional</li>
-            <li>Conferencias de egresados destacados</li>
-            <li>Mesa de oportunidades laborales</li>
-            <li>Actividades culturales y convivio</li>
-          </ul>
-          <h3>Acreditación</h3>
-          <p>Presenta tu código QR en los módulos de acreditación en la entrada del Centro de Convenciones.</p>
-          <div class="info-callout">
-            <strong>Vestimenta recomendada:</strong> Semiformal. No se permite ropa deportiva ni de playa.
-          </div>
+          <ul><li>Talleres de desarrollo profesional</li><li>Conferencias de egresados destacados</li><li>Mesa de oportunidades laborales</li><li>Actividades culturales y convivio</li></ul>
+          <div class="info-callout"><strong>Vestimenta recomendada:</strong> Semiformal. No se permite ropa deportiva ni de playa.</div>
         </div>
         <div class="modal-footer">
           <button class="btn btn-ghost" onclick="closeModal('info-mexicali')">Cerrar</button>
-          <button class="btn btn-primary" onclick="closeModal('info-mexicali'); openModal('modal-registro', 'Regresa a Casa – Mexicali 2025', 'assets/images/egresados-tijuana2.jpg')">
-            Registrarme a este evento
-          </button>
+          <button class="btn btn-primary" onclick="closeModal('info-mexicali'); openModal('modal-registro', 'Regresa a Casa – Mexicali 2025', 'assets/images/egresados-tijuana2.jpg')">Registrarme a este evento</button>
         </div>
       </div>
     </div>
