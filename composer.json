@@ -1,0 +1,17 @@
+{
+    "name": "juancarlos/regresoacasauabc",
+    "autoload": {
+        "psr-4": {
+            "Juancarlos\\Regresoacasauabc\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Juan Carlos",
+            "email": "juan.cruz11@uabc.edu.mx"
+        }
+    ],
+    "require": {
+        "vlucas/phpdotenv": "^5.6"
+    }
+}

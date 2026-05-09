@@ -4,12 +4,76 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('form-registro');
   if (!form) return;
 
+  // Lógica original para validar y enviar
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     if (validarFormulario()) {
       enviarRegistro();
     }
   });
+
+  // --- NUEVA LÓGICA: Selectores Dinámicos (Campus -> Facultad -> Carrera) ---
+  const campusSelect = document.getElementById('field-campus');
+  const facultadSelect = document.getElementById('field-facultad');
+  const carreraSelect = document.getElementById('field-carrera');
+
+  // Escuchar cambio en Campus
+  if (campusSelect && facultadSelect && carreraSelect) {
+    campusSelect.addEventListener('change', function() {
+        const campusId = this.value;
+        
+        // Reiniciar Selects dependientes
+        facultadSelect.innerHTML = '<option value="">Selecciona tu facultad</option>';
+        carreraSelect.innerHTML = '<option value="">Primero selecciona una facultad</option>';
+        carreraSelect.disabled = true;
+
+        if (campusId) {
+            facultadSelect.disabled = false;
+            fetch(`php/get_facultades.php?campus_id=${campusId}`)
+                .then(response => response.json())
+                .then(result => {
+                    if (result.status === 'success') {
+                        result.data.forEach(facultad => {
+                            const option = document.createElement('option');
+                            option.value = facultad.id;
+                            option.textContent = `${facultad.codigo || ''} - ${facultad.nombre}`;
+                            facultadSelect.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error cargando facultades:', error));
+        } else {
+            facultadSelect.disabled = true;
+        }
+    });
+
+    // Escuchar cambio en Facultad
+    facultadSelect.addEventListener('change', function() {
+        const facultadId = this.value;
+        
+        carreraSelect.innerHTML = '<option value="">Selecciona tu carrera</option>';
+
+        if (facultadId) {
+            carreraSelect.disabled = false;
+            fetch(`php/get_carreras.php?facultad_id=${facultadId}`)
+                .then(response => response.json())
+                .then(result => {
+                    if (result.status === 'success') {
+                        result.data.forEach(carrera => {
+                            const option = document.createElement('option');
+                            option.value = carrera.id;
+                            option.textContent = carrera.nombre;
+                            carreraSelect.appendChild(option);
+                        });
+                    }
+                })
+                .catch(error => console.error('Error cargando carreras:', error));
+        } else {
+            carreraSelect.disabled = true;
+        }
+    });
+  }
+  // --- FIN LÓGICA SELECTORES DINÁMICOS ---
 });
 
 function validarFormulario() {
@@ -58,14 +122,56 @@ function validarFormulario() {
 }
 
 function enviarRegistro() {
-  // TODO: Reemplazar con fetch() a api/registro.php
-  // const datos = new FormData(document.getElementById('form-registro'));
-  // fetch('api/registro.php', { method: 'POST', body: datos })
-  //   .then(r => r.json())
-  //   .then(res => { if(res.ok) mostrarConfirmacion(); })
+  const form = document.getElementById('form-registro');
+  const datos = new FormData(form);
+  const btnSubmit = form.querySelector('button[type="submit"]');
 
-  // Simulación (eliminar cuando esté el backend)
-  closeModal('modal-registro');
-  document.getElementById('form-registro').reset();
-  setTimeout(() => openModal('modal-confirmacion'), 200);
+  // Cambiar el texto del botón y deshabilitarlo para evitar que hagan doble clic
+  const textoOriginal = btnSubmit.textContent;
+  btnSubmit.disabled = true;
+  btnSubmit.textContent = 'Guardando registro...';
+
+  // Hacemos la petición al backend
+  fetch('php/procesar_registro.php', { 
+      method: 'POST', 
+      body: datos 
+  })
+  .then(response => response.json())
+  .then(res => { 
+      // Restauramos el botón
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = textoOriginal;
+
+      if(res.status === 'success') {
+          // Si guardó bien en la BD, cerramos el formulario
+          closeModal('modal-registro');
+          form.reset();
+          
+          // Limpiamos los selects dinámicos para que queden como al inicio
+          const facultadSelect = document.getElementById('field-facultad');
+          const carreraSelect = document.getElementById('field-carrera');
+          if(facultadSelect) {
+              facultadSelect.innerHTML = '<option value="">Primero selecciona un campus</option>';
+              facultadSelect.disabled = true;
+          }
+          if(carreraSelect) {
+              carreraSelect.innerHTML = '<option value="">Primero selecciona una facultad</option>';
+              carreraSelect.disabled = true;
+          }
+
+          // Mostramos la ventana de "Registro Exitoso"
+          setTimeout(() => openModal('modal-confirmacion'), 200);
+      } else {
+          // Si PHP nos mandó un error, lo mostramos en consola y en un alert
+          console.error("Error PHP:", res.message);
+          alert("Ocurrió un error al guardar: " + res.message);
+      }
+  })
+  .catch(error => {
+      // Error de red o servidor caído
+      btnSubmit.disabled = false;
+      btnSubmit.textContent = textoOriginal;
+      console.error("Error en la petición:", error);
+      alert("Error de comunicación con el servidor. Intenta de nuevo.");
+  });
 }

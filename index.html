@@ -15,11 +15,9 @@
 
   <a href="#main-content" class="skip-link">Saltar al contenido</a>
 
-  <!-- ===== HEADER ===== -->
   <header class="site-header">
     <div class="header-inner">
 
-      <!-- Izquierda: Logo + texto -->
       <div class="header-left">
         <a href="index.html" class="header-logo" aria-label="Regresa a Casa UABC – Inicio">
           <img src="assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="64" height="64" loading="eager" class="header-logo-img">
@@ -29,12 +27,10 @@
         </div>
       </div>
 
-      <!-- Centro: Nombre de la universidad -->
       <div class="header-center">
         <p class="header-university">Universidad Autónoma de Baja California</p>
       </div>
 
-      <!-- Derecha: Botón Admin -->
       <div class="header-right">
         <a href="admin/login.html" class="btn-header-admin">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -44,10 +40,8 @@
 
     </div>
 
-    <!-- Línea dorada -->
     <div class="header-gold-line" aria-hidden="true"></div>
 
-    <!-- NAV -->
     <nav class="site-nav" aria-label="Navegación principal">
       <ul role="list" class="nav-list">
         <li><a href="#inicio" class="nav-link active">Inicio</a></li>
@@ -58,7 +52,6 @@
     </nav>
   </header>
 
-  <!-- ===== MAIN ===== -->
   <main id="main-content">
 
     <section id="inicio" class="hero-section">
@@ -197,7 +190,6 @@
     </div>
   </footer>
 
-  <!-- MODAL REGISTRO -->
   <div class="modal-overlay" id="modal-registro" role="dialog" aria-modal="true" aria-labelledby="modal-registro-title" hidden>
     <div class="modal">
       <div class="modal-header">
@@ -215,9 +207,33 @@
           </div>
           <div class="form-group"><label for="field-email" class="form-label">Correo electrónico <span class="required" aria-hidden="true">*</span></label><input type="email" id="field-email" name="email" class="form-input" placeholder="correo@ejemplo.com" required autocomplete="email"><span class="form-error" id="error-email" aria-live="polite"></span></div>
           <div class="form-group"><label for="field-telefono" class="form-label">Número de teléfono <span class="optional">(opcional)</span></label><input type="tel" id="field-telefono" name="telefono" class="form-input" placeholder="664 000 0000" autocomplete="tel"></div>
-          <div class="form-group"><label for="field-campus" class="form-label">Campus de egreso <span class="required" aria-hidden="true">*</span></label><select id="field-campus" name="campus" class="form-select" required><option value="">Selecciona tu campus</option><option value="tijuana">Tijuana</option><option value="mexicali">Mexicali</option><option value="ensenada">Ensenada</option><option value="tecate">Tecate</option><option value="san-quintin">San Quintín</option></select><span class="form-error" id="error-campus" aria-live="polite"></span></div>
-          <div class="form-group"><label for="field-facultad" class="form-label">Facultad o unidad académica <span class="required" aria-hidden="true">*</span></label><input type="text" id="field-facultad" name="facultad" class="form-input" placeholder="Ej. FCITEC, FCA, FCE..." required><span class="form-error" id="error-facultad" aria-live="polite"></span></div>
-          <div class="form-group"><label for="field-carrera" class="form-label">Carrera o programa académico <span class="required" aria-hidden="true">*</span></label><input type="text" id="field-carrera" name="carrera" class="form-input" placeholder="Ej. Ingeniería en Sistemas, Administración..." required><span class="form-error" id="error-carrera" aria-live="polite"></span></div>
+          
+          <div class="form-group">
+            <label for="field-campus" class="form-label">Campus de egreso <span class="required" aria-hidden="true">*</span></label>
+            <select id="field-campus" name="campus" class="form-select" required>
+              <option value="">Selecciona tu campus</option>
+              <option value="1">Tijuana</option>
+              <option value="2">Mexicali</option>
+              <option value="3">Ensenada</option>
+            </select>
+            <span class="form-error" id="error-campus" aria-live="polite"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="field-facultad" class="form-label">Facultad o unidad académica <span class="required" aria-hidden="true">*</span></label>
+            <select id="field-facultad" name="facultad" class="form-select" required disabled>
+              <option value="">Primero selecciona un campus</option>
+            </select>
+            <span class="form-error" id="error-facultad" aria-live="polite"></span>
+          </div>
+
+          <div class="form-group">
+            <label for="field-carrera" class="form-label">Carrera o programa académico <span class="required" aria-hidden="true">*</span></label>
+            <select id="field-carrera" name="carrera" class="form-select" required disabled>
+              <option value="">Primero selecciona una facultad</option>
+            </select>
+            <span class="form-error" id="error-carrera" aria-live="polite"></span>
+          </div>
           <div class="form-row">
             <div class="form-group"><label for="field-generacion" class="form-label">Generación <span class="required" aria-hidden="true">*</span></label><input type="text" id="field-generacion" name="generacion" class="form-input" placeholder="Ej. 2015-2020" required><span class="form-error" id="error-generacion" aria-live="polite"></span></div>
             <div class="form-group"><label for="field-tipo" class="form-label">Tipo de asistente <span class="required" aria-hidden="true">*</span></label><select id="field-tipo" name="tipo" class="form-select" required><option value="">Selecciona...</option><option value="egresado">Egresado</option><option value="estudiante">Estudiante</option><option value="docente">Docente</option><option value="administrativo">Administrativo</option><option value="invitado">Invitado especial</option></select><span class="form-error" id="error-tipo" aria-live="polite"></span></div>
@@ -231,7 +247,6 @@
     </div>
   </div>
 
-  <!-- MODAL CONFIRMACIÓN -->
   <div class="modal-overlay" id="modal-confirmacion" role="dialog" aria-modal="true" aria-labelledby="modal-confirm-title" hidden>
     <div class="modal modal--sm">
       <div class="modal-header">
@@ -246,7 +261,6 @@
     </div>
   </div>
 
-  <!-- MODAL INFO TIJUANA -->
   <div class="modal-overlay" id="info-tijuana" role="dialog" aria-modal="true" aria-labelledby="info-tijuana-title" hidden>
     <div class="modal modal--info">
       <div class="modal-header">
@@ -276,7 +290,6 @@
     </div>
   </div>
 
-  <!-- MODAL INFO MEXICALI -->
   <div class="modal-overlay" id="info-mexicali" role="dialog" aria-modal="true" aria-labelledby="info-mexicali-title" hidden>
     <div class="modal modal--info">
       <div class="modal-header">

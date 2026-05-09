@@ -1,14 +1,26 @@
 <?php
-$host = "localhost";
-$user = "root"; // Tu usuario de base de datos
-$pass = "";     // Tu contraseña de base de datos
-$db   = "regreso_a_casa"; // Asegúrate de que este sea el nombre de tu BD
+require_once __DIR__ . '/../../vendor/autoload.php';
+
+use Dotenv\Dotenv;
 
 try {
+    // Le indicamos a Dotenv dónde está el archivo .env (en la raíz)
+    $dotenv = Dotenv::createImmutable(__DIR__ . '/../../');
+    $dotenv->load();
+
+    // Leemos las credenciales usando $_ENV
+    $host = $_ENV['DB_HOST'];
+    $db   = $_ENV['DB_NAME'];
+    $user = $_ENV['DB_USER'];
+    $pass = $_ENV['DB_PASS'];
+
+    // Creamos la conexión PDO
     $conexion = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
-    // Configurar para que lance excepciones en caso de error
     $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Error de conexión: " . $e->getMessage());
+
+} catch (Exception $e) {
+    // Si hay error en el .env o en la base de datos, lo capturamos
+    error_log("Error de conexión: " . $e->getMessage());
+    die("Error real de BD: " . $e->getMessage());
 }
 ?>
