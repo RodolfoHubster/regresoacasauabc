@@ -3,32 +3,437 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Regresa a Casa - UABC</title>
+  <title>Regresa a Casa — UABC</title>
+
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@300..700&display=swap" rel="stylesheet">
+
+  <!-- Iconos -->
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js" defer></script>
+
+  <!-- CSS -->
   <link rel="stylesheet" href="assets/css/base.css">
   <link rel="stylesheet" href="assets/css/style.css">
   <link rel="stylesheet" href="assets/css/components.css">
 </head>
 <body>
 
-  <!-- NAV -->
-  <header id="navbar"></header>
+  <!-- ========== SKIP LINK ========== -->
+  <a href="#main-content" class="skip-link">Saltar al contenido</a>
 
-  <!-- HERO / LISTA DE EVENTOS -->
+  <!-- ========== NAVBAR ========== -->
+  <header class="navbar" role="banner">
+    <div class="navbar-inner container">
+
+      <!-- Logo -->
+      <a href="index.html" class="navbar-logo" aria-label="Regresa a Casa UABC — Inicio">
+        <svg class="logo-icon" width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+          <rect width="36" height="36" rx="8" fill="#002855"/>
+          <path d="M8 26 L18 10 L28 26" stroke="#C8972B" stroke-width="2.5" stroke-linejoin="round" fill="none"/>
+          <path d="M12 26 L18 16 L24 26" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" fill="none"/>
+          <circle cx="18" cy="8" r="2.5" fill="#C8972B"/>
+        </svg>
+        <span class="logo-text">
+          <span class="logo-title">Regresa a Casa</span>
+          <span class="logo-sub">UABC</span>
+        </span>
+      </a>
+
+      <!-- Nav links -->
+      <nav class="navbar-nav" aria-label="Navegación principal">
+        <a href="#eventos" class="nav-link">Eventos</a>
+        <a href="#como-funciona" class="nav-link">¿Cómo funciona?</a>
+        <a href="#faq" class="nav-link">Preguntas frecuentes</a>
+      </nav>
+
+      <!-- Acciones -->
+      <div class="navbar-actions">
+        <button class="btn btn-ghost btn-sm" data-theme-toggle aria-label="Cambiar tema">
+          <i data-lucide="sun" width="18" height="18"></i>
+        </button>
+        <a href="admin/index.html" class="btn btn-ghost btn-sm">
+          <i data-lucide="shield" width="16" height="16"></i>
+          Admin
+        </a>
+      </div>
+
+      <!-- Hamburger mobile -->
+      <button class="navbar-hamburger" id="nav-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobile-menu">
+        <i data-lucide="menu" width="22" height="22"></i>
+      </button>
+    </div>
+
+    <!-- Mobile menu -->
+    <div class="mobile-menu" id="mobile-menu" hidden>
+      <nav aria-label="Menú móvil">
+        <a href="#eventos" class="mobile-nav-link">Eventos</a>
+        <a href="#como-funciona" class="mobile-nav-link">¿Cómo funciona?</a>
+        <a href="#faq" class="mobile-nav-link">Preguntas frecuentes</a>
+        <a href="admin/index.html" class="mobile-nav-link">Administración</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ========== MAIN ========== -->
   <main id="main-content">
-    <!-- Aquí se listarán las cards de los eventos disponibles -->
+
+    <!-- HERO -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="container hero-content">
+        <span class="hero-eyebrow">Universidad Autónoma de Baja California</span>
+        <h1 class="hero-title" id="hero-title">Regresa a<br><em>Casa</em></h1>
+        <p class="hero-desc">Reencuéntrate con tu alma máter. Celebra tu trayectoria como egresado y vive la experiencia UABC una vez más.</p>
+        <a href="#eventos" class="btn btn-accent btn-lg">
+          <i data-lucide="calendar" width="18" height="18"></i>
+          Ver eventos disponibles
+        </a>
+      </div>
+      <div class="hero-wave" aria-hidden="true">
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="var(--color-bg)"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ¿CÓMO FUNCIONA? -->
+    <section class="section" id="como-funciona" aria-labelledby="como-title">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title" id="como-title">¿Cómo funciona?</h2>
+          <p class="section-subtitle">Registrarte es rápido y sencillo. En minutos tendrás tu acceso confirmado.</p>
+        </div>
+        <ol class="steps-list" role="list">
+          <li class="step-item">
+            <div class="step-number" aria-hidden="true">01</div>
+            <div class="step-body">
+              <h3 class="step-title">Elige tu evento</h3>
+              <p class="step-desc">Consulta los eventos disponibles y selecciona el que quieres asistir.</p>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-number" aria-hidden="true">02</div>
+            <div class="step-body">
+              <h3 class="step-title">Completa tu registro</h3>
+              <p class="step-desc">Ingresa tus datos de egresado: carrera, generación y tipo de asistente.</p>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-number" aria-hidden="true">03</div>
+            <div class="step-body">
+              <h3 class="step-title">Recibe tu QR</h3>
+              <p class="step-desc">Te enviamos un código QR por correo con toda la información del evento.</p>
+            </div>
+          </li>
+          <li class="step-item">
+            <div class="step-number" aria-hidden="true">04</div>
+            <div class="step-body">
+              <h3 class="step-title">¡Preséntate!</h3>
+              <p class="step-desc">El día del evento presenta tu QR en la entrada. ¡Bienvenido de vuelta a casa!</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- EVENTOS -->
+    <section class="section section-alt" id="eventos" aria-labelledby="eventos-title">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title" id="eventos-title">Eventos disponibles</h2>
+          <p class="section-subtitle">Selecciona el evento al que deseas asistir y regístrate.</p>
+        </div>
+
+        <!-- Grid de cards de eventos -->
+        <div class="events-grid" id="events-grid" role="list">
+
+          <!-- CARD EJEMPLO 1 -->
+          <article class="event-card" role="listitem" tabindex="0">
+            <div class="event-card-image">
+              <img
+                src="https://picsum.photos/seed/uabc-evento1/600/340"
+                alt="Regresa a Casa — Edición Primavera 2026"
+                width="600" height="340"
+                loading="lazy"
+                decoding="async"
+              >
+              <span class="event-badge event-badge--open">Registro abierto</span>
+            </div>
+            <div class="event-card-body">
+              <h3 class="event-card-title">Regresa a Casa — Primavera 2026</h3>
+              <p class="event-card-desc">Celebración de reencuentro para egresados de todas las facultades del campus Tijuana.</p>
+              <ul class="event-card-meta" role="list">
+                <li>
+                  <i data-lucide="calendar" width="15" height="15" aria-hidden="true"></i>
+                  <span>Sábado 20 de junio, 2026 — 10:00 AM</span>
+                </li>
+                <li>
+                  <i data-lucide="map-pin" width="15" height="15" aria-hidden="true"></i>
+                  <span>Campus Tijuana, Auditorio Central</span>
+                </li>
+              </ul>
+            </div>
+            <div class="event-card-footer">
+              <button class="btn btn-primary btn-full" data-event-id="1" data-modal="registro">
+                Registrarme
+                <i data-lucide="arrow-right" width="16" height="16" aria-hidden="true"></i>
+              </button>
+            </div>
+          </article>
+
+          <!-- CARD EJEMPLO 2 -->
+          <article class="event-card" role="listitem" tabindex="0">
+            <div class="event-card-image">
+              <img
+                src="https://picsum.photos/seed/uabc-evento2/600/340"
+                alt="Regresa a Casa — Edición Otoño 2026"
+                width="600" height="340"
+                loading="lazy"
+                decoding="async"
+              >
+              <span class="event-badge event-badge--soon">Próximamente</span>
+            </div>
+            <div class="event-card-body">
+              <h3 class="event-card-title">Regresa a Casa — Otoño 2026</h3>
+              <p class="event-card-desc">Segunda edición del año con actividades culturales, deportivas y reencuentros de generación.</p>
+              <ul class="event-card-meta" role="list">
+                <li>
+                  <i data-lucide="calendar" width="15" height="15" aria-hidden="true"></i>
+                  <span>Sábado 14 de noviembre, 2026 — 9:00 AM</span>
+                </li>
+                <li>
+                  <i data-lucide="map-pin" width="15" height="15" aria-hidden="true"></i>
+                  <span>Campus Ensenada, Explanada Principal</span>
+                </li>
+              </ul>
+            </div>
+            <div class="event-card-footer">
+              <button class="btn btn-secondary btn-full" disabled>
+                <i data-lucide="clock" width="16" height="16" aria-hidden="true"></i>
+                Registro próximamente
+              </button>
+            </div>
+          </article>
+
+          <!-- CARD EJEMPLO 3 -->
+          <article class="event-card" role="listitem" tabindex="0">
+            <div class="event-card-image">
+              <img
+                src="https://picsum.photos/seed/uabc-evento3/600/340"
+                alt="Regresa a Casa — Edición Invierno 2026"
+                width="600" height="340"
+                loading="lazy"
+                decoding="async"
+              >
+              <span class="event-badge event-badge--closed">Registro cerrado</span>
+            </div>
+            <div class="event-card-body">
+              <h3 class="event-card-title">Regresa a Casa — Invierno 2026</h3>
+              <p class="event-card-desc">Cierre de año con ceremonia especial para egresados de la generación 2001-2006.</p>
+              <ul class="event-card-meta" role="list">
+                <li>
+                  <i data-lucide="calendar" width="15" height="15" aria-hidden="true"></i>
+                  <span>Sábado 5 de diciembre, 2026 — 11:00 AM</span>
+                </li>
+                <li>
+                  <i data-lucide="map-pin" width="15" height="15" aria-hidden="true"></i>
+                  <span>Campus Mexicali, Rectoría</span>
+                </li>
+              </ul>
+            </div>
+            <div class="event-card-footer">
+              <button class="btn btn-ghost btn-full" disabled>
+                Registro no disponible
+              </button>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="section" id="faq" aria-labelledby="faq-title">
+      <div class="container container-narrow">
+        <div class="section-header">
+          <h2 class="section-title" id="faq-title">Preguntas frecuentes</h2>
+          <p class="section-subtitle">Resolvemos tus dudas más comunes sobre el evento.</p>
+        </div>
+        <div class="faq-list" id="faq-list">
+
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false" aria-controls="faq-1">
+              <span>¿Hay estacionamiento disponible?</span>
+              <i data-lucide="chevron-down" width="18" height="18" aria-hidden="true"></i>
+            </button>
+            <div class="faq-answer" id="faq-1" hidden>
+              <p>Sí, el campus cuenta con estacionamiento gratuito para asistentes registrados. Te recomendamos llegar con 30 minutos de anticipación para asegurar lugar.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false" aria-controls="faq-2">
+              <span>¿Cuál es la hora de acceso?</span>
+              <i data-lucide="chevron-down" width="18" height="18" aria-hidden="true"></i>
+            </button>
+            <div class="faq-answer" id="faq-2" hidden>
+              <p>Las puertas abren 45 minutos antes del inicio del evento. Te pedimos presentarte puntual para facilitar el registro de acceso con tu código QR.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false" aria-controls="faq-3">
+              <span>¿Hay código de vestimenta?</span>
+              <i data-lucide="chevron-down" width="18" height="18" aria-hidden="true"></i>
+            </button>
+            <div class="faq-answer" id="faq-3" hidden>
+              <p>El código de vestimenta es smart casual. No se requiere traje formal, pero sí se pide una presentación elegante. El uso de playeras tipo polo o vestimenta de negocios casual es ideal.</p>
+            </div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false" aria-controls="faq-4">
+              <span>¿Puedo registrar a un acompañante?</span>
+              <i data-lucide="chevron-down" width="18" height="18" aria-hidden="true"></i>
+            </button>
+            <div class="faq-answer" id="faq-4" hidden>
+              <p>Sí. Cada egresado puede registrar hasta un acompañante seleccionando el tipo de asistente correspondiente en el formulario de registro.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
   </main>
 
-  <!-- FOOTER -->
-  <footer id="footer"></footer>
+  <!-- ========== FOOTER ========== -->
+  <footer class="footer" role="contentinfo">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <svg class="logo-icon" width="28" height="28" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+          <rect width="36" height="36" rx="8" fill="#C8972B"/>
+          <path d="M8 26 L18 10 L28 26" stroke="#002855" stroke-width="2.5" stroke-linejoin="round" fill="none"/>
+          <path d="M12 26 L18 16 L24 26" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" fill="none"/>
+          <circle cx="18" cy="8" r="2.5" fill="#002855"/>
+        </svg>
+        <span class="footer-brand-name">Regresa a Casa UABC</span>
+      </div>
+      <p class="footer-copy">© 2026 Universidad Autónoma de Baja California. Todos los derechos reservados.</p>
+      <nav class="footer-nav" aria-label="Navegación del pie de página">
+        <a href="#eventos">Eventos</a>
+        <a href="#faq">FAQ</a>
+        <a href="admin/index.html">Administración</a>
+      </nav>
+    </div>
+  </footer>
 
-  <!-- MODAL: Registro al evento -->
-  <div id="modal-registro" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-registro-title"></div>
+  <!-- ========== MODAL: REGISTRO ========== -->
+  <div class="modal-backdrop" id="modal-backdrop" hidden aria-hidden="true"></div>
 
-  <!-- MODAL: Preguntas frecuentes -->
-  <div id="modal-faq" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-faq-title"></div>
+  <div
+    class="modal"
+    id="modal-registro"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-registro-title"
+    hidden
+  >
+    <div class="modal-container">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-registro-title">Registro al evento</h2>
+        <button class="modal-close" data-modal-close aria-label="Cerrar modal">
+          <i data-lucide="x" width="20" height="20"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="form-registro" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="reg-nombre">Nombre <span aria-hidden="true">*</span></label>
+              <input class="form-input" type="text" id="reg-nombre" name="nombre" required autocomplete="given-name" placeholder="Ej. María">
+              <span class="form-error" id="err-nombre" role="alert" hidden></span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reg-apellidos">Apellidos <span aria-hidden="true">*</span></label>
+              <input class="form-input" type="text" id="reg-apellidos" name="apellidos" required autocomplete="family-name" placeholder="Ej. López García">
+              <span class="form-error" id="err-apellidos" role="alert" hidden></span>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-email">Correo electrónico <span aria-hidden="true">*</span></label>
+            <input class="form-input" type="email" id="reg-email" name="email" required autocomplete="email" placeholder="correo@ejemplo.com">
+            <span class="form-error" id="err-email" role="alert" hidden></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-telefono">
+              Número de teléfono
+              <span class="form-hint">(opcional)</span>
+            </label>
+            <input class="form-input" type="tel" id="reg-telefono" name="telefono" autocomplete="tel" placeholder="664 123 4567">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-campus">Campus de egreso <span aria-hidden="true">*</span></label>
+            <select class="form-select" id="reg-campus" name="campus" required>
+              <option value="" disabled selected>Selecciona tu campus</option>
+              <option value="tijuana">Tijuana</option>
+              <option value="mexicali">Mexicali</option>
+              <option value="ensenada">Ensenada</option>
+              <option value="tecate">Tecate</option>
+              <option value="san-quintin">San Quintín</option>
+            </select>
+            <span class="form-error" id="err-campus" role="alert" hidden></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-facultad">Facultad o unidad académica <span aria-hidden="true">*</span></label>
+            <input class="form-input" type="text" id="reg-facultad" name="facultad" required placeholder="Ej. FCITEC, Medicina, Derecho...">
+            <span class="form-error" id="err-facultad" role="alert" hidden></span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reg-carrera">Carrera o programa académico <span aria-hidden="true">*</span></label>
+            <input class="form-input" type="text" id="reg-carrera" name="carrera" required placeholder="Ej. Ingeniería en Computación">
+            <span class="form-error" id="err-carrera" role="alert" hidden></span>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="reg-generacion">Generación <span aria-hidden="true">*</span></label>
+              <input class="form-input" type="text" id="reg-generacion" name="generacion" required placeholder="Ej. 2015-2020">
+              <span class="form-error" id="err-generacion" role="alert" hidden></span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="reg-tipo">Tipo de asistente <span aria-hidden="true">*</span></label>
+              <select class="form-select" id="reg-tipo" name="tipo" required>
+                <option value="" disabled selected>Selecciona</option>
+                <option value="egresado">Egresado</option>
+                <option value="acompanante">Acompañante</option>
+                <option value="exdocente">Ex docente</option>
+              </select>
+              <span class="form-error" id="err-tipo" role="alert" hidden></span>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-ghost" data-modal-close>Cancelar</button>
+        <button class="btn btn-primary" id="btn-submit-registro" type="submit" form="form-registro">
+          <i data-lucide="send" width="16" height="16" aria-hidden="true"></i>
+          Confirmar registro
+        </button>
+      </div>
+    </div>
+  </div>
 
+  <!-- JS -->
   <script src="assets/js/main.js"></script>
   <script src="assets/js/eventos.js"></script>
   <script src="assets/js/registro.js"></script>
+
+  <script>
+    // Inicializar iconos Lucide
+    lucide.createIcons();
+  </script>
+
 </body>
 </html>
