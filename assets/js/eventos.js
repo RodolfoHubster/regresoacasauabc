@@ -1,49 +1,88 @@
-/* eventos.js – Carga y renderiza eventos (preparado para PHP/MySQL) */
+/* eventos.js – Funciones de modal para eventos */
 
-// TODO: Reemplazar este array con una llamada fetch() a la API PHP
-// Ejemplo: fetch('api/eventos.php').then(r => r.json()).then(renderEvents)
-
-const eventosEjemplo = [
-  {
-    id: 1,
-    nombre: 'Regresa a Casa – Tijuana 2025',
-    fecha: '15 de Agosto, 2025',
-    hora: '10:00 AM',
-    campus: 'Campus Tijuana – Auditorio Central',
-    descripcion: 'Reencuentro de egresados de todas las generaciones en el campus Tijuana.',
-    imagen: 'https://picsum.photos/seed/uabc1/600/300',
-    disponible: true
-  },
-  {
-    id: 2,
-    nombre: 'Regresa a Casa – Mexicali 2025',
-    fecha: '22 de Octubre, 2025',
-    hora: '9:00 AM',
-    campus: 'Campus Mexicali – Centro de Convenciones',
-    descripcion: 'Celebración anual de egresados en campus Mexicali.',
-    imagen: 'https://picsum.photos/seed/uabc2/600/300',
-    disponible: true
-  },
-  {
-    id: 3,
-    nombre: 'Regresa a Casa – Ensenada 2025',
-    fecha: 'Diciembre 2025',
-    hora: 'Por confirmar',
-    campus: 'Campus Ensenada',
-    descripcion: 'Próximo evento de egresados en el campus Ensenada.',
-    imagen: 'https://picsum.photos/seed/uabc3/600/300',
-    disponible: false
-  }
-];
-
-// Función auxiliar – disponible para uso futuro con datos dinámicos
-function renderEventos(eventos) {
-  const grid = document.getElementById('events-grid');
-  if (!grid || !eventos) return;
-  // TODO: implementar render dinámico desde API
-  console.log('Eventos cargados:', eventos.length);
+/**
+ * Abre el modal de información de un evento
+ * @param {string} modalId - ID del modal a abrir
+ */
+function openModalInfo(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  modal.removeAttribute('hidden');
+  document.body.style.overflow = 'hidden';
+  // Focus al primer elemento interactivo
+  const focusable = modal.querySelector('button, [href], input, select');
+  if (focusable) setTimeout(() => focusable.focus(), 50);
 }
 
+/**
+ * Abre el modal de registro precargando el evento
+ * @param {string} modalId
+ * @param {string} eventoNombre
+ * @param {string} eventoImagen
+ */
+function openModal(modalId, eventoNombre, eventoImagen) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+
+  // Precargar datos del evento en el modal de registro
+  if (modalId === 'modal-registro') {
+    const banner = document.getElementById('modal-event-banner');
+    const label  = document.getElementById('modal-event-label');
+    const hidden = document.getElementById('field-evento');
+    if (banner && eventoImagen) banner.style.backgroundImage = `url('${eventoImagen}')`;
+    if (label  && eventoNombre) label.textContent = eventoNombre;
+    if (hidden && eventoNombre) hidden.value = eventoNombre;
+  }
+
+  modal.removeAttribute('hidden');
+  document.body.style.overflow = 'hidden';
+  const focusable = modal.querySelector('button, [href], input, select');
+  if (focusable) setTimeout(() => focusable.focus(), 50);
+}
+
+/**
+ * Cierra cualquier modal por ID
+ * @param {string} modalId
+ */
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  if (!modal) return;
+  modal.setAttribute('hidden', '');
+  document.body.style.overflow = '';
+}
+
+// Cerrar modal al hacer clic en el overlay
 document.addEventListener('DOMContentLoaded', () => {
-  renderEventos(eventosEjemplo);
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.setAttribute('hidden', '');
+        document.body.style.overflow = '';
+      }
+    });
+  });
+
+  // Cerrar con Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay:not([hidden])').forEach(m => {
+        m.setAttribute('hidden', '');
+        document.body.style.overflow = '';
+      });
+    }
+  });
+
+  // Navegación activa al hacer scroll
+  const navLinks = document.querySelectorAll('.nav-link');
+  const sections = document.querySelectorAll('section[id]');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(link => link.classList.remove('active'));
+        const activeLink = document.querySelector(`.nav-link[href="#${entry.target.id}"]`);
+        if (activeLink) activeLink.classList.add('active');
+      }
+    });
+  }, { threshold: 0.4 });
+  sections.forEach(s => observer.observe(s));
 });
