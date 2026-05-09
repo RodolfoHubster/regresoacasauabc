@@ -1,114 +1,78 @@
-/**
- * main.js — Inicialización global, tema, navbar mobile, FAQ accordion
- * Proyecto: Regresa a Casa UABC
- */
+/* main.js – Inicialización global */
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Resaltar nav link activo al hacer scroll
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-link');
 
-  // ---- TEMA CLARO / OSCURO ----
-  const html = document.documentElement;
-  const themeToggle = document.querySelector('[data-theme-toggle]');
-  let currentTheme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-  html.setAttribute('data-theme', currentTheme);
-  updateThemeIcon();
-
-  themeToggle?.addEventListener('click', () => {
-    currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', currentTheme);
-    updateThemeIcon();
-    lucide.createIcons();
-  });
-
-  function updateThemeIcon() {
-    if (!themeToggle) return;
-    const icon = currentTheme === 'dark' ? 'sun' : 'moon';
-    themeToggle.setAttribute('aria-label', currentTheme === 'dark' ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro');
-    themeToggle.innerHTML = `<i data-lucide="${icon}" width="18" height="18"></i>`;
-  }
-
-  // ---- NAVBAR MOBILE ----
-  const navToggle = document.getElementById('nav-toggle');
-  const mobileMenu = document.getElementById('mobile-menu');
-
-  navToggle?.addEventListener('click', () => {
-    const isOpen = !mobileMenu.hidden;
-    mobileMenu.hidden = isOpen;
-    navToggle.setAttribute('aria-expanded', String(!isOpen));
-    navToggle.innerHTML = isOpen
-      ? '<i data-lucide="menu" width="22" height="22"></i>'
-      : '<i data-lucide="x" width="22" height="22"></i>';
-    lucide.createIcons();
-  });
-
-  // Cerrar menú móvil al hacer clic en un link
-  mobileMenu?.querySelectorAll('.mobile-nav-link').forEach(link => {
-    link.addEventListener('click', () => {
-      mobileMenu.hidden = true;
-      navToggle.setAttribute('aria-expanded', 'false');
-      navToggle.innerHTML = '<i data-lucide="menu" width="22" height="22"></i>';
-      lucide.createIcons();
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(link => {
+          link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id);
+        });
+      }
     });
-  });
+  }, { threshold: 0.4 });
 
-  // ---- FAQ ACCORDION ----
-  document.querySelectorAll('.faq-question').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const expanded = btn.getAttribute('aria-expanded') === 'true';
-      const targetId = btn.getAttribute('aria-controls');
-      const answer = document.getElementById(targetId);
+  sections.forEach(sec => observer.observe(sec));
 
-      // Cerrar todos los demás
-      document.querySelectorAll('.faq-question').forEach(other => {
-        if (other !== btn) {
-          other.setAttribute('aria-expanded', 'false');
-          const otherId = other.getAttribute('aria-controls');
-          document.getElementById(otherId).hidden = true;
-        }
+  // FAQ accordion
+  document.querySelectorAll('.faq-trigger').forEach(trigger => {
+    trigger.addEventListener('click', () => {
+      const expanded = trigger.getAttribute('aria-expanded') === 'true';
+      const answerId = trigger.getAttribute('aria-controls');
+      const answer = document.getElementById(answerId);
+
+      // Cerrar todos
+      document.querySelectorAll('.faq-trigger').forEach(t => {
+        t.setAttribute('aria-expanded', 'false');
+        const id = t.getAttribute('aria-controls');
+        const a = document.getElementById(id);
+        if (a) a.hidden = true;
       });
 
-      btn.setAttribute('aria-expanded', String(!expanded));
-      answer.hidden = expanded;
+      // Abrir el actual si estaba cerrado
+      if (!expanded) {
+        trigger.setAttribute('aria-expanded', 'true');
+        if (answer) answer.hidden = false;
+      }
     });
   });
+});
 
-  // ---- MODAL ----
-  const backdrop = document.getElementById('modal-backdrop');
+// ─── MODAL HELPERS ───
+function openModal(id, eventoNombre) {
+  const overlay = document.getElementById(id);
+  if (!overlay) return;
+  overlay.hidden = false;
+  document.body.style.overflow = 'hidden';
 
-  // Abrir modal de registro
-  document.querySelectorAll('[data-modal="registro"]').forEach(btn => {
-    btn.addEventListener('click', () => openModal('modal-registro'));
-  });
+  if (eventoNombre) {
+    const label = document.getElementById('modal-event-label');
+    const hidden = document.getElementById('field-evento');
+    if (label) label.textContent = '📅 ' + eventoNombre;
+    if (hidden) hidden.value = eventoNombre;
+  }
 
-  // Cerrar modal
-  document.querySelectorAll('[data-modal-close]').forEach(btn => {
-    btn.addEventListener('click', closeAllModals);
-  });
-  backdrop?.addEventListener('click', closeAllModals);
+  // Focus primer elemento interactivo
+  const firstFocusable = overlay.querySelector('input, select, textarea, button:not(.modal-close)');
+  if (firstFocusable) setTimeout(() => firstFocusable.focus(), 100);
 
   // Cerrar con Escape
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') closeAllModals();
-  });
+  overlay._escHandler = (e) => { if (e.key === 'Escape') closeModal(id); };
+  document.addEventListener('keydown', overlay._escHandler);
 
-  function openModal(id) {
-    const modal = document.getElementById(id);
-    if (!modal) return;
-    backdrop.hidden = false;
-    backdrop.removeAttribute('aria-hidden');
-    modal.hidden = false;
-    // Focus al primer input
-    setTimeout(() => {
-      const first = modal.querySelector('input, select, button, [tabindex]:not([tabindex="-1"])');
-      first?.focus();
-    }, 50);
-  }
+  // Cerrar al click en overlay
+  overlay._clickHandler = (e) => { if (e.target === overlay) closeModal(id); };
+  overlay.addEventListener('click', overlay._clickHandler);
+}
 
-  function closeAllModals() {
-    document.querySelectorAll('.modal').forEach(m => m.hidden = true);
-    if (backdrop) {
-      backdrop.hidden = true;
-      backdrop.setAttribute('aria-hidden', 'true');
-    }
-  }
-
-});
+function closeModal(id) {
+  const overlay = document.getElementById(id);
+  if (!overlay) return;
+  overlay.hidden = true;
+  document.body.style.overflow = '';
+  if (overlay._escHandler) document.removeEventListener('keydown', overlay._escHandler);
+  if (overlay._clickHandler) overlay.removeEventListener('click', overlay._clickHandler);
+}
