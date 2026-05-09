@@ -21,11 +21,7 @@
     <div class="header-inner">
       <!-- Logo -->
       <a href="index.html" class="header-logo" aria-label="Regresa a Casa UABC – Inicio">
-        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
-          <rect width="48" height="48" rx="6" fill="#F5C200"/>
-          <path d="M24 8L10 20v20h10v-12h8v12h10V20L24 8z" fill="#1A6B2A"/>
-          <circle cx="24" cy="16" r="3" fill="#1A6B2A"/>
-        </svg>
+        <img src="assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="48" height="48" loading="eager" class="header-logo-img">
         <div class="header-logo-text">
           <span class="logo-title">Regresa a Casa</span>
           <span class="logo-sub">UABC</span>
@@ -72,7 +68,7 @@
         <div class="hero-card">
           <h1 class="hero-title">Bienvenido a <span class="text-gold">Regresa a Casa</span></h1>
           <p class="hero-desc">El espacio oficial para egresados UABC. Consulta los eventos disponibles, regístrate fácilmente y recibe tu QR de confirmación directo en tu correo.</p>
-          <a href="#eventos" class="btn btn-primary btn-lg">Ver Eventos Disponibles →</a>
+          <a href="#eventos" class="btn btn-primary btn-lg">Ver Eventos Disponibles</a>
         </div>
       </div>
     </section>
@@ -89,7 +85,7 @@
 
           <!-- Card Evento 1 -->
           <article class="event-card">
-            <div class="event-card-img" style="background-image: url('https://picsum.photos/seed/uabc-evento1/600/300');" role="img" aria-label="Foto del evento Regresa a Casa Tijuana 2025">
+            <div class="event-card-img" style="background-image: url('assets/images/486642144_1054752733356249_5093856031880116704_n.jpg');" role="img" aria-label="Foto del evento Regresa a Casa Tijuana 2025">
               <span class="event-badge">Disponible</span>
             </div>
             <div class="event-card-body">
@@ -105,7 +101,7 @@
                 </li>
               </ul>
               <p class="event-card-desc">Reencuentro de egresados de todas las generaciones en el campus Tijuana. Ponencias, networking y celebración.</p>
-              <button class="btn btn-primary" onclick="openModal('modal-registro', 'Regresa a Casa – Tijuana 2025')">
+              <button class="btn btn-primary" onclick="openModal('modal-registro', 'Regresa a Casa – Tijuana 2025', 'assets/images/486642144_1054752733356249_5093856031880116704_n.jpg')">
                 Registrarme a este evento
               </button>
             </div>
@@ -113,7 +109,7 @@
 
           <!-- Card Evento 2 -->
           <article class="event-card">
-            <div class="event-card-img" style="background-image: url('https://picsum.photos/seed/uabc-evento2/600/300');" role="img" aria-label="Foto del evento Regresa a Casa Mexicali 2025">
+            <div class="event-card-img" style="background-image: url('assets/images/egresados-tijuana2.jpg');" role="img" aria-label="Foto del evento Regresa a Casa Mexicali 2025">
               <span class="event-badge">Disponible</span>
             </div>
             <div class="event-card-body">
@@ -129,7 +125,7 @@
                 </li>
               </ul>
               <p class="event-card-desc">Celebración anual de egresados en el campus Mexicali. Talleres, conferencias y actividades de integración.</p>
-              <button class="btn btn-primary" onclick="openModal('modal-registro', 'Regresa a Casa – Mexicali 2025')">
+              <button class="btn btn-primary" onclick="openModal('modal-registro', 'Regresa a Casa – Mexicali 2025', 'assets/images/egresados-tijuana2.jpg')">
                 Registrarme a este evento
               </button>
             </div>
@@ -137,7 +133,7 @@
 
           <!-- Card Evento 3 -->
           <article class="event-card">
-            <div class="event-card-img" style="background-image: url('https://picsum.photos/seed/uabc-evento3/600/300');" role="img" aria-label="Foto del evento Regresa a Casa Ensenada 2025">
+            <div class="event-card-img" style="background-image: url('assets/images/download.jpg');" role="img" aria-label="Foto del evento Regresa a Casa Ensenada 2025">
               <span class="event-badge event-badge--pronto">Próximamente</span>
             </div>
             <div class="event-card-body">
@@ -160,6 +156,17 @@
           </article>
 
         </div>
+
+        <!-- EMPTY STATE: se muestra cuando no hay eventos disponibles -->
+        <div class="events-empty" id="events-empty" hidden>
+          <div class="events-empty-icon" aria-hidden="true">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8" y2="14"/><line x1="12" y1="14" x2="12" y2="14"/><line x1="16" y1="14" x2="16" y2="14"/></svg>
+          </div>
+          <h3 class="events-empty-title">No hay eventos disponibles por el momento</h3>
+          <p class="events-empty-desc">Estamos preparando los próximos eventos del año. Regresa pronto o contáctanos para más información.</p>
+          <a href="#contacto" class="btn btn-primary">Contactar</a>
+        </div>
+
       </div>
     </section>
 
@@ -199,7 +206,7 @@
               <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
             <div class="faq-answer" id="faq-3" hidden>
-              <p>El evento es semiformale. Se recomienda vestimenta casual elegante. No se permite ropa de playa ni deportiva. Los colores institucionales UABC siempre son bienvenidos.</p>
+              <p>El evento es semiformal. Se recomienda vestimenta casual elegante. No se permite ropa de playa ni deportiva. Los colores institucionales UABC siempre son bienvenidos.</p>
             </div>
           </div>
 
@@ -264,6 +271,8 @@
       </div>
 
       <div class="modal-body">
+        <!-- Imagen del evento -->
+        <div class="modal-event-banner" id="modal-event-banner" aria-hidden="true"></div>
         <p class="modal-event-name" id="modal-event-label"></p>
 
         <form id="form-registro" novalidate>
@@ -351,7 +360,7 @@
   <div class="modal-overlay" id="modal-confirmacion" role="dialog" aria-modal="true" aria-labelledby="modal-confirm-title" hidden>
     <div class="modal modal--sm">
       <div class="modal-header">
-        <h2 class="modal-title" id="modal-confirm-title">¡Registro Exitoso!</h2>
+        <h2 class="modal-title" id="modal-confirm-title">Registro Exitoso</h2>
         <button class="modal-close" onclick="closeModal('modal-confirmacion')" aria-label="Cerrar">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
