@@ -2,8 +2,10 @@
 
 /* =====================================================
    HEADER
-   Layout: logo izquierda | texto centro | acciones derecha
-   Inspirado en la barra institucional UABC
+   Layout: logo pegado izquierda | texto centro | acciones derecha
+   El .site-header ocupa 100% del ancho.
+   .header-inner NO tiene max-width ni margin-inline: auto
+   para que el logo quede literalmente en el borde izquierdo.
    ===================================================== */
 
 .skip-link {
@@ -29,18 +31,18 @@
   box-shadow: var(--shadow-md);
 }
 
-/* Grid de 3 zonas: logo | centro | acciones */
+/* Grid 3 zonas — SIN max-width, SIN margin-inline: auto.
+   El logo toca el borde izquierdo real de la pantalla. */
 .header-inner {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  max-width: var(--content-wide);
-  margin-inline: auto;
-  padding: var(--space-3) var(--space-6);
+  width: 100%;
+  padding: var(--space-3) var(--space-5);
   gap: var(--space-4);
 }
 
-/* ── Logo: alineado al borde izquierdo ── */
+/* ── Logo: borde izquierdo real ── */
 .header-logo {
   display: flex;
   align-items: center;
@@ -122,9 +124,7 @@
 }
 
 .nav-inner {
-  max-width: var(--content-wide);
-  margin-inline: auto;
-  padding-inline: var(--space-6);
+  padding-inline: var(--space-5);
 }
 
 .nav-list {
@@ -205,7 +205,7 @@
    ===================================================== */
 
 .hero-section {
-  background: linear-gradient(135deg, var(--uabc-verde) 0%, var(--uabc-verde-oscuro) 100%);
+  background: var(--uabc-verde);
   padding-block: clamp(var(--space-16), 8vw, var(--space-20));
   color: var(--uabc-blanco);
 }
@@ -662,7 +662,6 @@
   margin-top: var(--space-2);
 }
 
-/* Banner evento dentro del modal de registro */
 .modal-event-banner {
   height: 90px;
   border-radius: var(--radius-lg);
@@ -874,23 +873,18 @@
 
 @media (max-width: 768px) {
   .header-inner {
-    grid-template-columns: auto 1fr auto;
     padding: var(--space-3) var(--space-4);
     gap: var(--space-3);
   }
 
   .header-logo-img { height: 44px; }
 
-  .header-university {
-    font-size: var(--text-sm);
-  }
+  .header-university { font-size: var(--text-sm); }
+  .header-dept       { font-size: var(--text-xs); }
 
-  .header-dept {
-    font-size: var(--text-xs);
-  }
-
-  .nav-list { overflow-x: auto; }
-  .nav-link { padding: var(--space-2) var(--space-3); white-space: nowrap; }
+  .nav-inner { padding-inline: var(--space-4); }
+  .nav-list  { overflow-x: auto; }
+  .nav-link  { padding: var(--space-2) var(--space-3); white-space: nowrap; }
 
   .container { padding-inline: var(--space-4); }
 
