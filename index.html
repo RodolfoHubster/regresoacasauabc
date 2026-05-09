@@ -20,27 +20,39 @@
   <header class="site-header">
     <div class="header-inner">
 
-      <!-- Columna izquierda: logo + subtítulo -->
-      <div class="header-left">
-        <a href="index.html" class="header-logo" aria-label="Regresa a Casa UABC – Inicio">
-          <img src="assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="64" height="64" loading="eager" class="header-logo-img">
-        </a>
-        <span class="header-alumni-label">ALUMNI</span>
+      <!--
+        Estructura:
+        [ header-brand (logo + ALUMNI + título + subtítulo) ]  [ header-right (Admin) ]
+        El header-brand usa flex-row con el logo a la izquierda y el texto al centro.
+        header-right está fijo a la derecha con el mismo ancho que el botón.
+        Un div wrapper centrado (.header-brand-wrap) centra el bloque en el espacio
+        restante, generando simetría perfecta.
+      -->
+
+      <!-- Bloque de marca centrado (logo + textos institucionales) -->
+      <div class="header-brand-wrap">
+        <div class="header-brand">
+          <!-- Logo -->
+          <a href="index.html" class="header-logo" aria-label="Regresa a Casa UABC – Inicio">
+            <img src="assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="64" height="64" loading="eager" class="header-logo-img">
+          </a>
+          <!-- Textos -->
+          <div class="header-brand-text">
+            <span class="header-alumni-label">ALUMNI</span>
+            <p class="header-university">Universidad Autónoma de Baja California</p>
+            <p class="header-dept">Comunidad de egresadas y egresados de la UABC</p>
+          </div>
+        </div>
       </div>
 
-      <!-- Columna central: nombre de la universidad -->
-      <div class="header-center">
-        <p class="header-university">Universidad Autónoma de Baja California</p>
-        <p class="header-dept">Comunidad de egresadas y egresados de la UABC</p>
-      </div>
-
-      <!-- Columna derecha: botón admin -->
+      <!-- Botón Admin alineado a la derecha -->
       <div class="header-right">
         <a href="admin/index.html" class="btn-header-admin">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           Admin
         </a>
       </div>
+
     </div>
 
     <!-- Línea dorada separadora -->
