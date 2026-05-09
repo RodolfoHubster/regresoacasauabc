@@ -19,15 +19,15 @@
   <!-- ===== HEADER ===== -->
   <header class="site-header">
     <div class="header-inner">
-      <!-- Solo logo -->
+      <!-- Logo pegado a la izquierda -->
       <a href="index.html" class="header-logo" aria-label="Regresa a Casa UABC – Inicio">
-        <img src="assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="72" height="72" loading="eager" class="header-logo-img">
+        <img src="assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="64" height="64" loading="eager" class="header-logo-img">
       </a>
 
-      <!-- Centro de header -->
+      <!-- Centro del header -->
       <div class="header-center">
         <p class="header-university">Universidad Autónoma de Baja California</p>
-        <p class="header-dept">Dirección de Egresados</p>
+        <p class="header-dept">Comunidad de egresadas y egresados de la UABC</p>
       </div>
 
       <!-- Acciones -->
@@ -158,7 +158,7 @@
               </ul>
               <p class="event-card-desc">Próximo evento de egresados en el campus Ensenada. Manténte atento a la fecha oficial.</p>
               <div class="event-card-actions">
-                <button class="btn btn-outline-primary" onclick="openModalInfo('info-ensenada')" disabled>
+                <button class="btn btn-outline-primary" disabled>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
                   Información
                 </button>
@@ -391,8 +391,6 @@
       </div>
       <div class="modal-body">
         <img src="assets/images/486642144_1054752733356249_5093856031880116704_n.jpg" alt="Banner Tijuana 2025" class="info-banner" loading="lazy">
-
-        <!-- Datos destacados -->
         <div class="info-highlights">
           <div class="info-highlight-item">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -423,12 +421,9 @@
             </div>
           </div>
         </div>
-
-        <!-- Contenido rico editable por admin (desde BD) -->
         <div class="info-rich-content">
           <h3>Acerca del evento</h3>
           <p>El evento <strong>Regresa a Casa</strong> es el reencuentro oficial de egresados UABC del campus Tijuana. Un espacio para reconectarse con antiguos compañeros, académicos y la institución que los formó.</p>
-
           <h3>Programa destacado</h3>
           <ul>
             <li>Bienvenida institucional por el Rector</li>
@@ -436,15 +431,12 @@
             <li>Networking y convivio</li>
             <li>Reconocimientos a generaciones especiales</li>
           </ul>
-
           <h3>Acreditación</h3>
           <p>Presenta tu código QR recibido por correo en los módulos de acreditación ubicados en la entrada principal. El proceso toma menos de un minuto.</p>
-
           <div class="info-callout">
             <strong>Vestimenta recomendada:</strong> Semiformal. Los colores institucionales (verde y dorado) son bienvenidos.
           </div>
         </div>
-
         <div class="modal-footer">
           <button class="btn btn-ghost" onclick="closeModal('info-tijuana')">Cerrar</button>
           <button class="btn btn-primary" onclick="closeModal('info-tijuana'); openModal('modal-registro', 'Regresa a Casa – Tijuana 2025', 'assets/images/486642144_1054752733356249_5093856031880116704_n.jpg')">
