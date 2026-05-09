@@ -1,0 +1,75 @@
+/* login.css – Estilos específicos para la página de acceso */
+
+.login-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100dvh;
+    background: var(--uabc-verde-oscuro); /* Usando el verde oscuro institucional */
+    padding: var(--space-4);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--color-surface);
+    border-radius: var(--radius-lg);
+    border-top: 5px solid var(--uabc-dorado); /* Acento dorado UABC */
+    box-shadow: var(--shadow-lg);
+    padding: var(--space-8);
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: var(--space-6);
+}
+
+.login-logo {
+    width: 80px;
+    height: auto;
+    margin: 0 auto var(--space-4);
+}
+
+.login-title {
+    font-size: var(--text-lg);
+    color: var(--uabc-verde);
+    font-weight: 800;
+    margin-bottom: var(--space-1);
+    font-family: var(--font-display);
+}
+
+.login-subtitle {
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+/* Alerta de error dinámica */
+.error-msg {
+    background: color-mix(in oklch, var(--color-error) 10%, transparent);
+    color: var(--color-error);
+    padding: var(--space-3);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+    margin-bottom: var(--space-4);
+    border-left: 3px solid var(--color-error);
+    display: none; /* Se activa mediante JS si hay error */
+}
+
+.login-footer {
+    margin-top: var(--space-8);
+    text-align: center;
+}
+
+.login-back-link {
+    text-decoration: none;
+    font-size: var(--text-xs);
+    color: var(--color-text-muted);
+    transition: color 0.18s ease;
+}
+
+.login-back-link:hover {
+    color: var(--uabc-verde);
+}
