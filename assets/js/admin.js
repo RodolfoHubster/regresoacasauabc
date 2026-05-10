@@ -199,29 +199,28 @@ function loadEventos() {
           return;
         }
 
+        // Dentro de loadEventos en assets/js/admin.js
         result.data.forEach(evento => {
-          // ... dentro de la función loadEventos, en el forEach de los eventos:
-        const card = `
-          <div class="event-admin-card ${evento.estado === 'cerrado' ? 'event-admin-card--inactive' : ''}">
-            <div class="event-admin-img" style="background-image:url('${evento.imagen || '../assets/images/download.jpg'}');"></div>
-            <div class="event-admin-body">
-              <div class="event-admin-top">
-                <h3 class="event-admin-title">${evento.nombre}</h3>
-                <span class="badge ${evento.estado === 'activo' ? 'badge--green' : 'badge--gray'}">${evento.estado}</span>
-              </div>
-              <p class="event-admin-meta">${evento.fecha} · ${evento.ubicacion}</p>
-              <div class="event-admin-actions">
-                <button class="btn btn-secondary btn-sm" onclick="openModalEvento(${evento.id})">Editar</button>
-                <button class="btn btn-primary btn-sm" onclick="verQR(${evento.id}, '${evento.nombre}')">Ver QR</button>
-                
-                <a href="participantes.html?id=${evento.id}" class="btn btn-dark btn-sm">Participantes</a>
-                
-                <button class="btn btn-ghost btn-sm" onclick="openModalRecordatorio('${evento.nombre}')">Recordatorio</button>
+          const card = `
+            <div class="event-admin-card ${evento.estado === 'cerrado' ? 'event-admin-card--inactive' : ''}">
+              <div class="event-admin-img" style="background-image:url('${evento.imagen || '../assets/images/download.jpg'}');"></div>
+              <div class="event-admin-body">
+                <div class="event-admin-top">
+                  <h3 class="event-admin-title">${evento.nombre}</h3>
+                  <span class="badge ${evento.estado === 'activo' ? 'badge--green' : 'badge--gray'}">${evento.estado}</span>
+                </div>
+                <p class="event-admin-meta">${evento.fecha} · ${evento.ubicacion}</p>
+                <div class="event-admin-actions">
+                  <button class="btn btn-secondary btn-sm" onclick="openModalEvento(${evento.id})">Editar</button>
+                  <button class="btn btn-secondary btn-sm" onclick="verQR(${evento.id}, '${evento.nombre}')">Ver QR</button>
+                  <a href="participantes.php?id=${evento.id}" class="btn btn-secondary btn-sm">Participantes</a>
+                  <button class="btn btn-secondary btn-sm" onclick="openModalRecordatorio('${evento.nombre}')">Recordatorio</button>
+                  <button class="btn btn-secondary btn-sm btn-delete-hover" onclick="confirmarEliminar(${evento.id}, '${evento.nombre}')">Eliminar</button>
+                </div>
               </div>
             </div>
-          </div>
-        `;
-        container.innerHTML += card;
+          `;
+          container.innerHTML += card;
         });
       }
     })
@@ -386,3 +385,35 @@ document.addEventListener('DOMContentLoaded', () => {
       cargarTablaAsistentes();
   }
 });
+
+function confirmarEliminar(id, nombre) {
+    if (confirm(`¿Estás seguro de que deseas eliminar el evento "${nombre}"? Esta acción no se puede deshacer.`)) {
+        eliminarEvento(id);
+    }
+}
+
+async function eliminarEvento(id) {
+    try {
+        const response = await fetch('php/eliminar_evento.php', {
+            method: 'POST',
+            // Enviamos el ID en un formato que el PHP pueda leer fácilmente
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
+        });
+        
+        // Verificamos si la respuesta es OK antes de intentar convertir a JSON
+        if (!response.ok) throw new Error('Error en la respuesta del servidor');
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            alert(result.message);
+            loadEventos(); // Es mejor llamar a la función que recarga los eventos que recargar toda la página
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        console.error('Error al eliminar:', error);
+        alert('Ocurrió un error al intentar eliminar el evento.');
+    }
+}

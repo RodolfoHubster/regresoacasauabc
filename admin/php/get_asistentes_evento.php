@@ -6,8 +6,17 @@ if (isset($_GET['evento_id'])) {
     try {
         $id = $_GET['evento_id'];
         
-        // CORRECCIÓN: Cambiamos 'asistente' por 'registro_asistente'
-        $sql = "SELECT * FROM registro_asistente WHERE evento_id = :id ORDER BY apellidos ASC";
+        // Unimos con las tablas campus, facultad y carrera para obtener los nombres
+        $sql = "SELECT r.*, 
+                       cp.nombre as campus_nombre, 
+                       f.nombre as facultad_nombre, 
+                       cr.nombre as carrera_nombre
+                FROM registro_asistente r
+                LEFT JOIN campus cp ON r.campus_id = cp.id
+                LEFT JOIN facultad f ON r.facultad_id = f.id
+                LEFT JOIN carrera cr ON r.carrera_id = cr.id
+                WHERE r.evento_id = :id 
+                ORDER BY r.apellidos ASC";
         
         $stmt = $conexion->prepare($sql);
         $stmt->execute([':id' => $id]);
@@ -17,7 +26,5 @@ if (isset($_GET['evento_id'])) {
     } catch (Exception $e) {
         echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
     }
-} else {
-    echo json_encode(['status' => 'error', 'message' => 'ID de evento no proporcionado']);
 }
 ?>

@@ -12,6 +12,9 @@ header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
+        // --- NUEVO: Recibir el ID del evento ---
+        $evento_id = $_POST['evento_id'] ?? ''; 
+        
         $nombre = $_POST['nombre'] ?? '';
         $apellidos = $_POST['apellidos'] ?? '';
         $correo = $_POST['email'] ?? ''; 
@@ -22,20 +25,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $generacion = $_POST['generacion'] ?? '';
         $tipo_asistente = $_POST['tipo'] ?? '';
 
-        if (empty($nombre) || empty($correo) || empty($campus_id)) {
-            throw new Exception("Faltan campos obligatorios.");
+        // Validar que el evento_id no esté vacío
+        if (empty($nombre) || empty($correo) || empty($campus_id) || empty($evento_id)) {
+            throw new Exception("Faltan campos obligatorios (incluyendo el ID del evento).");
         }
 
-        // 1. Generar un código único para este asistente (Ej. UABC-64A3F...)
+        // 1. Generar un código único
         $qr_codigo = 'UABC-' . strtoupper(uniqid());
 
-        // 2. Guardar en la base de datos
+        // 2. Guardar en la base de datos (Se añadió evento_id)
         $sql = "INSERT INTO registro_asistente 
-                (qr_codigo, nombre, apellidos, correo, telefono, campus_id, facultad_id, carrera_id, generacion, tipo_asistente) 
-                VALUES (:qr_codigo, :nombre, :apellidos, :correo, :telefono, :campus_id, :facultad_id, :carrera_id, :generacion, :tipo_asistente)";
+                (evento_id, qr_codigo, nombre, apellidos, correo, telefono, campus_id, facultad_id, carrera_id, generacion, tipo_asistente) 
+                VALUES (:evento_id, :qr_codigo, :nombre, :apellidos, :correo, :telefono, :campus_id, :facultad_id, :carrera_id, :generacion, :tipo_asistente)";
         
         $stmt = $conexion->prepare($sql);
         $stmt->execute([
+            ':evento_id' => $evento_id, // Vinculamos el asistente al evento
             ':qr_codigo' => $qr_codigo,
             ':nombre' => $nombre,
             ':apellidos' => $apellidos,
@@ -53,14 +58,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $writer = new PngWriter();
         $result = $writer->write($qr);
         
-        // Guardamos el QR temporalmente para adjuntarlo al correo
         $qr_path = sys_get_temp_dir() . '/' . $qr_codigo . '.png';
         $result->saveToFile($qr_path);
 
         // 4. Enviar el correo con PHPMailer
         $mail = new PHPMailer(true);
-        
-        // Configuración del servidor SMTP (leyendo del .env)
         $mail->isSMTP();
         $mail->Host       = $_ENV['MAIL_HOST'];
         $mail->SMTPAuth   = true;
@@ -70,44 +72,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $mail->Port       = $_ENV['MAIL_PORT'];
         $mail->CharSet    = 'UTF-8';
 
-        // Remitente y Destinatario
         $mail->setFrom($_ENV['MAIL_USER'], 'Regreso a Casa UABC');
         $mail->addAddress($correo, $nombre . ' ' . $apellidos);
-
-        // Adjuntar el código QR
         $mail->addAttachment($qr_path, 'Tu_Codigo_QR.png');
 
-        // Contenido del correo
         $mail->isHTML(true);
         $mail->Subject = '¡Registro Confirmado! - Regresa a Casa UABC';
         $mail->Body    = "
             <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;'>
                 <h2 style='color: #00713d;'>¡Hola $nombre!</h2>
-                <p>Tu registro para el evento <strong>Regresa a Casa UABC</strong> ha sido exitoso.</p>
-                <p>Adjunto a este correo encontrarás tu <strong>Código QR de acceso</strong>. Por favor, llévalo en tu celular o impreso el día del evento para agilizar tu entrada.</p>
-                <p>Tu código de confirmación manual es: <strong>$qr_codigo</strong></p>
+                <p>Tu registro para el evento ha sido exitoso.</p>
+                <p>Adjunto encontrarás tu <strong>Código QR de acceso</strong>.</p>
+                <p>Tu código manual: <strong>$qr_codigo</strong></p>
                 <br>
                 <p>¡Te esperamos!</p>
-                <p><small>Dirección de Egresados UABC</small></p>
             </div>
         ";
 
         $mail->send();
 
-        // Si se envió el correo, actualizamos la columna `correo_enviado` a 1
+        // Actualizamos estado de envío
         $conexion->query("UPDATE registro_asistente SET correo_enviado = 1 WHERE qr_codigo = '$qr_codigo'");
-
-        // Borramos el QR temporal del servidor para no ocupar espacio
         unlink($qr_path);
 
         echo json_encode(['status' => 'success', 'message' => '¡Registro guardado y correo enviado!']);
 
     } catch (Exception $e) {
-        // Aunque falle el correo, el usuario ya se guardó, pero le avisamos del error
         error_log("Error de registro/correo: " . $e->getMessage());
-        echo json_encode(['status' => 'error', 'message' => 'Registro completado, pero ocurrió un error al enviar el correo.']);
+        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
     }
-} else {
-    echo json_encode(['status' => 'error', 'message' => 'Método no permitido.']);
 }
 ?>
