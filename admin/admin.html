@@ -339,50 +339,11 @@
                   <th>Acciones</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody id="tabla-asistentes-body">
                 <tr>
-                  <td>Ana Martínez López</td>
-                  <td>ana.martinez@uabc.edu.mx</td>
-                  <td>Tijuana</td>
-                  <td>Ing. Sistemas</td>
-                  <td>2015-2020</td>
-                  <td><span class="badge badge--green">Egresado</span></td>
-                  <td>Tijuana 2025</td>
-                  <td><span class="badge badge--green">Enviado</span></td>
-                  <td class="table-actions">
-                    <button class="btn-icon" title="Ver detalle" onclick="openModalAsistente('Ana Martínez')" aria-label="Ver detalle">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Carlos Ruiz Mendoza</td>
-                  <td>carlos.ruiz@gmail.com</td>
-                  <td>Mexicali</td>
-                  <td>Administración</td>
-                  <td>2018-2023</td>
-                  <td><span class="badge badge--green">Egresado</span></td>
-                  <td>Mexicali 2025</td>
-                  <td><span class="badge badge--green">Enviado</span></td>
-                  <td class="table-actions">
-                    <button class="btn-icon" title="Ver detalle" onclick="openModalAsistente('Carlos Ruiz')" aria-label="Ver detalle">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Laura Pérez González</td>
-                  <td>laura.perez@outlook.com</td>
-                  <td>Tijuana</td>
-                  <td>Contabilidad</td>
-                  <td>2010-2015</td>
-                  <td><span class="badge badge--gold">Docente</span></td>
-                  <td>Tijuana 2025</td>
-                  <td><span class="badge badge--gray">Pendiente</span></td>
-                  <td class="table-actions">
-                    <button class="btn-icon" title="Ver detalle" onclick="openModalAsistente('Laura Pérez')" aria-label="Ver detalle">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
+                  <td colspan="9" style="text-align: center; padding: 20px;">
+                    <span class="spinner" style="display:inline-block; width:20px; height:20px; border:2px solid #ccc; border-top-color:#00713d; border-radius:50%; animation:spin 1s linear infinite;"></span>
+                    Cargando asistentes...
                   </td>
                 </tr>
               </tbody>
@@ -467,6 +428,15 @@
         <div class="admin-section-header">
           <h2 class="admin-section-title">Validar QR de Acceso</h2>
           <p class="admin-section-desc">Ingresa o escanea el código QR del asistente para verificar su registro.</p>
+        </div>
+
+        <div class="qr-layout">
+          <div class="admin-card qr-card">
+            <h3 class="admin-card-title">Escanear con Cámara</h3>
+            <p style="margin-bottom: 15px; font-size: 0.9rem; color: #666;">Abre esta página en tu celular para usar la cámara trasera.</p>
+            
+            <div id="lector-camara" style="width: 100%; max-width: 400px; margin: 0 auto;"></div>
+            
         </div>
 
         <div class="qr-layout">
@@ -683,6 +653,7 @@
     </div>
   </div>
 
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <script src="../assets/js/main.js"></script>
   <script src="../assets/js/admin.js"></script>
   <script src="../assets/js/qr-scanner.js"></script>
