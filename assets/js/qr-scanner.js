@@ -1,70 +1,114 @@
-/* qr-scanner.js – Validación de QR desde distintos dispositivos */
-
-function validarQR() {
-  const input = document.getElementById('qr-input');
-  const resultContainer = document.getElementById('qr-result');
-  const resultContent = document.getElementById('qr-result-content');
-  if (!input || !resultContainer) return;
-
-  const codigo = input.value.trim();
-  if (!codigo) {
-    input.focus();
-    input.style.borderColor = 'var(--color-error)';
-    return;
-  }
-  input.style.borderColor = '';
-
-  // TODO: Reemplazar con fetch() a api/validar-qr.php
-  // fetch('api/validar-qr.php?code=' + encodeURIComponent(codigo))
-  //   .then(r => r.json())
-  //   .then(data => mostrarResultadoQR(data))
-
-  // Simulación de respuesta
-  const esValido = codigo.startsWith('UABC') || codigo.length > 5;
-
-  resultContainer.hidden = false;
-  if (esValido) {
-    resultContent.className = 'qr-result-card qr-result-card--ok';
-    resultContent.innerHTML = `
-      <div class="qr-result-icon" style="color:var(--uabc-verde)">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-          <polyline points="22 4 12 14.01 9 11.01"/>
-        </svg>
-      </div>
-      <div class="qr-result-info">
-        <p class="qr-result-status">✓ Registro válido</p>
-        <p class="qr-result-name">Asistente verificado</p>
-        <p class="qr-result-detail">Código: ${codigo}</p>
-      </div>
-    `;
-  } else {
-    resultContent.className = 'qr-result-card qr-result-card--error';
-    resultContent.innerHTML = `
-      <div class="qr-result-icon" style="color:var(--color-error)">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="12" cy="12" r="10"/>
-          <line x1="15" y1="9" x2="9" y2="15"/>
-          <line x1="9" y1="9" x2="15" y2="15"/>
-        </svg>
-      </div>
-      <div class="qr-result-info">
-        <p class="qr-result-status" style="color:var(--color-error)">× Código no encontrado</p>
-        <p class="qr-result-detail">Verifica el código e intenta nuevamente.</p>
-      </div>
-    `;
-  }
+document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar el escáner
+    const html5QrcodeScanner = new Html5QrcodeScanner(
+      "lector-camara", 
+      { fps: 10, qrbox: {width: 250, height: 250} }, 
+      false
+    );
+  
+    // Esta función se ejecuta mágicamente cuando la cámara detecta un QR
+    function onScanSuccess(decodedText, decodedResult) {
+      // 1. Pausar el escáner para que no lea el mismo QR 10 veces por segundo
+      html5QrcodeScanner.pause();
+  
+      // 2. Opcional: Hacer un sonido de "Beep"
+      tocarBeep();
+  
+      // 3. Poner el código en el input manual para que el usuario lo vea
+      document.getElementById('qr-input').value = decodedText;
+  
+      // 4. Enviar al servidor para registrar la asistencia
+      validarQRBD(decodedText);
+    }
+  
+    // Renderizar la cámara en el div que creamos
+    html5QrcodeScanner.render(onScanSuccess);
+});
+  
+// Función para hacer un ruidito cuando escanea (tipo cajero de súper)
+function tocarBeep() {
+    const context = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = context.createOscillator();
+    oscillator.type = 'sine';
+    oscillator.frequency.value = 800;
+    oscillator.connect(context.destination);
+    oscillator.start();
+    setTimeout(() => { oscillator.stop(); }, 150);
 }
 
-// Soporte para lector QR USB (funciona como teclado, dispara Enter)
-document.addEventListener('DOMContentLoaded', () => {
-  const qrInput = document.getElementById('qr-input');
-  if (!qrInput) return;
+// Función que manda el código a PHP
+function validarQRBD(codigoQR) {
+    const resultDiv = document.getElementById('qr-result');
+    const resultName = document.getElementById('qr-result-name');
+    const resultDetail = document.getElementById('qr-result-detail');
+    const resultStatus = document.querySelector('.qr-result-status');
 
-  qrInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      validarQR();
+    fetch('../admin/php/validar_qr.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'codigo=' + encodeURIComponent(codigoQR)
+    })
+    .then(response => response.json())
+    .then(res => {
+        resultDiv.hidden = false;
+        
+        if (res.status === 'success') {
+            resultStatus.textContent = "¡Acceso Permitido!";
+            resultStatus.style.color = "green";
+            resultName.textContent = res.data.nombre + ' ' + res.data.apellidos;
+            resultDetail.textContent = res.data.campus + ' · ' + res.data.carrera;
+            
+            // ACTUALIZACIÓN EN TIEMPO REAL:
+            // Llamamos a las funciones que ya tienes definidas en admin.js
+            if (typeof cargarTablaAsistentes === 'function') {
+                cargarTablaAsistentes(); 
+            }
+            if (typeof cargarDashboardStats === 'function') {
+                cargarDashboardStats();
+            }
+
+        } else if (res.status === 'already_scanned') {
+            resultStatus.textContent = "⚠️ QR Ya fue utilizado";
+            resultStatus.style.color = "orange";
+            resultName.textContent = res.data.nombre + ' ' + res.data.apellidos;
+            resultDetail.textContent = "Este asistente ya había registrado su entrada.";
+        } else {
+            resultStatus.textContent = "❌ QR Inválido";
+            resultStatus.style.color = "red";
+            resultName.textContent = "Código no encontrado";
+            resultDetail.textContent = "Verifica que pertenezca a este evento.";
+        }
+
+        // Reactivar la cámara después de 3 segundos para el siguiente asistente
+        setTimeout(() => {
+            document.getElementById('qr-input').value = '';
+            resultDiv.hidden = true;
+            // Si usamos html5QrcodeScanner.pause(), lo reanudamos con resume()
+            // (La variable scanner no es global aquí, así que el usuario tendrá que darle al botón de la UI o recargamos)
+            location.reload(); // Forma más ruda pero efectiva de limpiar para el siguiente
+        }, 4000);
+    })
+    .catch(err => console.error("Error validando:", err));
+}
+
+// Para el botón manual que ya tenías
+function validarQR() {
+    const input = document.getElementById('qr-input').value;
+    if(input.trim() !== '') {
+        validarQRBD(input);
     }
-  });
+}
+
+// Escuchar la tecla "Enter" en el campo de texto (Ideal para pistolas USB)
+document.addEventListener('DOMContentLoaded', () => {
+    const inputQR = document.getElementById('qr-input');
+    if (inputQR) {
+        inputQR.addEventListener('keypress', function(event) {
+            // Si la tecla presionada es "Enter"
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Evita que la página se recargue
+                validarQR(); // Ejecuta la misma función que el botón
+            }
+        });
+    }
 });

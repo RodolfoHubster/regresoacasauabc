@@ -27,6 +27,10 @@ function showSection(name) {
   // Scroll al inicio
   const main = document.getElementById('admin-main');
   if (main) main.scrollTop = 0;
+
+  if (name === 'registros') {
+      cargarTablaAsistentes(); // Recarga los datos reales al hacer clic en el menú
+  }
 }
 
 function toggleSidebar() {
@@ -108,5 +112,92 @@ document.addEventListener('DOMContentLoaded', () => {
       alert('Pregunta guardada (simulación). Requiere backend PHP.');
       closeAdminModal('modal-faq');
     });
+  }
+});
+
+// ─── CARGAR ESTADÍSTICAS DEL DASHBOARD ───
+function cargarDashboardStats() {
+  fetch('php/get_dashboard_stats.php')
+    .then(response => response.json())
+    .then(result => {
+      if (result.status === 'success') {
+        // Enlaza los datos de PHP con los atributos data-kpi de tu HTML
+        const kpiRegistros = document.querySelector('[data-kpi="total-registros"]');
+        const kpiEventos = document.querySelector('[data-kpi="total-eventos"]');
+        const kpiConfirmados = document.querySelector('[data-kpi="confirmados"]');
+        const kpiCorreos = document.querySelector('[data-kpi="correos"]');
+
+        if (kpiRegistros) kpiRegistros.textContent = result.data.total_registros;
+        if (kpiEventos) kpiEventos.textContent = result.data.eventos_activos;
+        if (kpiConfirmados) kpiConfirmados.textContent = result.data.qr_confirmados;
+        if (kpiCorreos) kpiCorreos.textContent = result.data.correos_enviados;
+      } else {
+        console.error('Error BD:', result.message);
+      }
+    })
+    .catch(error => console.error('Error al cargar stats:', error));
+}
+
+// ─── CARGAR TABLA DE ASISTENTES (QR ESCANEADO) ───
+function cargarTablaAsistentes() {
+  fetch('php/get_asistentes.php')
+    .then(response => response.json())
+    .then(result => {
+      if (result.status === 'success') {
+        const tbody = document.getElementById('tabla-asistentes-body');
+        if (!tbody) return; // Si no encuentra la tabla, se detiene
+        
+        tbody.innerHTML = ''; // Limpiar la tabla antes de llenarla
+
+        if (result.data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Aún no hay asistentes confirmados (QR escaneados).</td></tr>';
+            return;
+        }
+
+        // Recorrer los datos y crear las filas HTML
+        result.data.forEach(asistente => {
+          const tr = document.createElement('tr');
+          
+          tr.innerHTML = `
+            <td>
+              <div class="user-info">
+                <div class="user-avatar" aria-hidden="true">${asistente.nombre.charAt(0)}${asistente.apellidos.charAt(0)}</div>
+                <div>
+                  <p class="user-name">${asistente.nombre} ${asistente.apellidos}</p>
+                </div>
+              </div>
+            </td>
+            <td>${asistente.correo}</td>
+            <td>${asistente.campus}</td>
+            <td>
+               <span style="font-weight: 600;">${asistente.facultad_nombre || ''}</span><br>
+               <small style="color: #666;">${asistente.carrera}</small>
+            </td>
+            <td>${asistente.generacion}</td>
+            <td>
+              <span class="badge badge--success">Asistió</span>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } else {
+        console.error('Error al cargar tabla:', result.message);
+      }
+    })
+    .catch(error => console.error('Error de red:', error));
+}
+
+// ─── MODIFICAR LA CARGA INICIAL ───
+// Busca el DOMContentLoaded que pusimos antes y agrégale la nueva función:
+// Al final de admin.js
+document.addEventListener('DOMContentLoaded', () => {
+  // Primero cargamos las estadísticas de los cuadros de colores
+  if (typeof cargarDashboardStats === 'function') {
+      cargarDashboardStats();
+  }
+  
+  // LUEGO cargamos la tabla de asistentes
+  if (typeof cargarTablaAsistentes === 'function') {
+      cargarTablaAsistentes();
   }
 });
