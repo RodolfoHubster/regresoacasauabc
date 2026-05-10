@@ -221,81 +221,13 @@
         <div class="admin-section-header">
           <h2 class="admin-section-title">Gestión de Eventos</h2>
           <button class="btn btn-primary" onclick="openModalEvento(null)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             Nuevo Evento
           </button>
         </div>
 
-        <div class="events-admin-grid">
-          <div class="event-admin-card">
-            <div class="event-admin-img" style="background-image:url('../assets/images/486642144_1054752733356249_5093856031880116704_n.jpg');"></div>
-            <div class="event-admin-body">
-              <div class="event-admin-top">
-                <h3 class="event-admin-title">Regresa a Casa – Tijuana 2025</h3>
-                <span class="badge badge--green">Activo</span>
-              </div>
-              <p class="event-admin-meta">15 Ago 2025 · Campus Tijuana</p>
-              <p class="event-admin-meta">142 registros</p>
-              <div class="event-admin-actions">
-                <button class="btn btn-secondary btn-sm" onclick="openModalEvento('Tijuana 2025')">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  Editar
-                </button>
-                <button class="btn btn-primary btn-sm" onclick="alert('Exportar Excel – requiere backend PHP')">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                  Exportar Excel
-                </button>
-                <button class="btn btn-ghost btn-sm" onclick="openModalRecordatorio('Tijuana 2025')">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                  Recordatorio
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="event-admin-card">
-            <div class="event-admin-img" style="background-image:url('../assets/images/egresados-tijuana2.jpg');"></div>
-            <div class="event-admin-body">
-              <div class="event-admin-top">
-                <h3 class="event-admin-title">Regresa a Casa – Mexicali 2025</h3>
-                <span class="badge badge--green">Activo</span>
-              </div>
-              <p class="event-admin-meta">22 Oct 2025 · Campus Mexicali</p>
-              <p class="event-admin-meta">106 registros</p>
-              <div class="event-admin-actions">
-                <button class="btn btn-secondary btn-sm" onclick="openModalEvento('Mexicali 2025')">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  Editar
-                </button>
-                <button class="btn btn-primary btn-sm" onclick="alert('Exportar Excel – requiere backend PHP')">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                  Exportar Excel
-                </button>
-                <button class="btn btn-ghost btn-sm" onclick="openModalRecordatorio('Mexicali 2025')">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                  Recordatorio
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div class="event-admin-card event-admin-card--inactive">
-            <div class="event-admin-img" style="background-image:url('../assets/images/download.jpg');"></div>
-            <div class="event-admin-body">
-              <div class="event-admin-top">
-                <h3 class="event-admin-title">Regresa a Casa – Ensenada 2025</h3>
-                <span class="badge badge--gray">Próximamente</span>
-              </div>
-              <p class="event-admin-meta">Dic 2025 · Campus Ensenada</p>
-              <p class="event-admin-meta">0 registros</p>
-              <div class="event-admin-actions">
-                <button class="btn btn-secondary btn-sm" onclick="openModalEvento('Ensenada 2025')">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                  Editar
-                </button>
-              </div>
-            </div>
-          </div>
+        <div class="events-admin-grid" id="events-container">
+          <p>Cargando eventos...</p>
         </div>
       </section>
 
@@ -502,10 +434,13 @@
       </div>
       <div class="modal-body">
         <form id="form-evento" novalidate>
+          <input type="hidden" id="ev-id" name="id">
+
           <div class="form-group">
             <label for="ev-nombre" class="form-label">Nombre del evento <span class="required">*</span></label>
             <input type="text" id="ev-nombre" class="form-input" placeholder="Ej. Regresa a Casa – Tijuana 2026">
           </div>
+      
           <div class="form-group">
             <label for="ev-descripcion" class="form-label">Descripción</label>
             <textarea id="ev-descripcion" class="form-input" rows="3" placeholder="Descripción del evento..."></textarea>
@@ -652,8 +587,36 @@
       </div>
     </div>
   </div>
+  
+  <div class="modal-overlay" id="modal-evento-exito" role="dialog" aria-modal="true" hidden>
+    <div class="modal modal--sm">
+      <div class="modal-header">
+        <h2 class="modal-title">Evento Creado</h2>
+        <button class="modal-close" onclick="closeAdminModal('modal-evento-exito')">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body modal-body--center" style="align-items: center; text-align: center;">
+        <p class="modal-event-name" style="margin-bottom: var(--space-4);">¡El evento se ha creado correctamente!</p>
+        
+        <div id="qrcode-container" style="display: flex; justify-content: center; background: white; padding: 10px; border-radius: 8px; margin-bottom: var(--space-4);"></div>
+        
+        <div class="form-group" style="width: 100%; text-align: left;">
+          <label class="form-label">Link del formulario:</label>
+          <div class="qr-input-row" style="display: flex; gap: 10px;">
+            <input type="text" id="event-link-input" class="form-input" readonly>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="copyEventLink()">Copiar</button>
+          </div>
+        </div>
 
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+        <div class="modal-footer" style="width: 100%; margin-top: var(--space-4); padding: 0;">
+          <button type="button" class="btn btn-primary" onclick="downloadQR()" style="width: 100%; justify-content: center;">Descargar QR</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="../assets/js/main.js"></script>
   <script src="../assets/js/admin.js"></script>
   <script src="../assets/js/qr-scanner.js"></script>

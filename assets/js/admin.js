@@ -22,9 +22,7 @@ function showSection(name) {
   const title = document.getElementById('topbar-title');
   if (title) title.textContent = sectionTitles[name] || name;
 
-  // Cerrar sidebar en móvil
   document.getElementById('admin-sidebar').classList.remove('open');
-  // Scroll al inicio
   const main = document.getElementById('admin-main');
   if (main) main.scrollTop = 0;
 
@@ -60,9 +58,33 @@ function closeAdminModal(id) {
   if (overlay._click) overlay.removeEventListener('click', overlay._click);
 }
 
-function openModalEvento(nombre) {
+// Variable global para guardar los eventos
+let eventosCargados = [];
+
+function openModalEvento(id) {
   const title = document.getElementById('modal-evento-title');
-  if (title) title.textContent = nombre ? 'Editar Evento: ' + nombre : 'Nuevo Evento';
+  const form = document.getElementById('form-evento');
+  form.reset(); 
+  
+  const idInput = document.getElementById('ev-id');
+  if (idInput) idInput.value = ""; 
+
+  if (id) {
+    title.textContent = 'Editar Evento';
+    const evento = eventosCargados.find(e => e.id == id);
+    if (evento) {
+      if (idInput) idInput.value = evento.id;
+      document.getElementById('ev-nombre').value = evento.nombre;
+      document.getElementById('ev-descripcion').value = evento.descripcion;
+      document.getElementById('ev-fecha').value = evento.fecha;
+      document.getElementById('ev-hora').value = evento.hora;
+      document.getElementById('ev-ubicacion').value = evento.ubicacion;
+      document.getElementById('ev-imagen').value = evento.imagen;
+      document.getElementById('ev-estado').value = evento.estado;
+    }
+  } else {
+    title.textContent = 'Nuevo Evento';
+  }
   openAdminModal('modal-evento');
 }
 
@@ -73,7 +95,6 @@ function openModalRecordatorio(evento) {
 }
 
 function openModalAsistente(nombre) {
-  // TODO: cargar datos reales desde API PHP
   const nameEl = document.getElementById('asi-nombre');
   if (nameEl) nameEl.textContent = nombre;
   openAdminModal('modal-asistente');
@@ -87,34 +108,198 @@ function openModalFaq(key) {
 
 function confirmarEliminarFaq(id) {
   if (confirm('¿Eliminar esta pregunta frecuente? Esta acción no se puede deshacer.')) {
-    // TODO: fetch DELETE a api/faq.php
     alert('Pregunta #' + id + ' eliminada (simulación). Requiere backend PHP.');
   }
 }
 
-// ─── FORMULARIOS ───
+// ─── FUNCIONES DE QR ───
+
+// Función para cuando se CREA un evento nuevo
+// Función para cuando se CREA un evento nuevo
+function showSuccessWithQR(eventId) {
+  const container = document.getElementById('qrcode-container');
+  const linkInput = document.getElementById('event-link-input');
+  
+  // Extraemos solo el número del ID (ej. de EVT-2026-5 sacamos el 5)
+  const soloId = eventId.split('-').pop();
+  
+  container.innerHTML = "";
+  
+  // Forzamos la ruta de tu carpeta específica
+  const eventUrl = `${window.location.origin}/regresoacasauabc/index.html?evento=${soloId}`;
+  linkInput.value = eventUrl;
+
+  new QRCode(container, {
+    text: eventUrl,
+    width: 180,
+    height: 180,
+    colorDark : "#002855",
+    colorLight : "#ffffff",
+    correctLevel : QRCode.CorrectLevel.H
+  });
+
+  closeAdminModal('modal-evento');
+  openAdminModal('modal-evento-exito');
+}
+
+// Función para el botón "Ver QR"
+function verQR(id, nombre) {
+  const container = document.getElementById('qrcode-container');
+  const linkInput = document.getElementById('event-link-input');
+
+  container.innerHTML = "";
+  
+  // Usamos directamente el ID numérico y la carpeta del proyecto
+  const eventUrl = `${window.location.origin}/regresoacasauabc/index.html?evento=${id}`;
+  linkInput.value = eventUrl;
+
+  new QRCode(container, {
+    text: eventUrl,
+    width: 180,
+    height: 180,
+    colorDark : "#002855",
+    colorLight : "#ffffff",
+    correctLevel : QRCode.CorrectLevel.H
+  });
+
+  openAdminModal('modal-evento-exito');
+}
+
+function copyEventLink() {
+  const linkInput = document.getElementById('event-link-input');
+  linkInput.select();
+  document.execCommand('copy');
+  alert('¡Link copiado!');
+}
+
+function downloadQR() {
+  const qrImage = document.querySelector('#qrcode-container img');
+  if (qrImage) {
+    const link = document.createElement('a');
+    link.download = 'QR-Evento-UABC.png';
+    link.href = qrImage.src;
+    link.click();
+  }
+}
+
+// ─── CARGAR EVENTOS DESDE LA BASE DE DATOS ───
+function loadEventos() {
+  const container = document.getElementById('events-container');
+  if (!container) return;
+
+  fetch('php/get_eventos.php')
+    .then(res => res.json())
+    .then(result => {
+      if (result.status === 'success') {
+        eventosCargados = result.data; 
+        container.innerHTML = ""; 
+        
+        if (result.data.length === 0) {
+          container.innerHTML = "<p>No hay eventos registrados.</p>";
+          return;
+        }
+
+        result.data.forEach(evento => {
+          // ... dentro de la función loadEventos, en el forEach de los eventos:
+        const card = `
+          <div class="event-admin-card ${evento.estado === 'cerrado' ? 'event-admin-card--inactive' : ''}">
+            <div class="event-admin-img" style="background-image:url('${evento.imagen || '../assets/images/download.jpg'}');"></div>
+            <div class="event-admin-body">
+              <div class="event-admin-top">
+                <h3 class="event-admin-title">${evento.nombre}</h3>
+                <span class="badge ${evento.estado === 'activo' ? 'badge--green' : 'badge--gray'}">${evento.estado}</span>
+              </div>
+              <p class="event-admin-meta">${evento.fecha} · ${evento.ubicacion}</p>
+              <div class="event-admin-actions">
+                <button class="btn btn-secondary btn-sm" onclick="openModalEvento(${evento.id})">Editar</button>
+                <button class="btn btn-primary btn-sm" onclick="verQR(${evento.id}, '${evento.nombre}')">Ver QR</button>
+                
+                <a href="participantes.html?id=${evento.id}" class="btn btn-dark btn-sm">Participantes</a>
+                
+                <button class="btn btn-ghost btn-sm" onclick="openModalRecordatorio('${evento.nombre}')">Recordatorio</button>
+              </div>
+            </div>
+          </div>
+        `;
+        container.innerHTML += card;
+        });
+      }
+    })
+    .catch(err => console.error("Error al cargar eventos:", err));
+}
+
+// ─── FORMULARIOS (AL CARGAR LA PÁGINA) ───
 document.addEventListener('DOMContentLoaded', () => {
+  
+  loadEventos();
+  
+  // 1. Manejo del formulario de EVENTOS
   const formEvento = document.getElementById('form-evento');
   if (formEvento) {
     formEvento.addEventListener('submit', (e) => {
       e.preventDefault();
-      // TODO: fetch POST a api/eventos.php
-      alert('Evento guardado (simulación). Requiere backend PHP.');
-      closeAdminModal('modal-evento');
+      
+      const idInput = document.getElementById('ev-id');
+      const id = idInput ? idInput.value : "";
+      
+      const formData = new FormData();
+      if (id) formData.append('id', id);
+      formData.append('nombre', document.getElementById('ev-nombre').value);
+      formData.append('descripcion', document.getElementById('ev-descripcion').value);
+      formData.append('fecha', document.getElementById('ev-fecha').value);
+      formData.append('hora', document.getElementById('ev-hora').value);
+      formData.append('ubicacion', document.getElementById('ev-ubicacion').value);
+      formData.append('imagen', document.getElementById('ev-imagen').value);
+      formData.append('estado', document.getElementById('ev-estado').value);
+
+      const btnSubmit = formEvento.querySelector('button[type="submit"]');
+      const originalText = btnSubmit.textContent;
+      btnSubmit.disabled = true;
+      btnSubmit.textContent = id ? 'Actualizando...' : 'Guardando...';
+
+      const url = id ? 'php/actualizar_evento.php' : 'php/crear_evento.php';
+
+      fetch(url, {
+        method: 'POST',
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = originalText;
+
+        if (data.status === 'success') {
+          if (!id) {
+            showSuccessWithQR('EVT-' + data.eventId);
+          } else {
+            alert('Evento actualizado con éxito');
+            closeAdminModal('modal-evento');
+          }
+          formEvento.reset();
+          loadEventos(); 
+        } else {
+          alert('Error: ' + data.message);
+        }
+      })
+      .catch(error => {
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = originalText;
+        console.error('Error:', error);
+        alert('Hubo un problema de conexión.');
+      });
     });
   }
 
+  // 2. Manejo del formulario de FAQ
   const formFaq = document.getElementById('form-faq');
   if (formFaq) {
     formFaq.addEventListener('submit', (e) => {
       e.preventDefault();
-      // TODO: fetch POST a api/faq.php
       alert('Pregunta guardada (simulación). Requiere backend PHP.');
       closeAdminModal('modal-faq');
     });
   }
-});
-
+});   
 // ─── CARGAR ESTADÍSTICAS DEL DASHBOARD ───
 function cargarDashboardStats() {
   fetch('php/get_dashboard_stats.php')
