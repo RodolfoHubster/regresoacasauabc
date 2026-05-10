@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participantes del Evento - UABC</title>
+    <link rel="stylesheet" href="../assets/css/base.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <link rel="stylesheet" href="../assets/css/components.css">
+    <style>
+        .p-header { padding: 2rem 0; background: var(--color-uabc-blue); color: white; margin-bottom: 2rem; }
+        .p-container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
+        .back-link { color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; font-size: 0.9rem; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body class="admin-body">
+
+    <header class="p-header">
+        <div class="p-container">
+            <a href="admin.html" class="back-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                Volver al Panel
+            </a>
+            <h1 id="event-title">Participantes</h1>
+            <p id="event-meta">Cargando información del evento...</p>
+        </div>
+    </header>
+
+    <main class="p-container">
+        <div class="admin-table-wrapper card">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Nombre Completo</th>
+                        <th>Email</th>
+                        <th>Campus</th>
+                        <th>Carrera</th>
+                        <th>Tipo</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-asistentes">
+                    <tr><td colspan="5" style="text-align:center;">Cargando asistentes...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Obtener el ID del evento de la URL (ej: participantes.html?id=5)
+            const params = new URLSearchParams(window.location.search);
+            const id = params.get('id');
+
+            if (!id) {
+                alert("ID de evento no encontrado");
+                window.location.href = 'admin.html';
+                return;
+            }
+
+            fetch(`php/get_asistentes_evento.php?evento_id=${id}`)
+                .then(res => res.json())
+                .then(result => {
+                    const tbody = document.getElementById('tabla-asistentes');
+                    const title = document.getElementById('event-title');
+                    
+                    if (result.status === 'success') {
+                        tbody.innerHTML = '';
+                        
+                        if (result.data.length === 0) {
+                            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay personas registradas aún.</td></tr>';
+                            return;
+                        }
+
+                        // Puedes opcionalmente pedir el nombre del evento en tu consulta PHP
+                        // Por ahora llenamos la tabla
+                        result.data.forEach(asistente => {
+                            const row = `
+                                <tr>
+                                    <td><strong>${asistente.apellidos}, ${asistente.nombre}</strong></td>
+                                    <td>${asistente.email}</td>
+                                    <td>${asistente.campus || 'N/A'}</td>
+                                    <td>${asistente.carrera || 'N/A'}</td>
+                                    <td><span class="badge badge--gray">${asistente.tipo}</span></td>
+                                </tr>
+                            `;
+                            tbody.innerHTML += row;
+                        });
+                    } else {
+                        tbody.innerHTML = `<tr><td colspan="5" style="color:red; text-align:center;">${result.message}</td></tr>`;
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById('tabla-asistentes').innerHTML = '<tr><td colspan="5" style="text-align:center;">Error de conexión.</td></tr>';
+                });
+        });
+    </script>
+</body>
+</html>

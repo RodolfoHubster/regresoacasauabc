@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('form-registro');
   if (!form) return;
 
-  // Lógica original para validar y enviar
+  // Lógica para validar y enviar
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     if (validarFormulario()) {
@@ -12,17 +12,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // --- NUEVA LÓGICA: Selectores Dinámicos (Campus -> Facultad -> Carrera) ---
+  // --- LÓGICA: Selectores Dinámicos (Campus -> Facultad -> Carrera) ---
   const campusSelect = document.getElementById('field-campus');
   const facultadSelect = document.getElementById('field-facultad');
   const carreraSelect = document.getElementById('field-carrera');
 
-  // Escuchar cambio en Campus
   if (campusSelect && facultadSelect && carreraSelect) {
+    // Escuchar cambio en Campus
     campusSelect.addEventListener('change', function() {
         const campusId = this.value;
         
-        // Reiniciar Selects dependientes
         facultadSelect.innerHTML = '<option value="">Selecciona tu facultad</option>';
         carreraSelect.innerHTML = '<option value="">Primero selecciona una facultad</option>';
         carreraSelect.disabled = true;
@@ -50,7 +49,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Escuchar cambio en Facultad
     facultadSelect.addEventListener('change', function() {
         const facultadId = this.value;
-        
         carreraSelect.innerHTML = '<option value="">Selecciona tu carrera</option>';
 
         if (facultadId) {
@@ -73,12 +71,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
   }
-  // --- FIN LÓGICA SELECTORES DINÁMICOS ---
 });
 
 function validarFormulario() {
   let valido = true;
-
   const campos = [
     { id: 'field-nombre',     errorId: 'error-nombre',     msg: 'El nombre es requerido.' },
     { id: 'field-apellidos',  errorId: 'error-apellidos',  msg: 'Los apellidos son requeridos.' },
@@ -108,7 +104,6 @@ function validarFormulario() {
     }
   });
 
-  // Validar formato email
   const emailInput = document.getElementById('field-email');
   const emailError = document.getElementById('error-email');
   if (emailInput && emailInput.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
@@ -117,7 +112,6 @@ function validarFormulario() {
     emailInput.style.borderColor = 'var(--color-error)';
     valido = false;
   }
-
   return valido;
 }
 
@@ -125,29 +119,32 @@ function enviarRegistro() {
   const form = document.getElementById('form-registro');
   const datos = new FormData(form);
   const btnSubmit = form.querySelector('button[type="submit"]');
-
-  // Cambiar el texto del botón y deshabilitarlo para evitar que hagan doble clic
   const textoOriginal = btnSubmit.textContent;
+
   btnSubmit.disabled = true;
   btnSubmit.textContent = 'Guardando registro...';
 
-  // Hacemos la petición al backend
   fetch('php/procesar_registro.php', { 
       method: 'POST', 
       body: datos 
   })
   .then(response => response.json())
   .then(res => { 
-      // Restauramos el botón
       btnSubmit.disabled = false;
       btnSubmit.textContent = textoOriginal;
 
       if(res.status === 'success') {
-          // Si guardó bien en la BD, cerramos el formulario
           closeModal('modal-registro');
           form.reset();
           
-          // Limpiamos los selects dinámicos para que queden como al inicio
+          // Reset de estilos y selects
+          const inputs = form.querySelectorAll('.form-input, .form-select');
+          inputs.forEach(input => {
+              input.style.borderColor = '';
+              input.removeAttribute('aria-invalid');
+          });
+          document.querySelectorAll('.form-error').forEach(msg => msg.textContent = '');
+
           const facultadSelect = document.getElementById('field-facultad');
           const carreraSelect = document.getElementById('field-carrera');
           if(facultadSelect) {
@@ -159,19 +156,14 @@ function enviarRegistro() {
               carreraSelect.disabled = true;
           }
 
-          // Mostramos la ventana de "Registro Exitoso"
           setTimeout(() => openModal('modal-confirmacion'), 200);
       } else {
-          // Si PHP nos mandó un error, lo mostramos en consola y en un alert
-          console.error("Error PHP:", res.message);
           alert("Ocurrió un error al guardar: " + res.message);
       }
   })
   .catch(error => {
-      // Error de red o servidor caído
       btnSubmit.disabled = false;
       btnSubmit.textContent = textoOriginal;
-      console.error("Error en la petición:", error);
-      alert("Error de comunicación con el servidor. Intenta de nuevo.");
+      alert("Error de comunicación con el servidor.");
   });
 }
