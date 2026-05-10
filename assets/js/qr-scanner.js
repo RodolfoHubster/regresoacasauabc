@@ -1,6 +1,8 @@
+let html5QrcodeScanner;
+
 document.addEventListener('DOMContentLoaded', () => {
     // Inicializar el escáner
-    const html5QrcodeScanner = new Html5QrcodeScanner(
+    html5QrcodeScanner = new Html5QrcodeScanner(
       "lector-camara", 
       { fps: 10, qrbox: {width: 250, height: 250} }, 
       false
@@ -80,13 +82,22 @@ function validarQRBD(codigoQR) {
         }
 
         // Reactivar la cámara después de 3 segundos para el siguiente asistente
-        setTimeout(() => {
-            document.getElementById('qr-input').value = '';
-            resultDiv.hidden = true;
-            // Si usamos html5QrcodeScanner.pause(), lo reanudamos con resume()
-            // (La variable scanner no es global aquí, así que el usuario tendrá que darle al botón de la UI o recargamos)
-            location.reload(); // Forma más ruda pero efectiva de limpiar para el siguiente
-        }, 4000);
+        // Busca esta parte al final de la función validarQRBD
+      setTimeout(() => {
+          // 1. Limpiamos el campo de texto
+          document.getElementById('qr-input').value = '';
+          
+          // 2. Ocultamos el cuadro con el resultado del escaneo anterior
+          resultDiv.hidden = true;
+          
+          // 3. ¡LA CLAVE! Reactivamos el escáner sin recargar la página
+          // Esto permite que la cámara siga encendida y lista para el siguiente
+          if (html5QrcodeScanner) {
+              html5QrcodeScanner.resume(); 
+          }
+          
+          // Quitamos el location.reload(); <-- BORRA ESA LÍNEA
+      }, 3000); // 3 segundos es ideal para que alcances a leer el nombre y pase el siguiente
     })
     .catch(err => console.error("Error validando:", err));
 }

@@ -341,30 +341,46 @@ function cargarTablaAsistentes() {
 
         // Recorrer los datos y crear las filas HTML
         result.data.forEach(asistente => {
-          const tr = document.createElement('tr');
-          
-          tr.innerHTML = `
-            <td>
-              <div class="user-info">
-                <div class="user-avatar" aria-hidden="true">${asistente.nombre.charAt(0)}${asistente.apellidos.charAt(0)}</div>
-                <div>
-                  <p class="user-name">${asistente.nombre} ${asistente.apellidos}</p>
-                </div>
-              </div>
-            </td>
-            <td>${asistente.correo}</td>
-            <td>${asistente.campus}</td>
-            <td>
-               <span style="font-weight: 600;">${asistente.facultad_nombre || ''}</span><br>
-               <small style="color: #666;">${asistente.carrera}</small>
-            </td>
-            <td>${asistente.generacion}</td>
-            <td>
-              <span class="badge badge--success">Asistió</span>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
+                    const tr = document.createElement('tr');
+                    
+                    // Lógica para los colores de las etiquetas (badges)
+                    const tipoAsistente = asistente.tipo_asistente || 'N/A';
+                    const badgeTipo = tipoAsistente.toLowerCase().includes('docente') ? 'badge--gold' : 'badge--green';
+                    
+                    const qrEnviado = parseInt(asistente.correo_enviado) === 1;
+                    const badgeQR = qrEnviado 
+                        ? '<span class="badge badge--green">Enviado</span>' 
+                        : '<span class="badge badge--gold">Pendiente</span>';
+                        
+                    const yaAsistio = parseInt(asistente.asistencia) === 1;
+                    const badgeEstatus = yaAsistio 
+                        ? '<span class="badge badge--success">Asistió</span>' 
+                        : '<span class="badge badge--gray">Registrado</span>';
+
+                    const nombreEvento = asistente.evento_nombre || 'Evento no asignado';
+
+                    tr.innerHTML = `
+                        <td>
+                          <div class="user-info">
+                            <div class="user-avatar" aria-hidden="true">${asistente.nombre.charAt(0)}${asistente.apellidos.charAt(0)}</div>
+                            <div>
+                              <p class="user-name">${asistente.nombre} ${asistente.apellidos}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td>${asistente.correo}</td>
+                        <td>${asistente.campus}</td>
+                        <td>
+                           <span style="font-weight: 600;">${asistente.carrera || 'N/A'}</span><br>
+                           <small style="color: #666;">Gen: ${asistente.generacion || 'N/A'}</small>
+                        </td>
+                        <td><span class="badge ${badgeTipo}">${tipoAsistente}</span></td>
+                        <td><small>${nombreEvento}</small></td>
+                        <td>${badgeQR}</td>
+                        <td>${badgeEstatus}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
       } else {
         console.error('Error al cargar tabla:', result.message);
       }
@@ -386,3 +402,56 @@ document.addEventListener('DOMContentLoaded', () => {
       cargarTablaAsistentes();
   }
 });
+
+// ─── ENVIAR CORREOS DE RECORDATORIO ───
+function enviarCorreosRecordatorio() {
+    const tipoEnvio = document.querySelector('input[name="rec-tipo"]:checked').value;
+    const mensaje = document.getElementById('rec-mensaje').value;
+    const btn = document.getElementById('btn-enviar-rec');
+    
+    // Cambiar el botón a estado de carga para que el usuario no le pique dos veces
+    const originalText = btn.innerHTML;
+    btn.innerHTML = 'Enviando... (Puede tardar)';
+    btn.disabled = true;
+
+    // Crear los datos a enviar
+    const formData = new FormData();
+    formData.append('tipo', tipoEnvio);
+    formData.append('mensaje', mensaje);
+
+    fetch('php/enviar_recordatorio.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.status === 'success') {
+            // 1. Cerrar el modal de configuración de recordatorio
+            const modalRecordatorio = document.getElementById('modal-recordatorio');
+            if(modalRecordatorio) modalRecordatorio.hidden = true;
+            
+            // 2. Limpiar el texto que escribiste
+            document.getElementById('rec-mensaje').value = ''; 
+            
+            // 3. Inyectar el número de correos enviados en el modal de éxito
+            document.getElementById('mensaje-exito').textContent = `Se enviaron ${result.enviados} correos correctamente.`;
+            
+            // 4. Mostrar el modal de éxito elegante
+            document.getElementById('modal-exito').hidden = false;
+        } else {
+            // Si hay un error, actualizamos el mismo modal pero con texto de error
+            document.getElementById('mensaje-exito').textContent = 'Ocurrió un error: ' + result.message;
+            document.getElementById('modal-exito').hidden = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error al enviar:', error);
+        document.getElementById('mensaje-exito').textContent = 'Hubo un error de conexión al enviar los correos.';
+        document.getElementById('modal-exito').hidden = false;
+    })
+    .finally(() => {
+        // Regresar el botón a la normalidad
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    });
+}

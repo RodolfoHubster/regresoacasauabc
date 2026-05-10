@@ -11,6 +11,8 @@
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/components.css">
   <link rel="stylesheet" href="../assets/css/admin.css">
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body class="admin-body">
 
@@ -260,24 +262,18 @@
             <table class="admin-table">
               <thead>
                 <tr>
-                  <th>Nombre</th>
+                  <th>Nombre completo</th>
                   <th>Correo</th>
                   <th>Campus</th>
-                  <th>Carrera</th>
-                  <th>Generación</th>
+                  <th>Carrera / Gen.</th>
                   <th>Tipo</th>
                   <th>Evento</th>
-                  <th>QR</th>
-                  <th>Acciones</th>
+                  <th>QR Correo</th>
+                  <th>Estatus</th>
                 </tr>
               </thead>
               <tbody id="tabla-asistentes-body">
-                <tr>
-                  <td colspan="9" style="text-align: center; padding: 20px;">
-                    <span class="spinner" style="display:inline-block; width:20px; height:20px; border:2px solid #ccc; border-top-color:#00713d; border-radius:50%; animation:spin 1s linear infinite;"></span>
-                    Cargando asistentes...
-                  </td>
-                </tr>
+                <tr><td colspan="8" style="text-align:center;">Cargando asistentes...</td></tr>
               </tbody>
             </table>
           </div>
@@ -495,12 +491,12 @@
           <label class="form-label">Tipo de envío</label>
           <div class="radio-group">
             <label class="radio-label"><input type="radio" name="rec-tipo" value="todos" checked> Todos los registrados</label>
-            <label class="radio-label"><input type="radio" name="rec-tipo" value="sin-qr"> Solo los que no tienen QR</label>
+            <label class="radio-label"><input type="radio" name="rec-tipo" value="sin-qr"> Solo los que falló el correo</label>
           </div>
         </div>
         <div class="form-group">
           <label for="rec-mensaje" class="form-label">Mensaje personalizado (opcional)</label>
-          <textarea id="rec-mensaje" class="form-input" rows="3" placeholder="Recuerda que el evento es en 2 días..."></textarea>
+          <textarea id="rec-mensaje" class="form-input" rows="3" placeholder="Ej. Recuerda que el evento es mañana..."></textarea>
         </div>
         <div class="reminder-info">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -508,10 +504,12 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-ghost" onclick="closeAdminModal('modal-recordatorio')">Cancelar</button>
-          <button type="button" class="btn btn-primary" onclick="alert('Envío de recordatorio – requiere backend PHP'); closeAdminModal('modal-recordatorio')">
+          
+          <button type="button" id="btn-enviar-rec" class="btn btn-primary" onclick="enviarCorreosRecordatorio()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-            Enviar Recordatorio
+            <span>Enviar Recordatorio</span>
           </button>
+          
         </div>
       </div>
     </div>
@@ -616,7 +614,24 @@
     </div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <div class="modal-overlay" id="modal-exito" role="dialog" aria-modal="true" hidden>
+    <div class="modal modal--sm" style="text-align: center; padding: 30px 20px;">
+      <div style="color: #00713d; margin-bottom: 15px; display: flex; justify-content: center;">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        </svg>
+      </div>
+      <h2 class="modal-title" style="margin-bottom: 10px; font-size: 1.5rem;">¡Completado!</h2>
+      <p id="mensaje-exito" style="color: #666; margin-bottom: 25px; line-height: 1.5;">
+        Los correos se han enviado correctamente.
+      </p>
+      <button type="button" class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="document.getElementById('modal-exito').hidden = true;">
+        Aceptar
+      </button>
+    </div>
+  </div>
+
   <script src="../assets/js/main.js"></script>
   <script src="../assets/js/admin.js"></script>
   <script src="../assets/js/qr-scanner.js"></script>
