@@ -288,16 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
   }
-
-  // 2. Manejo del formulario de FAQ
-  const formFaq = document.getElementById('form-faq');
-  if (formFaq) {
-    formFaq.addEventListener('submit', (e) => {
-      e.preventDefault();
-      alert('Pregunta guardada (simulación). Requiere backend PHP.');
-      closeAdminModal('modal-faq');
-    });
-  }
 });   
 // ─── CARGAR ESTADÍSTICAS DEL DASHBOARD ───
 function cargarDashboardStats() {
@@ -323,63 +313,18 @@ function cargarDashboardStats() {
 }
 
 // ─── CARGAR TABLA DE ASISTENTES (QR ESCANEADO) ───
+// Variable global para guardar a los asistentes sin tener que consultar la BD a cada rato
+let asistentesCargados = [];
+
+// ─── CARGAR TABLA DE ASISTENTES ───
 function cargarTablaAsistentes() {
   fetch('php/get_asistentes.php')
     .then(response => response.json())
     .then(result => {
       if (result.status === 'success') {
-        const tbody = document.getElementById('tabla-asistentes-body');
-        if (!tbody) return; // Si no encuentra la tabla, se detiene
-        
-        tbody.innerHTML = ''; // Limpiar la tabla antes de llenarla
-
-        if (result.data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Aún no hay asistentes confirmados (QR escaneados).</td></tr>';
-            return;
-        }
-
-        // Recorrer los datos y crear las filas HTML
-        result.data.forEach(asistente => {
-                    const tr = document.createElement('tr');
-                    
-                    // Lógica para los colores de las etiquetas (badges)
-                    const tipoAsistente = asistente.tipo_asistente || 'N/A';
-                    const badgeTipo = tipoAsistente.toLowerCase().includes('docente') ? 'badge--gold' : 'badge--green';
-                    
-                    const qrEnviado = parseInt(asistente.correo_enviado) === 1;
-                    const badgeQR = qrEnviado 
-                        ? '<span class="badge badge--green">Enviado</span>' 
-                        : '<span class="badge badge--gold">Pendiente</span>';
-                        
-                    const yaAsistio = parseInt(asistente.asistencia) === 1;
-                    const badgeEstatus = yaAsistio 
-                        ? '<span class="badge badge--success">Asistió</span>' 
-                        : '<span class="badge badge--gray">Registrado</span>';
-
-                    const nombreEvento = asistente.evento_nombre || 'Evento no asignado';
-
-                    tr.innerHTML = `
-                        <td>
-                          <div class="user-info">
-                            <div class="user-avatar" aria-hidden="true">${asistente.nombre.charAt(0)}${asistente.apellidos.charAt(0)}</div>
-                            <div>
-                              <p class="user-name">${asistente.nombre} ${asistente.apellidos}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td>${asistente.correo}</td>
-                        <td>${asistente.campus}</td>
-                        <td>
-                           <span style="font-weight: 600;">${asistente.carrera || 'N/A'}</span><br>
-                           <small style="color: #666;">Gen: ${asistente.generacion || 'N/A'}</small>
-                        </td>
-                        <td><span class="badge ${badgeTipo}">${tipoAsistente}</span></td>
-                        <td><small>${nombreEvento}</small></td>
-                        <td>${badgeQR}</td>
-                        <td>${badgeEstatus}</td>
-                    `;
-                    tbody.appendChild(tr);
-                });
+        asistentesCargados = result.data; // Guardamos en la variable global
+        renderTablaAsistentes(asistentesCargados); // Dibujamos la tabla completa
+        poblarFiltrosEventos(); // Llenamos los <select> con los nombres reales de los eventos
       } else {
         console.error('Error al cargar tabla:', result.message);
       }
@@ -387,18 +332,201 @@ function cargarTablaAsistentes() {
     .catch(error => console.error('Error de red:', error));
 }
 
+// ─── DIBUJAR LA TABLA (Con soporte para filtros) ───
+function renderTablaAsistentes(datos) {
+  const tbody = document.getElementById('tabla-asistentes-body');
+  if (!tbody) return;
+  tbody.innerHTML = ''; 
+
+  if (datos.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No se encontraron registros para este evento.</td></tr>';
+      return;
+  }
+
+  datos.forEach(asistente => {
+      const tr = document.createElement('tr');
+      
+      const tipoAsistente = asistente.tipo_asistente || 'N/A';
+      const badgeTipo = tipoAsistente.toLowerCase().includes('docente') ? 'badge--gold' : 'badge--green';
+      
+      const qrEnviado = parseInt(asistente.correo_enviado) === 1;
+      const badgeQR = qrEnviado 
+          ? '<span class="badge badge--green">Enviado</span>' 
+          : '<span class="badge badge--gold">Pendiente</span>';
+          
+      const yaAsistio = parseInt(asistente.asistencia) === 1;
+      const badgeEstatus = yaAsistio 
+          ? '<span class="badge badge--success">Asistió</span>' 
+          : '<span class="badge badge--gray">Registrado</span>';
+
+      const nombreEvento = asistente.evento_nombre || 'Evento no asignado';
+
+      tr.innerHTML = `
+          <td>
+            <div class="user-info">
+              <div class="user-avatar" aria-hidden="true">${asistente.nombre.charAt(0)}${asistente.apellidos.charAt(0)}</div>
+              <div><p class="user-name">${asistente.nombre} ${asistente.apellidos}</p></div>
+            </div>
+          </td>
+          <td>${asistente.correo}</td>
+          <td>${asistente.campus}</td>
+          <td>
+             <span style="font-weight: 600;">${asistente.carrera || 'N/A'}</span><br>
+             <small style="color: #666;">Gen: ${asistente.generacion || 'N/A'}</small>
+          </td>
+          <td><span class="badge ${badgeTipo}">${tipoAsistente}</span></td>
+          <td><small>${nombreEvento}</small></td>
+          <td>${badgeQR}</td>
+          <td>${badgeEstatus}</td>
+      `;
+      tbody.appendChild(tr);
+  });
+}
+
+// ─── POBLAR LOS SELECTS DINÁMICAMENTE ───
+function poblarFiltrosEventos() {
+    // 1. Filtro de la tabla de asistentes
+    const selectFiltro = document.getElementById('filtro-evento');
+    if (selectFiltro && eventosCargados) {
+        selectFiltro.innerHTML = '<option value="">Todos los eventos</option>';
+        eventosCargados.forEach(evento => {
+            const opt = document.createElement('option');
+            opt.value = evento.nombre; 
+            opt.textContent = evento.nombre;
+            selectFiltro.appendChild(opt);
+        });
+    }
+
+    // 2. Select del modal de crear/editar FAQ
+    const selectFaqModal = document.getElementById('faq-evento-asoc');
+    if (selectFaqModal && eventosCargados) {
+        selectFaqModal.innerHTML = '<option value="">General (Aplica para todos)</option>';
+        eventosCargados.forEach(evento => {
+            const opt = document.createElement('option');
+            opt.value = evento.id; 
+            opt.textContent = `${evento.nombre} (${evento.campus_nombre})`;
+            selectFaqModal.appendChild(opt);
+        });
+    }
+
+    // 3. Filtro de la tabla de FAQs
+    const selectFiltroFaq = document.getElementById('faq-filtro-evento');
+    const selectFiltroFaqCampus = document.getElementById('faq-filtro-campus'); // Agregamos el de campus
+    
+    if (selectFiltroFaq && eventosCargados) {
+        selectFiltroFaq.innerHTML = '<option value="">Todos los eventos</option><option value="general">Generales (Aplica a todos)</option>';
+        eventosCargados.forEach(evento => {
+            const opt = document.createElement('option');
+            opt.value = evento.id; 
+            opt.textContent = `${evento.nombre} (${evento.campus_nombre})`;
+            selectFiltroFaq.appendChild(opt);
+        });
+
+        // Agregamos el "escuchador" a AMBOS filtros para que reaccionen al cambio
+        selectFiltroFaq.addEventListener('change', aplicarFiltrosFAQ);
+        if(selectFiltroFaqCampus) selectFiltroFaqCampus.addEventListener('change', aplicarFiltrosFAQ);
+    }
+}
+
+// ─── LÓGICA DE MULTI-FILTROS PARA FAQ ───
+function aplicarFiltrosFAQ() {
+    const selectEvento = document.getElementById('faq-filtro-evento');
+    const selectCampus = document.getElementById('faq-filtro-campus');
+    
+    const eventoSeleccionado = selectEvento ? selectEvento.value : "";
+    const campusSeleccionado = selectCampus ? selectCampus.value : "";
+
+    let filtradas = faqsCargadas;
+
+    // 1. Filtro por Evento
+    if (eventoSeleccionado === "general") {
+        // Solo las que NO tienen evento asignado
+        filtradas = filtradas.filter(faq => !faq.evento_id); 
+    } else if (eventoSeleccionado !== "") {
+        // Las del evento específico
+        filtradas = filtradas.filter(faq => faq.evento_id == eventoSeleccionado);
+    }
+
+    // 2. Filtro por Campus
+    if (campusSeleccionado !== "") {
+        // Mostrar las del campus elegido Y las generales (porque las generales aplican a todos)
+        filtradas = filtradas.filter(faq => faq.campus_nombre === campusSeleccionado || !faq.evento_id);
+    }
+
+    // Dibujamos la tabla con los resultados
+    renderTablaFAQs(filtradas);
+}
+
+// ─── LÓGICA DE MULTI-FILTROS (EVENTO Y CAMPUS) ───
+document.addEventListener('DOMContentLoaded', () => {
+    const selectEvento = document.getElementById('filtro-evento');
+    const selectCampus = document.getElementById('filtro-campus');
+
+    // Si cambias cualquiera de los dos, se ejecuta la misma función
+    if (selectEvento) selectEvento.addEventListener('change', aplicarFiltros);
+    if (selectCampus) selectCampus.addEventListener('change', aplicarFiltros);
+});
+
+function aplicarFiltros() {
+    const selectEvento = document.getElementById('filtro-evento');
+    const selectCampus = document.getElementById('filtro-campus');
+    
+    const eventoSeleccionado = selectEvento ? selectEvento.value : "";
+    const campusSeleccionado = selectCampus ? selectCampus.value : "";
+
+    // Empezamos con todos los asistentes
+    let filtrados = asistentesCargados;
+
+    // 1. Filtrar por evento (si hay uno seleccionado)
+    if (eventoSeleccionado !== "") {
+        filtrados = filtrados.filter(a => a.evento_nombre === eventoSeleccionado);
+    }
+
+    // 2. Filtrar por campus (si hay uno seleccionado)
+    if (campusSeleccionado !== "") {
+        filtrados = filtrados.filter(a => a.campus === campusSeleccionado);
+    }
+
+    // Dibujamos la tabla con el resultado de los filtros
+    renderTablaAsistentes(filtrados);
+}
+
+// ─── EXPORTAR A EXCEL: ASISTENTES (Con filtros) ───
+function exportarExcelAsistentes() {
+    const selectEvento = document.getElementById('filtro-evento');
+    const selectCampus = document.getElementById('filtro-campus');
+    
+    const evento = selectEvento ? selectEvento.value : "";
+    const campus = selectCampus ? selectCampus.value : "";
+
+    // Armamos la URL pasándole los filtros seleccionados
+    const url = `php/exportar_asistentes.php?evento=${encodeURIComponent(evento)}&campus=${encodeURIComponent(campus)}`;
+    
+    // Redirigir inicia la descarga del archivo sin cambiar de página
+    window.location.href = url;
+}
+
+// ─── EXPORTAR A EXCEL: DASHBOARD EVENTOS ───
+function exportarExcelDashboard() {
+    // Redirigimos directo al archivo PHP que genera el reporte de eventos
+    window.location.href = 'php/exportar_dashboard.php';
+}
+
 // ─── MODIFICAR LA CARGA INICIAL ───
-// Busca el DOMContentLoaded que pusimos antes y agrégale la nueva función:
-// Al final de admin.js
 document.addEventListener('DOMContentLoaded', () => {
   // Primero cargamos las estadísticas de los cuadros de colores
   if (typeof cargarDashboardStats === 'function') {
       cargarDashboardStats();
   }
   
-  // LUEGO cargamos la tabla de asistentes
+  // Cargamos la tabla de asistentes de la pestaña "Registros"
   if (typeof cargarTablaAsistentes === 'function') {
       cargarTablaAsistentes();
+  }
+
+  // NUEVO: Cargamos la tabla dinámica del Dashboard principal
+  if (typeof cargarDashboardEventos === 'function') {
+      cargarDashboardEventos();
   }
 });
 
@@ -485,4 +613,248 @@ function enviarCorreosRecordatorio() {
         btn.innerHTML = originalText;
         btn.disabled = false;
     });
+}
+
+// ─── SECCIÓN: PREGUNTAS FRECUENTES (FAQ) ───
+
+// Variable global para guardar las preguntas y poder editarlas sin volver a consultar la BD
+let faqsCargadas = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+    cargarFAQs(); // Cargar la tabla al iniciar
+    
+    // Configurar el formulario para guardar o actualizar la pregunta
+    const formFaq = document.getElementById('form-faq');
+    if (formFaq) {
+        formFaq.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Leemos el ID oculto (si tiene valor es porque estamos editando, si está vacío estamos creando)
+            const inputId = document.getElementById('faq-id');
+            const id = inputId ? inputId.value : '';
+            
+            const pregunta = document.getElementById('faq-pregunta').value;
+            const respuesta = document.getElementById('faq-respuesta').value;
+            const evento_id = document.getElementById('faq-evento-asoc').value;
+            const btnSubmit = formFaq.querySelector('button[type="submit"]');
+            
+            btnSubmit.innerHTML = id ? 'Actualizando...' : 'Guardando...';
+            btnSubmit.disabled = true;
+
+            const formData = new FormData();
+            if (id) formData.append('id', id); // Si hay ID, lo mandamos
+            formData.append('pregunta', pregunta);
+            formData.append('respuesta', respuesta);
+            if(evento_id) formData.append('evento_id', evento_id);
+
+            // Decidimos a qué archivo PHP mandarlo
+            const url = id ? 'php/actualizar_faq.php' : 'php/crear_faq.php';
+
+            fetch(url, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.status === 'success') {
+                    formFaq.reset(); 
+                    if(inputId) inputId.value = ''; // Limpiamos el ID
+                    closeAdminModal('modal-faq'); 
+                    cargarFAQs(); 
+                    
+                    const modalExito = document.getElementById('modal-exito');
+                    const msjExito = document.getElementById('mensaje-exito');
+                    if(modalExito && msjExito) {
+                        msjExito.textContent = id ? 'La pregunta se ha actualizado correctamente.' : 'La pregunta se ha guardado correctamente.';
+                        modalExito.hidden = false;
+                    }
+                } else {
+                    alert('Error: ' + result.message);
+                }
+            })
+            .catch(error => console.error('Error:', error))
+            .finally(() => {
+                btnSubmit.innerHTML = 'Guardar Pregunta';
+                btnSubmit.disabled = false;
+            });
+        });
+    }
+});
+
+// Función que SOLO trae los datos de la BD
+function cargarFAQs() {
+    fetch('php/get_faqs.php')
+        .then(response => response.json())
+        .then(result => {
+            if (result.status === 'success') {
+                faqsCargadas = result.data; // Guardamos en la variable global
+                renderTablaFAQs(faqsCargadas); // Mandamos a dibujar todas al inicio
+            }
+        })
+        .catch(error => console.error('Error al cargar FAQs:', error));
+}
+
+// NUEVA: Función que dibuja la tabla de FAQs en base a lo que se le envíe (todas o filtradas)
+function renderTablaFAQs(datos) {
+    const tbody = document.getElementById('tabla-faq-body'); 
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    if (datos.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No hay preguntas para este filtro.</td></tr>';
+        return;
+    }
+
+    datos.forEach((faq, index) => {
+        const tr = document.createElement('tr');
+        const nombreEvento = faq.evento_nombre ? `${faq.evento_nombre} (${faq.campus_nombre})` : 'General (Todos)';
+        
+        tr.innerHTML = `
+            <td>${index + 1}</td>
+            <td><strong>${faq.pregunta}</strong></td>
+            <td><span style="display:inline-block; max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${faq.respuesta}">${faq.respuesta}</span></td>
+            <td><span class="badge badge--gray">${nombreEvento}</span></td>
+            <td class="table-actions">
+                <button class="btn-icon" title="Editar" onclick="openModalFaq(${faq.id})">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                </button>
+                <button class="btn-icon btn-icon--danger" title="Eliminar" onclick="confirmarEliminarFaq(${faq.id})">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                </button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// ─── FUNCIONES PARA ABRIR Y ELIMINAR ───
+
+// Reemplaza la antigua función openModalFaq
+function openModalFaq(id) {
+    const title = document.getElementById('modal-faq-title');
+    const form = document.getElementById('form-faq');
+    const inputId = document.getElementById('faq-id');
+    
+    form.reset(); // Limpiar el formulario
+    if(inputId) inputId.value = ''; // Limpiar el ID oculto
+
+    if (id) {
+        if(title) title.textContent = 'Editar Pregunta Frecuente';
+        
+        // Buscar los datos de la pregunta que queremos editar
+        const faq = faqsCargadas.find(f => f.id === id);
+        if (faq) {
+            if(inputId) inputId.value = faq.id;
+            document.getElementById('faq-pregunta').value = faq.pregunta;
+            document.getElementById('faq-respuesta').value = faq.respuesta;
+            document.getElementById('faq-evento-asoc').value = faq.evento_id || '';
+        }
+    } else {
+        if(title) title.textContent = 'Nueva Pregunta Frecuente';
+    }
+    openAdminModal('modal-faq');
+}
+
+// Variable global para saber qué ID vamos a borrar cuando le demos clic al botón rojo
+let idFaqAEliminar = null;
+
+// 1. Esta función se ejecuta al darle clic al bote de basura en la tabla
+function confirmarEliminarFaq(id) {
+    idFaqAEliminar = id; // Guardamos el ID temporalmente
+    openAdminModal('modal-confirmar-eliminar'); // Abrimos el modal bonito de advertencia
+}
+
+// 2. Esta función se ejecuta al darle clic al botón rojo "Eliminar" dentro del modal
+function ejecutarEliminarFaq() {
+    if (!idFaqAEliminar) return;
+
+    const btn = document.getElementById('btn-confirmar-eliminar');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = 'Eliminando...';
+    btn.disabled = true;
+
+    fetch('php/eliminar_faq.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: idFaqAEliminar })
+    })
+    .then(res => res.json())
+    .then(result => {
+        if (result.status === 'success') {
+            closeAdminModal('modal-confirmar-eliminar'); // Cerramos el modal de advertencia
+            cargarFAQs(); // Recargamos la tabla
+            
+            // Mostramos el modal de éxito con la palomita verde
+            const modalExito = document.getElementById('modal-exito');
+            const msjExito = document.getElementById('mensaje-exito');
+            if(modalExito && msjExito) {
+                msjExito.textContent = 'La pregunta ha sido eliminada correctamente.';
+                modalExito.hidden = false;
+            }
+        } else {
+            alert('Error al eliminar: ' + result.message);
+        }
+    })
+    .catch(err => console.error('Error:', err))
+    .finally(() => {
+        // Regresamos el botón a la normalidad y limpiamos la variable
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        idFaqAEliminar = null; 
+    });
+}
+
+// ─── CARGAR TABLA RESUMEN EN EL DASHBOARD ───
+function cargarDashboardEventos() {
+    fetch('php/get_dashboard_eventos.php')
+        .then(response => response.json())
+        .then(result => {
+            if (result.status === 'success') {
+                const tbody = document.getElementById('dashboard-eventos-body');
+                if (!tbody) return;
+
+                tbody.innerHTML = '';
+
+                result.data.forEach(evento => {
+                    const tr = document.createElement('tr');
+                    
+                    // Formatear la fecha para que se vea más limpia
+                    const fechaObj = new Date(evento.fecha);
+                    const fechaFormateada = fechaObj.toLocaleDateString('es-MX', { day: '2-digit', month: 'short', year: 'numeric' });
+
+                    // Determinar el color del punto de estado
+                    const statusClass = evento.estado === 'activo' ? 'status-dot--active' : 'status-dot--pending';
+
+                    tr.innerHTML = `
+                        <td><strong>${evento.nombre}</strong></td>
+                        <td>${evento.campus}</td>
+                        <td>${fechaFormateada}</td>
+                        <td><span class="badge badge--green">${evento.total_registros}</span></td>
+                        <td><span class="status-dot ${statusClass}"></span> ${evento.estado.charAt(0).toUpperCase() + evento.estado.slice(1)}</td>
+                        <td class="table-actions">
+                            <button class="btn-icon" title="Ver asistentes" onclick="irARegistrosConFiltro('${evento.nombre}')">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            </button>
+                            <button class="btn-icon" title="Editar evento" onclick="openModalEvento(${evento.id})">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        })
+        .catch(error => console.error('Error al cargar tabla dashboard:', error));
+}
+
+// Función extra para que el botón de "ojo" te mande a la pestaña de asistentes ya filtrado
+function irARegistrosConFiltro(nombreEvento) {
+    showSection('registros');
+    const select = document.getElementById('filtro-evento');
+    if (select) {
+        select.value = nombreEvento;
+        // Disparamos el evento de cambio manualmente para que se aplique el filtro
+        select.dispatchEvent(new Event('change'));
+    }
 }
