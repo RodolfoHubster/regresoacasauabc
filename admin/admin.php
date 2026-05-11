@@ -147,7 +147,7 @@
         <div class="admin-card">
           <div class="admin-card-header">
             <h3 class="admin-card-title">Registros por Evento</h3>
-            <button class="btn btn-primary btn-sm" onclick="alert('Función Excel: se implementará con PHP')">
+            <button class="btn btn-primary btn-sm" onclick="exportarExcelDashboard()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               Exportar Excel
             </button>
@@ -164,56 +164,8 @@
                   <th>Acciones</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td><strong>Regresa a Casa – Tijuana 2025</strong></td>
-                  <td>Tijuana</td>
-                  <td>15 Ago 2025</td>
-                  <td><span class="badge badge--green">142</span></td>
-                  <td><span class="status-dot status-dot--active"></span> Activo</td>
-                  <td class="table-actions">
-                    <button class="btn-icon" title="Ver asistentes" onclick="showSection('registros')" aria-label="Ver asistentes">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
-                    <button class="btn-icon" title="Editar evento" onclick="openModalEvento('Regresa a Casa – Tijuana 2025')" aria-label="Editar evento">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </button>
-                    <button class="btn-icon btn-icon--reminder" title="Enviar recordatorio" onclick="openModalRecordatorio('Regresa a Casa – Tijuana 2025')" aria-label="Enviar recordatorio">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td><strong>Regresa a Casa – Mexicali 2025</strong></td>
-                  <td>Mexicali</td>
-                  <td>22 Oct 2025</td>
-                  <td><span class="badge badge--green">106</span></td>
-                  <td><span class="status-dot status-dot--active"></span> Activo</td>
-                  <td class="table-actions">
-                    <button class="btn-icon" title="Ver asistentes" onclick="showSection('registros')" aria-label="Ver asistentes">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                    </button>
-                    <button class="btn-icon" title="Editar evento" onclick="openModalEvento('Regresa a Casa – Mexicali 2025')" aria-label="Editar evento">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </button>
-                    <button class="btn-icon btn-icon--reminder" title="Enviar recordatorio" onclick="openModalRecordatorio('Regresa a Casa – Mexicali 2025')" aria-label="Enviar recordatorio">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                    </button>
-                  </td>
-                </tr>
-                <tr class="row--muted">
-                  <td><strong>Regresa a Casa – Ensenada 2025</strong></td>
-                  <td>Ensenada</td>
-                  <td>Dic 2025</td>
-                  <td><span class="badge badge--gray">0</span></td>
-                  <td><span class="status-dot status-dot--pending"></span> Próximamente</td>
-                  <td class="table-actions">
-                    <button class="btn-icon" title="Editar evento" onclick="openModalEvento('Regresa a Casa – Ensenada 2025')" aria-label="Editar evento">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
+              <tbody id="dashboard-eventos-body">
+                </tbody>
             </table>
           </div>
         </div>
@@ -243,13 +195,21 @@
         <div class="admin-section-header">
           <h2 class="admin-section-title">Asistentes Registrados</h2>
           <div class="admin-section-actions">
-            <select class="form-select form-select--sm" id="filtro-evento" aria-label="Filtrar por evento">
-              <option value="">Todos los eventos</option>
-              <option value="tijuana">Tijuana 2025</option>
-              <option value="mexicali">Mexicali 2025</option>
-              <option value="ensenada">Ensenada 2025</option>
-            </select>
-            <button class="btn btn-primary btn-sm" onclick="alert('Exportar Excel – requiere backend PHP')">
+            <div class="table-filters" style="display: flex; gap: 15px; margin-bottom: 20px;">
+  
+              <select id="filtro-evento" class="form-select" style="min-width: 200px;">
+                <option value="">Todos los eventos</option>
+                </select>
+
+              <select id="filtro-campus" class="form-select" style="min-width: 200px;">
+                <option value="">Todos los campus</option>
+                <option value="Tijuana">Tijuana</option>
+                <option value="Mexicali">Mexicali</option>
+                <option value="Ensenada">Ensenada</option>
+              </select>
+
+            </div>
+            <button class="btn btn-primary btn-sm" onclick="exportarExcelAsistentes()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               Exportar Excel
             </button>
@@ -296,56 +256,39 @@
         </div>
 
         <div class="admin-card">
-          <div class="faq-admin-filter">
+          <div class="faq-admin-filter" style="display: flex; gap: 15px; margin-bottom: 20px;">
+          
+          <div style="flex: 1;">
             <label for="faq-filtro-evento" class="form-label">Evento:</label>
             <select id="faq-filtro-evento" class="form-select form-select--sm" aria-label="Filtrar FAQ por evento">
               <option value="">Todos los eventos</option>
-              <option value="tijuana">Tijuana 2025</option>
-              <option value="mexicali">Mexicali 2025</option>
-              <option value="ensenada">Ensenada 2025</option>
             </select>
           </div>
+
+          <div style="flex: 1;">
+            <label for="faq-filtro-campus" class="form-label">Campus:</label>
+            <select id="faq-filtro-campus" class="form-select form-select--sm" aria-label="Filtrar FAQ por campus">
+              <option value="">Todos los campus</option>
+              <option value="Tijuana">Tijuana</option>
+              <option value="Mexicali">Mexicali</option>
+              <option value="Ensenada">Ensenada</option>
+            </select>
+          </div>
+
+        </div>
 
           <div class="table-wrap">
             <table class="admin-table">
               <thead>
                 <tr>
-                  <th>#</th>
                   <th>Pregunta</th>
                   <th>Respuesta</th>
                   <th>Evento</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
-              <tbody>
-                <tr>
-                  <td>1</td>
-                  <td>¿Hay estacionamiento disponible?</td>
-                  <td class="td-truncate">Sí, estacionamiento gratuito para egresados registrados...</td>
-                  <td>Todos</td>
-                  <td class="table-actions">
-                    <button class="btn-icon" title="Editar" onclick="openModalFaq('estacionamiento')" aria-label="Editar pregunta">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </button>
-                    <button class="btn-icon btn-icon--danger" title="Eliminar" onclick="confirmarEliminarFaq(1)" aria-label="Eliminar pregunta">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-                    </button>
-                  </td>
-                </tr>
-                <tr>
-                  <td>2</td>
-                  <td>¿A qué hora puedo ingresar?</td>
-                  <td class="td-truncate">Las puertas abren 30 minutos antes del evento...</td>
-                  <td>Todos</td>
-                  <td class="table-actions">
-                    <button class="btn-icon" title="Editar" onclick="openModalFaq('acceso')" aria-label="Editar">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                    </button>
-                    <button class="btn-icon btn-icon--danger" title="Eliminar" onclick="confirmarEliminarFaq(2)" aria-label="Eliminar">
-                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
-                    </button>
-                  </td>
-                </tr>
+              <tbody id="tabla-faq-body">
+                <tr><td colspan="5" style="text-align:center;">Cargando preguntas...</td></tr>
               </tbody>
             </table>
           </div>
@@ -563,6 +506,7 @@
       </div>
       <div class="modal-body">
         <form id="form-faq" novalidate>
+          <input type="hidden" id="faq-id" name="id">
           <div class="form-group">
             <label for="faq-pregunta" class="form-label">Pregunta <span class="required">*</span></label>
             <input type="text" id="faq-pregunta" class="form-input" placeholder="¿Cuál es la pregunta?">
@@ -632,6 +576,32 @@
       <button type="button" class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="document.getElementById('modal-exito').hidden = true;">
         Aceptar
       </button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-confirmar-eliminar" role="dialog" aria-modal="true" hidden>
+    <div class="modal modal--sm" style="text-align: center; padding: 30px 20px;">
+      
+      <div style="color: #d32f2f; margin-bottom: 15px; display: flex; justify-content: center;">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="15" y1="9" x2="9" y2="15"></line>
+          <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+      </div>
+      
+      <h2 class="modal-title" style="margin-bottom: 10px; font-size: 1.5rem;">¿Estás seguro?</h2>
+      <p style="color: #666; margin-bottom: 25px; line-height: 1.5;">
+        Esta acción no se puede deshacer. El registro será eliminado permanentemente de la base de datos.
+      </p>
+      
+      <div style="display: flex; gap: 10px; justify-content: center;">
+        <button type="button" class="btn btn-ghost" onclick="closeAdminModal('modal-confirmar-eliminar')" style="flex: 1;">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btn-confirmar-eliminar" style="flex: 1; background-color: #d32f2f; border-color: #d32f2f;" onclick="ejecutarEliminarFaq()">
+          Eliminar
+        </button>
+      </div>
+
     </div>
   </div>
 
