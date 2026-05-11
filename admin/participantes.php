@@ -1,3 +1,5 @@
+<?php include 'php/auth_check.php'; ?>
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,19 +8,13 @@
     <title>Participantes del Evento - UABC</title>
     <link rel="stylesheet" href="../assets/css/base.css">
     <link rel="stylesheet" href="../assets/css/style.css">
-    <link rel="stylesheet" href="../assets/css/components.css">
-    <style>
-        .p-header { padding: 2rem 0; background: var(--color-uabc-blue); color: white; margin-bottom: 2rem; }
-        .p-container { max-width: 1200px; margin: 0 auto; padding: 0 1rem; }
-        .back-link { color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; font-size: 0.9rem; }
-        .back-link:hover { text-decoration: underline; }
-    </style>
+    <link rel="stylesheet" href="../assets/css/participantes.css">
 </head>
 <body class="admin-body">
 
     <header class="p-header">
         <div class="p-container">
-            <a href="admin.html" class="back-link">
+            <a href="admin.php" class="back-link">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
                 Volver al Panel
             </a>
@@ -35,7 +31,7 @@
                         <th>Nombre Completo</th>
                         <th>Email</th>
                         <th>Campus</th>
-                        <th>Carrera</th>
+                        <th>Facultad</th> <th>Carrera</th>
                         <th>Tipo</th>
                     </tr>
                 </thead>
@@ -74,18 +70,21 @@
 
                         // Puedes opcionalmente pedir el nombre del evento en tu consulta PHP
                         // Por ahora llenamos la tabla
-                        result.data.forEach(asistente => {
-                            const row = `
-                                <tr>
-                                    <td><strong>${asistente.apellidos}, ${asistente.nombre}</strong></td>
-                                    <td>${asistente.email}</td>
-                                    <td>${asistente.campus || 'N/A'}</td>
-                                    <td>${asistente.carrera || 'N/A'}</td>
-                                    <td><span class="badge badge--gray">${asistente.tipo}</span></td>
-                                </tr>
-                            `;
-                            tbody.innerHTML += row;
-                        });
+                        // Busca este bloque en participantes.html y actualízalo
+                    // Dentro del fetch de cargarParticipantes...
+                    // Busca esta parte en el script de participantes.html
+                    result.data.forEach(asistente => {
+                        const row = `
+                            <tr>
+                                <td><strong>${asistente.apellidos}, ${asistente.nombre}</strong></td>
+                                <td>${asistente.correo}</td>
+                                <td>${asistente.campus_nombre || 'N/A'}</td>
+                                <td>${asistente.facultad_nombre || 'N/A'}</td> <td>${asistente.carrera_nombre || 'N/A'}</td>
+                                <td><span class="badge badge--gray">${asistente.tipo_asistente}</span></td>
+                            </tr>
+                        `;
+                        tbody.innerHTML += row;
+                    });
                     } else {
                         tbody.innerHTML = `<tr><td colspan="5" style="color:red; text-align:center;">${result.message}</td></tr>`;
                     }

@@ -1,3 +1,4 @@
+<?php include 'php/auth_check.php'; ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -64,11 +65,13 @@
     </nav>
 
     <div class="sidebar-footer">
-      <a href="../index.html" class="sidebar-link sidebar-link--muted">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-        Ver sitio público
+      <a href="php/logout.php" class="sidebar-link" style="color: #d32f2f;">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Cerrar Sesión
       </a>
     </div>
+
+    
   </aside>
 
   <!-- ===== LAYOUT PRINCIPAL ===== -->

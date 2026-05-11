@@ -22,12 +22,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Verificamos el hash
         if ($user && password_verify($password, $user['password'])) {
+            $_SESSION['admin_logeado'] = true;  
             $_SESSION['admin_id'] = $user['id'];
             $_SESSION['admin_nombre'] = $user['nombre'];
-            
+            $_SESSION['ultimo_acceso'] = time(); // Guardamos la hora actual en segundos
+
             // REDIRECCIÓN CORRECTA:
-            // Sube un nivel (sale de php/) y busca admin.html
-            header("Location: ../admin.html");
+            // Sube un nivel (sale de php/) y busca admin.php
+            header("Location: ../admin.php");
             exit();
         } else {
             // Si falla, regresa al login
