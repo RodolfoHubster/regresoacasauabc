@@ -901,11 +901,35 @@
 }
 
 /* =====================================================
+   RESPONSIVE – WIDE (≤ 1430px)
+   Punto de quiebre donde el título universitario
+   comienza a montarse con el bloque izquierdo.
+   Solución: permitir 2 líneas en lugar de nowrap.
+   ===================================================== */
+
+@media (max-width: 1430px) {
+  .header-university {
+    white-space: normal;
+    max-width: 280px;
+    line-height: 1.25;
+    font-size: var(--text-sm);
+    text-align: center;
+  }
+
+  /* Reserva espacio lateral para los bloques absolutos
+     y evita que el centro toque logo o botón Admin */
+  .header-center {
+    padding-inline: 220px;
+  }
+}
+
+/* =====================================================
    RESPONSIVE – TABLET  (≤ 900px)
    ===================================================== */
 
 @media (max-width: 900px) {
-  .header-university { font-size: var(--text-sm); }
+  .header-university { font-size: var(--text-xs); }
+  .header-center { padding-inline: 180px; }
   .events-grid { gap: var(--space-5); }
 }
 
