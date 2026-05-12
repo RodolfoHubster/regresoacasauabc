@@ -17,21 +17,18 @@
 </head>
 <body class="admin-body">
 
-  <!-- Overlay para cerrar sidebar tocando fuera -->
-  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+  <!-- Overlay: clic fuera del sidebar lo cierra -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
 
   <!-- ===== SIDEBAR ===== -->
   <aside class="admin-sidebar" id="admin-sidebar" aria-label="Menú de administración">
     <div class="sidebar-header">
+      <!-- Solo logo, sin texto "Regresa a Casa / Panel Admin" -->
       <a href="../index.html" class="sidebar-logo" aria-label="Ir al sitio público">
         <img src="../assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="36" height="36" loading="lazy">
-        <div class="sidebar-logo-text">
-          <span class="sidebar-logo-title">Regresa a Casa</span>
-          <span class="sidebar-logo-sub">Panel Admin</span>
-        </div>
       </a>
       <!-- Botón X para cerrar sidebar en móvil -->
-      <button class="sidebar-close" onclick="toggleSidebar()" aria-label="Cerrar menú">
+      <button class="sidebar-close" id="sidebar-close-btn" aria-label="Cerrar menú">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -84,7 +81,7 @@
 
     <!-- TOPBAR -->
     <header class="admin-topbar">
-      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="admin-sidebar" onclick="toggleSidebar()">
+      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="admin-sidebar">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <h1 class="admin-topbar-title" id="topbar-title">Dashboard</h1>
@@ -357,7 +354,7 @@
     </main>
   </div>
 
-  <!-- ===== MODALES (sin cambios de estructura) ===== -->
+  <!-- ===== MODALES ===== -->
 
   <!-- MODAL: CREAR / EDITAR EVENTO -->
   <div class="modal-overlay" id="modal-evento" role="dialog" aria-modal="true" aria-labelledby="modal-evento-title" hidden>
@@ -581,19 +578,42 @@
   <script src="../assets/js/qr-scanner.js"></script>
 
   <script>
-    // Cierra sidebar al navegar (móvil)
-    document.querySelectorAll('.sidebar-link[data-section]').forEach(function(btn) {
-      btn.addEventListener('click', function() {
-        if (window.innerWidth <= 900) {
-          var sidebar = document.getElementById('admin-sidebar');
-          var overlay = document.getElementById('sidebar-overlay');
-          var toggle  = document.getElementById('sidebar-toggle');
-          if (sidebar) sidebar.classList.remove('open');
-          if (overlay) overlay.classList.remove('active');
-          if (toggle)  toggle.setAttribute('aria-expanded', 'false');
-        }
+    (function () {
+      var sidebar  = document.getElementById('admin-sidebar');
+      var overlay  = document.getElementById('sidebar-overlay');
+      var toggle   = document.getElementById('sidebar-toggle');
+      var closeBtn = document.getElementById('sidebar-close-btn');
+
+      function openSidebar() {
+        sidebar.classList.add('open');
+        overlay.classList.add('active');
+        toggle.setAttribute('aria-expanded', 'true');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+
+      // Botón hamburguesa abre/cierra
+      toggle.addEventListener('click', function () {
+        sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
       });
-    });
+
+      // Botón X dentro del sidebar cierra
+      closeBtn.addEventListener('click', closeSidebar);
+
+      // Clic en el overlay (zona de contenido) cierra sidebar
+      overlay.addEventListener('click', closeSidebar);
+
+      // Cierra sidebar al hacer clic en un ítem de nav (solo en móvil)
+      document.querySelectorAll('.sidebar-link[data-section]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          if (window.innerWidth <= 900) closeSidebar();
+        });
+      });
+    })();
   </script>
 </body>
 </html>
