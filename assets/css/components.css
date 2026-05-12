@@ -1096,5 +1096,13 @@
    ===================================================== */
 
 @media (max-width: 400px) {
+  .header-dept { display: flex; }  /* solo logo en pantallas muy chicas */
+}
+
+/* =====================================================
+   RESPONSIVE – EXTRA PEQUEÑO  (≤ 320px)
+   ===================================================== */
+
+@media (max-width: 320px) {
   .header-dept { display: none; }  /* solo logo en pantallas muy chicas */
 }
