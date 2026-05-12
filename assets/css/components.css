@@ -228,7 +228,7 @@
 }
 
 .mobile-nav.is-open {
-  max-height: 320px;
+  max-height: 380px;  /* ampliado para incluir item Admin */
   padding-block: var(--space-2);
 }
 
@@ -255,6 +255,30 @@
 .mobile-nav-link:active {
   background: rgba(255,255,255,0.08);
   color: var(--uabc-blanco);
+  border-left-color: var(--uabc-dorado);
+}
+
+/* ── Ítem Admin en menú móvil ── */
+/* Separador visual arriba del ítem Admin */
+.mobile-nav-admin-item {
+  border-top: 1px solid rgba(255,255,255,0.12);
+  margin-top: var(--space-1);
+  padding-top: var(--space-1);
+}
+
+/* El enlace Admin tiene acento dorado siempre visible */
+.mobile-nav-link--admin {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--uabc-dorado);
+  font-weight: 600;
+  border-left-color: var(--uabc-dorado);
+}
+.mobile-nav-link--admin:hover,
+.mobile-nav-link--admin:active {
+  background: rgba(200,151,43,0.12);
+  color: var(--uabc-dorado);
   border-left-color: var(--uabc-dorado);
 }
 
@@ -966,7 +990,7 @@
     line-height: 1.2;
     display: -webkit-box;
     -webkit-line-clamp: 2;
-    line-clamp: 2; 
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -1040,11 +1064,37 @@
 }
 
 /* =====================================================
-   RESPONSIVE – EXTRA PEQUEÑO  (≤ 400px)
+   RESPONSIVE – MÓVIL CHICO  (≤ 512px)
+   Ocultar btn-header-admin del header; el acceso Admin
+   queda solo en el menú hamburguesa.
+   header-dept ("Comunidad de egresadas…") se mantiene.
    ===================================================== */
 
 @media (max-width: 512px) {
-  .header-dept { display: none; }
-  .hero-title  { font-size: var(--text-lg); }
+  /* Oculta el botón Admin del header */
+  .btn-header-admin { display: none; }
+
+  /* header-dept sigue visible: texto más compacto */
+  .header-dept {
+    font-size: var(--text-xs);
+    white-space: normal;
+    max-width: 180px;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .hero-title   { font-size: var(--text-lg); }
   .events-empty { padding: var(--space-10) var(--space-4); }
+}
+
+/* =====================================================
+   RESPONSIVE – EXTRA PEQUEÑO  (≤ 400px)
+   ===================================================== */
+
+@media (max-width: 400px) {
+  .header-dept { display: none; }  /* solo logo en pantallas muy chicas */
 }
