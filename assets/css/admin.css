@@ -356,7 +356,7 @@
 }
 
 .faq-admin-filter {
-  display: flex;
+  display: grid;
   gap: var(--space-3);
   margin-bottom: var(--space-4);
   flex-wrap: wrap;
