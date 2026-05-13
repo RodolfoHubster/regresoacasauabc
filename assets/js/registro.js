@@ -1,169 +1,250 @@
-/* registro.js – Validación y envío del formulario de registro */
+/* registro.js – Validación en tiempo real + envío del formulario */
 
+/* ─── REGLAS DE VALIDACIÓN ──────────────────────────────────────────────── */
+const REGLAS = {
+  'field-nombre': {
+    requerido: true,
+    minLen: 2,
+    maxLen: 80,
+    regex: /^[a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s'-]+$/,
+    msgs: {
+      vacio:  'El nombre es requerido.',
+      corto:  'Mínimo 2 caracteres.',
+      largo:  'Máximo 80 caracteres.',
+      regex:  'Solo se permiten letras y espacios.',
+    }
+  },
+  'field-apellidos': {
+    requerido: true,
+    minLen: 2,
+    maxLen: 100,
+    regex: /^[a-záéíóúüñA-ZÁÉÍÓÚÜÑ\s'-]+$/,
+    msgs: {
+      vacio:  'Los apellidos son requeridos.',
+      corto:  'Mínimo 2 caracteres.',
+      largo:  'Máximo 100 caracteres.',
+      regex:  'Solo se permiten letras y espacios.',
+    }
+  },
+  'field-email': {
+    requerido: true,
+    regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    msgs: {
+      vacio:  'El correo electrónico es requerido.',
+      regex:  'Ingresa un correo válido (ej. nombre@correo.com).',
+    }
+  },
+  'field-telefono': {
+    requerido: false,
+    minLen: 10,
+    maxLen: 15,
+    regex: /^[0-9 ()+-]*$/,
+    msgs: {
+      corto:  'Mínimo 10 dígitos.',
+      largo:  'Máximo 15 dígitos.',
+      regex:  'Solo se permiten números, espacios y los símbolos + ( ) -',
+    }
+  },
+  'field-campus': {
+    requerido: true,
+    msgs: { vacio: 'Selecciona tu campus de egreso.' }
+  },
+  'field-facultad': {
+    requerido: true,
+    msgs: { vacio: 'Selecciona tu facultad.' }
+  },
+  'field-carrera': {
+    requerido: true,
+    msgs: { vacio: 'Selecciona tu carrera.' }
+  },
+  'field-generacion': {
+    requerido: true,
+    regex: /^[0-9]{4}(-[0-9]{4})?$/,
+    msgs: {
+      vacio:  'La generación es requerida.',
+      regex:  'Formato válido: 2015 o 2015-2020.',
+    }
+  },
+  'field-tipo': {
+    requerido: true,
+    msgs: { vacio: 'Selecciona el tipo de asistente.' }
+  },
+};
+
+/* ─── VALIDAR UN CAMPO INDIVIDUAL ──────────────────────────────────────── */
+function validarCampo(id) {
+  const input   = document.getElementById(id);
+  const errorEl = document.getElementById('error-' + id.replace('field-', ''));
+  const regla   = REGLAS[id];
+  if (!input || !errorEl || !regla) return true;
+
+  const valor = input.value.trim();
+  let msg = '';
+
+  if (regla.requerido && valor === '') {
+    msg = regla.msgs.vacio;
+  } else if (valor !== '') {
+    if (regla.minLen && valor.replace(/\D/g, '').length < regla.minLen && id === 'field-telefono') {
+      msg = regla.msgs.corto;
+    } else if (regla.minLen && id !== 'field-telefono' && valor.length < regla.minLen) {
+      msg = regla.msgs.corto;
+    } else if (regla.maxLen && valor.length > regla.maxLen) {
+      msg = regla.msgs.largo;
+    } else if (regla.regex && !regla.regex.test(valor)) {
+      msg = regla.msgs.regex;
+    }
+  }
+
+  const esCorrecto = msg === '';
+
+  errorEl.textContent = msg;
+  input.setAttribute('aria-invalid', String(!esCorrecto));
+
+  // Clases visuales
+  input.classList.toggle('input--error', !esCorrecto);
+  input.classList.toggle('input--ok',    esCorrecto && (regla.requerido || valor !== ''));
+
+  return esCorrecto;
+}
+
+/* ─── INICIALIZAR EVENTOS DE TIEMPO REAL ───────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('form-registro');
   if (!form) return;
 
-  // Lógica para validar y enviar
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    if (validarFormulario()) {
-      enviarRegistro();
-    }
+  // Adjuntar listeners de tiempo real a cada campo con regla
+  Object.keys(REGLAS).forEach(id => {
+    const input = document.getElementById(id);
+    if (!input) return;
+
+    // 'input' para texto/email/tel/generacion; 'change' para selects
+    const evento = (input.tagName === 'SELECT') ? 'change' : 'input';
+
+    input.addEventListener(evento, () => validarCampo(id));
+
+    // También validar al perder el foco (blur) para capturar campos que
+    // el usuario salta sin escribir nada
+    input.addEventListener('blur', () => validarCampo(id));
   });
 
-  // --- LÓGICA: Selectores Dinámicos (Campus -> Facultad -> Carrera) ---
-  const campusSelect = document.getElementById('field-campus');
+  // ─── SELECTORES DINÁMICOS: Campus → Facultad → Carrera ───
+  const campusSelect   = document.getElementById('field-campus');
   const facultadSelect = document.getElementById('field-facultad');
-  const carreraSelect = document.getElementById('field-carrera');
+  const carreraSelect  = document.getElementById('field-carrera');
 
   if (campusSelect && facultadSelect && carreraSelect) {
-    // Escuchar cambio en Campus
-    campusSelect.addEventListener('change', function() {
-        const campusId = this.value;
-        
-        facultadSelect.innerHTML = '<option value="">Selecciona tu facultad</option>';
-        carreraSelect.innerHTML = '<option value="">Primero selecciona una facultad</option>';
-        carreraSelect.disabled = true;
 
-        if (campusId) {
-            facultadSelect.disabled = false;
-            fetch(`php/get_facultades.php?campus_id=${campusId}`)
-                .then(response => response.json())
-                .then(result => {
-                    if (result.status === 'success') {
-                        result.data.forEach(facultad => {
-                            const option = document.createElement('option');
-                            option.value = facultad.id;
-                            option.textContent = `${facultad.codigo || ''} - ${facultad.nombre}`;
-                            facultadSelect.appendChild(option);
-                        });
-                    }
-                })
-                .catch(error => console.error('Error cargando facultades:', error));
-        } else {
-            facultadSelect.disabled = true;
-        }
+    campusSelect.addEventListener('change', function () {
+      const campusId = this.value;
+
+      facultadSelect.innerHTML = '<option value="">Selecciona tu facultad</option>';
+      carreraSelect.innerHTML  = '<option value="">Primero selecciona una facultad</option>';
+      carreraSelect.disabled   = true;
+
+      if (campusId) {
+        facultadSelect.disabled = false;
+        fetch(`php/get_facultades.php?campus_id=${campusId}`)
+          .then(r => r.json())
+          .then(result => {
+            if (result.status === 'success') {
+              result.data.forEach(f => {
+                const opt = document.createElement('option');
+                opt.value       = f.id;
+                opt.textContent = `${f.codigo || ''} - ${f.nombre}`;
+                facultadSelect.appendChild(opt);
+              });
+            }
+          })
+          .catch(err => console.error('Error cargando facultades:', err));
+      } else {
+        facultadSelect.disabled = true;
+      }
     });
 
-    // Escuchar cambio en Facultad
-    facultadSelect.addEventListener('change', function() {
-        const facultadId = this.value;
-        carreraSelect.innerHTML = '<option value="">Selecciona tu carrera</option>';
+    facultadSelect.addEventListener('change', function () {
+      const facultadId = this.value;
+      carreraSelect.innerHTML = '<option value="">Selecciona tu carrera</option>';
 
-        if (facultadId) {
-            carreraSelect.disabled = false;
-            fetch(`php/get_carreras.php?facultad_id=${facultadId}`)
-                .then(response => response.json())
-                .then(result => {
-                    if (result.status === 'success') {
-                        result.data.forEach(carrera => {
-                            const option = document.createElement('option');
-                            option.value = carrera.id;
-                            option.textContent = carrera.nombre;
-                            carreraSelect.appendChild(option);
-                        });
-                    }
-                })
-                .catch(error => console.error('Error cargando carreras:', error));
-        } else {
-            carreraSelect.disabled = true;
-        }
+      if (facultadId) {
+        carreraSelect.disabled = false;
+        fetch(`php/get_carreras.php?facultad_id=${facultadId}`)
+          .then(r => r.json())
+          .then(result => {
+            if (result.status === 'success') {
+              result.data.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value       = c.id;
+                opt.textContent = c.nombre;
+                carreraSelect.appendChild(opt);
+              });
+            }
+          })
+          .catch(err => console.error('Error cargando carreras:', err));
+      } else {
+        carreraSelect.disabled = true;
+      }
     });
   }
-});
 
-function validarFormulario() {
-  let valido = true;
-  const campos = [
-    { id: 'field-nombre',     errorId: 'error-nombre',     msg: 'El nombre es requerido.' },
-    { id: 'field-apellidos',  errorId: 'error-apellidos',  msg: 'Los apellidos son requeridos.' },
-    { id: 'field-email',      errorId: 'error-email',      msg: 'El correo electrónico es requerido.' },
-    { id: 'field-campus',     errorId: 'error-campus',     msg: 'Selecciona tu campus de egreso.' },
-    { id: 'field-facultad',   errorId: 'error-facultad',   msg: 'La facultad es requerida.' },
-    { id: 'field-carrera',    errorId: 'error-carrera',    msg: 'La carrera es requerida.' },
-    { id: 'field-generacion', errorId: 'error-generacion', msg: 'La generación es requerida.' },
-    { id: 'field-tipo',       errorId: 'error-tipo',       msg: 'Selecciona el tipo de asistente.' },
-  ];
-
-  campos.forEach(campo => {
-    const input = document.getElementById(campo.id);
-    const errorEl = document.getElementById(campo.errorId);
-    if (!input || !errorEl) return;
-
-    const valor = input.value.trim();
-    if (!valor) {
-      errorEl.textContent = campo.msg;
-      input.setAttribute('aria-invalid', 'true');
-      input.style.borderColor = 'var(--color-error)';
-      valido = false;
-    } else {
-      errorEl.textContent = '';
-      input.removeAttribute('aria-invalid');
-      input.style.borderColor = '';
+  // ─── SUBMIT ───
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    // Validar todos los campos al enviar (por si el usuario nunca tocó alguno)
+    const todosOk = Object.keys(REGLAS).map(id => validarCampo(id)).every(Boolean);
+    if (todosOk) enviarRegistro();
+    else {
+      // Hacer scroll al primer campo con error
+      const primerError = form.querySelector('.input--error');
+      if (primerError) primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   });
+});
 
-  const emailInput = document.getElementById('field-email');
-  const emailError = document.getElementById('error-email');
-  if (emailInput && emailInput.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
-    if (emailError) emailError.textContent = 'Ingresa un correo electrónico válido.';
-    emailInput.setAttribute('aria-invalid', 'true');
-    emailInput.style.borderColor = 'var(--color-error)';
-    valido = false;
-  }
-  return valido;
+/* ─── ENVIAR REGISTRO ───────────────────────────────────────────────────── */
+function enviarRegistro() {
+  const form        = document.getElementById('form-registro');
+  const datos       = new FormData(form);
+  const btnSubmit   = form.querySelector('button[type="submit"]');
+  const textoOrig   = btnSubmit.textContent;
+
+  btnSubmit.disabled    = true;
+  btnSubmit.textContent = 'Guardando registro…';
+
+  fetch('php/procesar_registro.php', { method: 'POST', body: datos })
+    .then(r => r.json())
+    .then(res => {
+      btnSubmit.disabled    = false;
+      btnSubmit.textContent = textoOrig;
+
+      if (res.status === 'success') {
+        closeModal('modal-registro');
+        resetFormulario(form);
+        setTimeout(() => openModal('modal-confirmacion'), 200);
+      } else {
+        alert('Ocurrió un error al guardar: ' + res.message);
+      }
+    })
+    .catch(() => {
+      btnSubmit.disabled    = false;
+      btnSubmit.textContent = textoOrig;
+      alert('Error de comunicación con el servidor.');
+    });
 }
 
-function enviarRegistro() {
-  const form = document.getElementById('form-registro');
-  const datos = new FormData(form);
-  const btnSubmit = form.querySelector('button[type="submit"]');
-  const textoOriginal = btnSubmit.textContent;
+/* ─── RESET COMPLETO ────────────────────────────────────────────────────── */
+function resetFormulario(form) {
+  form.reset();
 
-  btnSubmit.disabled = true;
-  btnSubmit.textContent = 'Guardando registro...';
-
-  fetch('php/procesar_registro.php', { 
-      method: 'POST', 
-      body: datos 
-  })
-  .then(response => response.json())
-  .then(res => { 
-      btnSubmit.disabled = false;
-      btnSubmit.textContent = textoOriginal;
-
-      if(res.status === 'success') {
-          closeModal('modal-registro');
-          form.reset();
-          
-          // Reset de estilos y selects
-          const inputs = form.querySelectorAll('.form-input, .form-select');
-          inputs.forEach(input => {
-              input.style.borderColor = '';
-              input.removeAttribute('aria-invalid');
-          });
-          document.querySelectorAll('.form-error').forEach(msg => msg.textContent = '');
-
-          const facultadSelect = document.getElementById('field-facultad');
-          const carreraSelect = document.getElementById('field-carrera');
-          if(facultadSelect) {
-              facultadSelect.innerHTML = '<option value="">Primero selecciona un campus</option>';
-              facultadSelect.disabled = true;
-          }
-          if(carreraSelect) {
-              carreraSelect.innerHTML = '<option value="">Primero selecciona una facultad</option>';
-              carreraSelect.disabled = true;
-          }
-
-          setTimeout(() => openModal('modal-confirmacion'), 200);
-      } else {
-          alert("Ocurrió un error al guardar: " + res.message);
-      }
-  })
-  .catch(error => {
-      btnSubmit.disabled = false;
-      btnSubmit.textContent = textoOriginal;
-      alert("Error de comunicación con el servidor.");
+  // Limpiar clases visuales y mensajes de error
+  form.querySelectorAll('.form-input, .form-select').forEach(el => {
+    el.classList.remove('input--error', 'input--ok');
+    el.removeAttribute('aria-invalid');
   });
+  form.querySelectorAll('.form-error').forEach(el => el.textContent = '');
+
+  // Resetear selects dependientes
+  const fac = document.getElementById('field-facultad');
+  const car = document.getElementById('field-carrera');
+  if (fac) { fac.innerHTML = '<option value="">Primero selecciona un campus</option>'; fac.disabled = true; }
+  if (car) { car.innerHTML = '<option value="">Primero selecciona una facultad</option>'; car.disabled = true; }
 }
