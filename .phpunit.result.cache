@@ -1,1 +1,0 @@
-{"version":2,"defects":[],"times":{"RequestValidatorTest::testRegistrationFieldsAreValidWhenAllRequiredValuesExist":0.001,"RequestValidatorTest::testRegistrationFieldsAreInvalidWhenAnyRequiredValueIsMissingOrBlank":0,"RequestValidatorTest::testEventFieldsAreValidWhenAllRequiredValuesExist":0,"RequestValidatorTest::testEventFieldsAreInvalidWhenRequiredValueIsEmpty":0}}
