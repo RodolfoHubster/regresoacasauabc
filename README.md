@@ -47,9 +47,17 @@ Incluye:
    MAIL_PORT=465
    ```
 
-4. Asegúrate de tener en la base de datos:
-   - tablas del sistema (eventos, asistentes, faq, campus/facultad/carrera, etc.)
-   - al menos un usuario administrador en tabla `usuario` con contraseña hasheada (`password_hash`)
+4. Prepara la base de datos.
+   - Este repositorio no incluye migraciones ni script SQL de inicialización.
+   - Crea al menos las tablas usadas por el código:
+     - `usuario`
+     - `evento`
+     - `registro_asistente`
+     - `faq`
+     - `campus`
+     - `facultad`
+     - `carrera`
+   - Inserta al menos un usuario administrador en `usuario` con contraseña hasheada (`password_hash`).
 
 5. Levanta el proyecto en tu servidor local y abre:
    - Sitio público: `index.html`
