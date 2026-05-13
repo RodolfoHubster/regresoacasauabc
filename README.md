@@ -40,6 +40,17 @@ regresoacasauabc/
 - **Base de datos:** MySQL
 - **Paleta:** Azul marino UABC `#002855` + Dorado UABC `#C8972B`
 
+## Pruebas unitarias
+
+1. Instala dependencias:
+   ```bash
+   composer install
+   ```
+2. Ejecuta las pruebas:
+   ```bash
+   composer test
+   ```
+
 ## Autor
 
 - [RodolfoHubster](https://github.com/RodolfoHubster)

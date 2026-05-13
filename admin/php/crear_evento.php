@@ -1,5 +1,8 @@
 <?php
 require_once 'conexion.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
+
+use Juancarlos\Regresoacasauabc\Http\RequestValidator;
 
 header('Content-Type: application/json');
 
@@ -14,7 +17,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $estado = $_POST['estado'] ?? 'activo';
 
         // Validar que los campos requeridos no vengan vacíos
-        if (empty($nombre) || empty($fecha) || empty($hora) || empty($ubicacion)) {
+        if (!RequestValidator::hasRequiredEventFields([
+            'nombre' => $nombre,
+            'fecha' => $fecha,
+            'hora' => $hora,
+            'ubicacion' => $ubicacion
+        ])) {
             echo json_encode(['status' => 'error', 'message' => 'Faltan campos obligatorios.']);
             exit;
         }

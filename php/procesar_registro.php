@@ -5,6 +5,7 @@ require_once __DIR__ . '/../admin/php/conexion.php';
 
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
+use Juancarlos\Regresoacasauabc\Http\RequestValidator;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -26,7 +27,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $tipo_asistente = $_POST['tipo'] ?? '';
 
         // Validar que el evento_id no esté vacío
-        if (empty($nombre) || empty($correo) || empty($campus_id) || empty($evento_id)) {
+        if (!RequestValidator::hasRequiredRegistrationFields([
+            'nombre' => $nombre,
+            'email' => $correo,
+            'campus' => $campus_id,
+            'evento_id' => $evento_id
+        ])) {
             throw new Exception("Faltan campos obligatorios (incluyendo el ID del evento).");
         }
 
