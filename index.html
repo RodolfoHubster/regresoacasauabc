@@ -36,18 +36,49 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           Admin
         </a>
+
+        <!-- Botón hamburguesa: solo visible en móvil -->
+        <button
+          class="nav-hamburger"
+          id="nav-hamburger"
+          aria-label="Abrir menú de navegación"
+          aria-expanded="false"
+          aria-controls="mobile-nav"
+        >
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+          <span class="hamburger-bar"></span>
+        </button>
       </div>
 
     </div>
 
     <div class="header-gold-line" aria-hidden="true"></div>
 
+    <!-- NAV desktop -->
     <nav class="site-nav" aria-label="Navegación principal">
       <ul role="list" class="nav-list">
         <li><a href="#inicio" class="nav-link active">Inicio</a></li>
         <li><a href="#eventos" class="nav-link">Eventos</a></li>
         <li><a href="#faq" class="nav-link">Preguntas Frecuentes</a></li>
         <li><a href="#contacto" class="nav-link">Contacto</a></li>
+      </ul>
+    </nav>
+
+    <!-- NAV móvil (panel desplegable) -->
+    <nav class="mobile-nav" id="mobile-nav" aria-label="Menú móvil" aria-hidden="true">
+      <ul role="list" class="mobile-nav-list">
+        <li><a href="#inicio"   class="mobile-nav-link">Inicio</a></li>
+        <li><a href="#eventos"  class="mobile-nav-link">Eventos</a></li>
+        <li><a href="#faq"      class="mobile-nav-link">Preguntas Frecuentes</a></li>
+        <li><a href="#contacto" class="mobile-nav-link">Contacto</a></li>
+        <!-- Enlace Admin: siempre en el menú móvil, destacado visualmente -->
+        <li class="mobile-nav-admin-item">
+          <a href="admin/login.html" class="mobile-nav-link mobile-nav-link--admin">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            Acceso Admin
+          </a>
+        </li>
       </ul>
     </nav>
   </header>
@@ -70,7 +101,6 @@
           <h2 class="section-title">Eventos Disponibles</h2>
           <p class="section-desc">Selecciona el evento al que deseas asistir y regístrate en minutos.</p>
         </div>
-
 
         <div class="events-grid" id="events-grid">
           <p style="text-align:center; width:100%; color: var(--color-text-light);">Cargando eventos disponibles...</p>
@@ -133,11 +163,12 @@
     <div class="container">
       <div class="footer-inner">
         <p class="footer-copy">© 2025 Universidad Autónoma de Baja California · Dirección de Egresados</p>
-        <p class="footer-tagline">Por la realización plena del ser humano</p>
+        <p class="footer-tagline">Por la realización plena del ser</p>
       </div>
     </div>
   </footer>
 
+  <!-- MODAL REGISTRO -->
   <div class="modal-overlay" id="modal-registro" role="dialog" aria-modal="true" aria-labelledby="modal-registro-title" hidden>
     <div class="modal">
       <div class="modal-header">
@@ -185,10 +216,12 @@
             </select>
             <span class="form-error" id="error-carrera" aria-live="polite"></span>
           </div>
+
           <div class="form-row">
             <div class="form-group"><label for="field-generacion" class="form-label">Generación <span class="required" aria-hidden="true">*</span></label><input type="text" id="field-generacion" name="generacion" class="form-input" placeholder="Ej. 2015-2020" required><span class="form-error" id="error-generacion" aria-live="polite"></span></div>
             <div class="form-group"><label for="field-tipo" class="form-label">Tipo de asistente <span class="required" aria-hidden="true">*</span></label><select id="field-tipo" name="tipo" class="form-select" required><option value="">Selecciona...</option><option value="egresado">Egresado</option><option value="estudiante">Estudiante</option><option value="docente">Docente</option><option value="administrativo">Administrativo</option><option value="invitado">Invitado especial</option></select><span class="form-error" id="error-tipo" aria-live="polite"></span></div>
           </div>
+
           <div class="modal-footer">
             <button type="button" class="btn btn-ghost" onclick="closeModal('modal-registro')">Cancelar</button>
             <button type="submit" class="btn btn-primary">Confirmar Registro</button>
@@ -198,6 +231,7 @@
     </div>
   </div>
 
+  <!-- MODAL CONFIRMACIÓN -->
   <div class="modal-overlay" id="modal-confirmacion" role="dialog" aria-modal="true" aria-labelledby="modal-confirm-title" hidden>
     <div class="modal modal--sm">
       <div class="modal-header">
@@ -212,6 +246,7 @@
     </div>
   </div>
 
+  <!-- MODAL INFO TIJUANA -->
   <div class="modal-overlay" id="info-tijuana" role="dialog" aria-modal="true" aria-labelledby="info-tijuana-title" hidden>
     <div class="modal modal--info">
       <div class="modal-header">
@@ -241,6 +276,7 @@
     </div>
   </div>
 
+  <!-- MODAL INFO MEXICALI -->
   <div class="modal-overlay" id="info-mexicali" role="dialog" aria-modal="true" aria-labelledby="info-mexicali-title" hidden>
     <div class="modal modal--info">
       <div class="modal-header">

@@ -2,18 +2,6 @@
 
 /* =====================================================
    HEADER
-
-   Layout 3 columnas con position: relative en el inner:
-   ┌──────────────────────────────────────────────────────┐
-   │ [Logo | texto-izq]  [Universidad Autónoma...]  [Admin]│
-   │  ← posición absoluta izq    ← centrado →   absoluta →│
-   └──────────────────────────────────────────────────────┘
-
-   - .header-left  → position:absolute, left, flex-row logo+texto
-   - .header-center → display:block, text-align:center, margin:auto
-   - .header-right → position:absolute, right, botón Admin
-
-   NAV: justify-content:center para centrar los enlaces
    ===================================================== */
 
 .skip-link {
@@ -39,12 +27,11 @@
   box-shadow: var(--shadow-md);
 }
 
-/* Contenedor principal – position relative para anclar absolutos */
 .header-inner {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;   /* el header-center queda centrado */
+  justify-content: center;
   width: 100%;
   padding: var(--space-3) var(--space-6);
   min-height: 72px;
@@ -91,10 +78,10 @@
   white-space: nowrap;
 }
 
-/* ── Centro: Nombre universidad (centrado en toda la barra) ── */
+/* ── Centro: Nombre universidad ── */
 .header-center {
   text-align: center;
-  pointer-events: none;   /* el texto no interfiere con los absolutos */
+  pointer-events: none;
 }
 
 .header-university {
@@ -108,7 +95,7 @@
   white-space: nowrap;
 }
 
-/* ── Derecha: Botón Admin ── */
+/* ── Derecha: Admin + Hamburguesa ── */
 .header-right {
   position: absolute;
   right: var(--space-6);
@@ -116,6 +103,7 @@
   transform: translateY(-50%);
   display: flex;
   align-items: center;
+  gap: var(--space-2);
 }
 
 .btn-header-admin {
@@ -138,6 +126,50 @@
   border-color: rgba(255,255,255,0.8);
 }
 
+/* ── Botón Hamburguesa ── */
+.nav-hamburger {
+  display: none;   /* oculto en desktop */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 1.5px solid rgba(255,255,255,0.4);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.18s, border-color 0.18s;
+  flex-shrink: 0;
+}
+.nav-hamburger:hover {
+  background: rgba(255,255,255,0.12);
+  border-color: rgba(255,255,255,0.7);
+}
+
+.hamburger-bar {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: var(--uabc-blanco);
+  border-radius: 2px;
+  transition: transform 0.25s, opacity 0.25s;
+  transform-origin: center;
+}
+
+/* Estado abierto: anima a X */
+.nav-hamburger[aria-expanded="true"] .hamburger-bar:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.nav-hamburger[aria-expanded="true"] .hamburger-bar:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+.nav-hamburger[aria-expanded="true"] .hamburger-bar:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
 /* ── Línea dorada ── */
 .header-gold-line {
   height: 3px;
@@ -145,7 +177,7 @@
 }
 
 /* =====================================================
-   NAV – centrada
+   NAV DESKTOP
    ===================================================== */
 
 .site-nav {
@@ -154,7 +186,7 @@
 
 .nav-list {
   display: flex;
-  justify-content: center;   /* ← centrado horizontal */
+  justify-content: center;
   gap: 0;
   list-style: none;
   margin: 0;
@@ -173,16 +205,81 @@
   transition: color 0.18s, border-color 0.18s;
   white-space: nowrap;
 }
-
 .nav-link:hover {
   color: var(--uabc-blanco);
   border-bottom-color: var(--uabc-dorado);
 }
-
 .nav-link.active {
   color: var(--uabc-dorado);
   border-bottom-color: var(--uabc-dorado);
   font-weight: 600;
+}
+
+/* =====================================================
+   NAV MÓVIL
+   ===================================================== */
+
+.mobile-nav {
+  display: none;          /* oculto siempre en desktop */
+  background: var(--uabc-verde-oscuro);
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+}
+
+.mobile-nav.is-open {
+  max-height: 380px;  /* ampliado para incluir item Admin */
+  padding-block: var(--space-2);
+}
+
+.mobile-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-nav-link {
+  display: block;
+  padding: var(--space-4) var(--space-6);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: rgba(255,255,255,0.85);
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: background 0.16s, color 0.16s, border-color 0.16s;
+}
+.mobile-nav-link:hover,
+.mobile-nav-link:active {
+  background: rgba(255,255,255,0.08);
+  color: var(--uabc-blanco);
+  border-left-color: var(--uabc-dorado);
+}
+
+/* ── Ítem Admin en menú móvil ── */
+/* Separador visual arriba del ítem Admin */
+.mobile-nav-admin-item {
+  border-top: 1px solid rgba(255,255,255,0.12);
+  margin-top: var(--space-1);
+  padding-top: var(--space-1);
+}
+
+/* El enlace Admin tiene acento dorado siempre visible */
+.mobile-nav-link--admin {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--uabc-dorado);
+  font-weight: 600;
+  border-left-color: var(--uabc-dorado);
+}
+.mobile-nav-link--admin:hover,
+.mobile-nav-link--admin:active {
+  background: rgba(200,151,43,0.12);
+  color: var(--uabc-dorado);
+  border-left-color: var(--uabc-dorado);
 }
 
 /* =====================================================
@@ -433,10 +530,6 @@
 
 .event-card-actions .btn { justify-content: center; }
 
-@media (max-width: 400px) {
-  .event-card-actions { grid-template-columns: 1fr; }
-}
-
 /* =====================================================
    EMPTY STATE
    ===================================================== */
@@ -586,7 +679,7 @@
   text-align: center;
 }
 
-.footer-copy { font-size: var(--text-sm); color: rgba(255,255,255,0.75); }
+.footer-copy    { font-size: var(--text-sm); color: rgba(255,255,255,0.75); }
 .footer-tagline { font-size: var(--text-xs); color: rgba(255,255,255,0.45); font-style: italic; }
 
 /* =====================================================
@@ -773,8 +866,6 @@
   line-height: 1.6;
 }
 
-@media (max-width: 500px) { .info-highlights { grid-template-columns: 1fr; } }
-
 /* =====================================================
    FORMULARIO
    ===================================================== */
@@ -784,8 +875,6 @@
   grid-template-columns: 1fr 1fr;
   gap: var(--space-4);
 }
-
-@media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
 
 .form-group { display: flex; flex-direction: column; gap: var(--space-1); }
 
@@ -836,33 +925,184 @@
 }
 
 /* =====================================================
-   RESPONSIVE
+   RESPONSIVE – WIDE (≤ 1430px)
+   header-university rompe a 2 líneas.
    ===================================================== */
 
-@media (max-width: 768px) {
-  .header-inner { padding: var(--space-3) var(--space-4); min-height: 64px; }
-  .header-left  { left: var(--space-4); gap: var(--space-2); }
-  .header-right { right: var(--space-4); }
+@media (max-width: 1430px) {
+  .header-university {
+    white-space: normal;
+    max-width: 280px;
+    line-height: 1.25;
+    font-size: var(--text-sm);
+    text-align: center;
+  }
+  .header-center {
+    padding-inline: 220px;
+  }
+}
 
-  .header-logo-img  { height: 38px; }
-  .header-university { font-size: var(--text-sm); }
-  .header-dept       { font-size: var(--text-xs); }
+/* =====================================================
+   RESPONSIVE – SEMI-WIDE (≤ 1250px)
+   header-dept (Comunidad de egresadas…) rompe a 2 líneas.
+   ===================================================== */
+
+@media (max-width: 1250px) {
+  .header-dept {
+    white-space: normal;
+    max-width: 200px;
+    line-height: 1.25;
+    font-size: var(--text-xs);
+  }
+}
+
+/* =====================================================
+   RESPONSIVE – TABLET  (≤ 900px)
+   ===================================================== */
+
+@media (max-width: 900px) {
+  .header-university { font-size: var(--text-xs); }
+  .header-center { padding-inline: 180px; }
+  .events-grid { gap: var(--space-5); }
+}
+
+/* =====================================================
+   RESPONSIVE – MÓVIL  (≤ 815px)
+   ===================================================== */
+
+@media (max-width: 815px) {
+
+  /* ── Header ── */
+  .header-inner {
+    padding: var(--space-2) var(--space-4);
+    min-height: 60px;
+  }
+  .header-left  { left: var(--space-4); gap: var(--space-2); }
+  .header-right { right: var(--space-4); gap: var(--space-2); }
+  .header-logo-img { height: 36px; }
+  .header-university { display: none; }
+
+  /* header-dept: 2 líneas máximo, sin desbordarse */
+  .header-dept {
+    font-size: var(--text-xs);
+    white-space: normal;
+    max-width: 240px;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 
   .btn-header-admin { padding: var(--space-1) var(--space-3); font-size: var(--text-xs); }
 
-  .nav-list  { overflow-x: auto; justify-content: flex-start; padding-inline: var(--space-4); }
-  .nav-link  { padding: var(--space-2) var(--space-3); }
+  /* ── Hamburguesa visible ── */
+  .nav-hamburger { display: flex; }
 
+  /* ── Nav desktop oculto ── */
+  .site-nav { display: none; }
+
+  /* ── Nav móvil activo ── */
+  .mobile-nav { display: block; }
+
+  /* ── Contenedores ── */
   .container { padding-inline: var(--space-4); }
-  .events-grid { grid-template-columns: 1fr; }
 
-  .modal { max-height: 95vh; }
-  .modal-footer { flex-direction: column-reverse; }
+  /* ── Hero ── */
+  .hero-section { padding-block: var(--space-12) var(--space-10); }
+  .hero-title   { font-size: var(--text-xl); }
+  .hero-desc    { font-size: var(--text-sm); }
+  .btn-lg       { width: 100%; justify-content: center; font-size: var(--text-sm); padding: var(--space-3) var(--space-5); }
+
+  /* ── Section headers ── */
+  .section-header { margin-bottom: var(--space-6); }
+  .section-title  { font-size: var(--text-lg); }
+
+  /* ── Events grid ── */
+  .events-grid { grid-template-columns: 1fr; gap: var(--space-5); }
+  .event-card-actions { grid-template-columns: 1fr; gap: var(--space-2); }
+  .event-card-actions .btn { width: 100%; justify-content: center; }
+
+  /* ── FAQ ── */
+  .faq-trigger  { padding: var(--space-4); font-size: var(--text-sm); }
+  .faq-answer   { padding: 0 var(--space-4) var(--space-4); }
+
+  /* ── Contacto ── */
+  .contact-card { padding: var(--space-8) var(--space-5); }
+  .contact-title { font-size: var(--text-lg); }
+
+  /* ── Footer ── */
+  .site-footer  { padding-block: var(--space-5); margin-top: var(--space-8); }
+  .footer-copy  { font-size: var(--text-xs); text-align: center; }
+
+  /* ── Modales ── */
+  .modal-overlay { padding: var(--space-3); align-items: flex-end; }
+  .modal {
+    max-width: 100%;
+    max-height: 92vh;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+  .modal--sm   { max-width: 100%; }
+  .modal--info { max-width: 100%; }
+  .modal-body  { padding: var(--space-4); gap: var(--space-4); }
+  .modal-header { padding: var(--space-4); }
+  .modal-title { font-size: var(--text-base); }
+  .modal-footer {
+    flex-direction: column-reverse;
+    gap: var(--space-2);
+  }
   .modal-footer .btn { width: 100%; justify-content: center; }
+
+  /* ── Info modal highlights ── */
+  .info-highlights { grid-template-columns: 1fr; gap: var(--space-2); }
+  .info-banner     { height: 150px; }
+
+  /* ── Formulario ── */
+  .form-row { grid-template-columns: 1fr; }
+  .form-input, .form-select { font-size: var(--text-base); }
 }
 
-@media (max-width: 520px) {
-  /* Ocultar texto del centro si hay poco espacio, dejar al menos el logo */
-  .header-university { display: none; }
-  .header-dept { white-space: normal; max-width: 140px; font-size: 11px; }
+/* =====================================================
+   RESPONSIVE – MÓVIL CHICO  (≤ 512px)
+   Ocultar btn-header-admin del header; el acceso Admin
+   queda solo en el menú hamburguesa.
+   header-dept ("Comunidad de egresadas…") se mantiene.
+   ===================================================== */
+
+@media (max-width: 512px) {
+  /* Oculta el botón Admin del header */
+  .btn-header-admin { display: none; }
+
+  /* header-dept sigue visible: texto más compacto */
+  .header-dept {
+    font-size: var(--text-xs);
+    white-space: normal;
+    max-width: 180px;
+    line-height: 1.2;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .hero-title   { font-size: var(--text-lg); }
+  .events-empty { padding: var(--space-10) var(--space-4); }
+}
+
+/* =====================================================
+   RESPONSIVE – EXTRA PEQUEÑO  (≤ 400px)
+   ===================================================== */
+
+@media (max-width: 400px) {
+  .header-dept { display: flex; }  /* solo logo en pantallas muy chicas */
+}
+
+/* =====================================================
+   RESPONSIVE – EXTRA PEQUEÑO  (≤ 320px)
+   ===================================================== */
+
+@media (max-width: 320px) {
+  .header-dept { display: none; }  /* solo logo en pantallas muy chicas */
 }

@@ -17,16 +17,20 @@
 </head>
 <body class="admin-body">
 
+  <!-- Overlay: clic fuera del sidebar lo cierra -->
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
   <!-- ===== SIDEBAR ===== -->
   <aside class="admin-sidebar" id="admin-sidebar" aria-label="Menú de administración">
     <div class="sidebar-header">
+      <!-- Solo logo, sin texto "Regresa a Casa / Panel Admin" -->
       <a href="../index.html" class="sidebar-logo" aria-label="Ir al sitio público">
-        <img src="../assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="36" height="36" loading="lazy">
-        <div class="sidebar-logo-text">
-          <span class="sidebar-logo-title">Regresa a Casa</span>
-          <span class="sidebar-logo-sub">Panel Admin</span>
-        </div>
+        <img src="../assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="128" height="128" loading="lazy">
       </a>
+      <!-- Botón X para cerrar sidebar en móvil -->
+      <button class="sidebar-close" id="sidebar-close-btn" aria-label="Cerrar menú">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
 
     <nav class="sidebar-nav" aria-label="Navegación admin">
@@ -70,8 +74,6 @@
         Cerrar Sesión
       </a>
     </div>
-
-    
   </aside>
 
   <!-- ===== LAYOUT PRINCIPAL ===== -->
@@ -79,14 +81,14 @@
 
     <!-- TOPBAR -->
     <header class="admin-topbar">
-      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Abrir menú" onclick="toggleSidebar()">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="admin-sidebar">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <h1 class="admin-topbar-title" id="topbar-title">Dashboard</h1>
       <div class="admin-topbar-actions">
         <span class="admin-user-badge">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          Administrador
+          <span class="badge-label">Administrador</span>
         </span>
       </div>
     </header>
@@ -164,8 +166,7 @@
                   <th>Acciones</th>
                 </tr>
               </thead>
-              <tbody id="dashboard-eventos-body">
-                </tbody>
+              <tbody id="dashboard-eventos-body"></tbody>
             </table>
           </div>
         </div>
@@ -182,7 +183,6 @@
             Nuevo Evento
           </button>
         </div>
-
         <div class="events-admin-grid" id="events-container">
           <p>Cargando eventos...</p>
         </div>
@@ -195,19 +195,16 @@
         <div class="admin-section-header">
           <h2 class="admin-section-title">Asistentes Registrados</h2>
           <div class="admin-section-actions">
-            <div class="table-filters" style="display: flex; gap: 15px; margin-bottom: 20px;">
-  
-              <select id="filtro-evento" class="form-select" style="min-width: 200px;">
+            <div class="table-filters">
+              <select id="filtro-evento" class="form-select" aria-label="Filtrar por evento">
                 <option value="">Todos los eventos</option>
-                </select>
-
-              <select id="filtro-campus" class="form-select" style="min-width: 200px;">
+              </select>
+              <select id="filtro-campus" class="form-select" aria-label="Filtrar por campus">
                 <option value="">Todos los campus</option>
                 <option value="Tijuana">Tijuana</option>
                 <option value="Mexicali">Mexicali</option>
                 <option value="Ensenada">Ensenada</option>
               </select>
-
             </div>
             <button class="btn btn-primary btn-sm" onclick="exportarExcelAsistentes()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -256,27 +253,23 @@
         </div>
 
         <div class="admin-card">
-          <div class="faq-admin-filter" style="display: flex; gap: 15px; margin-bottom: 20px;">
-          
-          <div style="flex: 1;">
-            <label for="faq-filtro-evento" class="form-label">Evento:</label>
-            <select id="faq-filtro-evento" class="form-select form-select--sm" aria-label="Filtrar FAQ por evento">
-              <option value="">Todos los eventos</option>
-            </select>
+          <div class="faq-admin-filter">
+            <div>
+              <label for="faq-filtro-evento" class="form-label">Evento:</label>
+              <select id="faq-filtro-evento" class="form-select form-select--sm" aria-label="Filtrar FAQ por evento">
+                <option value="">Todos los eventos</option>
+              </select>
+            </div>
+            <div>
+              <label for="faq-filtro-campus" class="form-label">Campus:</label>
+              <select id="faq-filtro-campus" class="form-select form-select--sm" aria-label="Filtrar FAQ por campus">
+                <option value="">Todos los campus</option>
+                <option value="Tijuana">Tijuana</option>
+                <option value="Mexicali">Mexicali</option>
+                <option value="Ensenada">Ensenada</option>
+              </select>
+            </div>
           </div>
-
-          <div style="flex: 1;">
-            <label for="faq-filtro-campus" class="form-label">Campus:</label>
-            <select id="faq-filtro-campus" class="form-select form-select--sm" aria-label="Filtrar FAQ por campus">
-              <option value="">Todos los campus</option>
-              <option value="Tijuana">Tijuana</option>
-              <option value="Mexicali">Mexicali</option>
-              <option value="Ensenada">Ensenada</option>
-            </select>
-          </div>
-
-        </div>
-
           <div class="table-wrap">
             <table class="admin-table">
               <thead>
@@ -288,7 +281,7 @@
                 </tr>
               </thead>
               <tbody id="tabla-faq-body">
-                <tr><td colspan="5" style="text-align:center;">Cargando preguntas...</td></tr>
+                <tr><td colspan="4" style="text-align:center;">Cargando preguntas...</td></tr>
               </tbody>
             </table>
           </div>
@@ -307,13 +300,10 @@
         <div class="qr-layout">
           <div class="admin-card qr-card">
             <h3 class="admin-card-title">Escanear con Cámara</h3>
-            <p style="margin-bottom: 15px; font-size: 0.9rem; color: #666;">Abre esta página en tu celular para usar la cámara trasera.</p>
-            
+            <p style="margin-bottom: var(--space-4); font-size: var(--text-sm); color: var(--color-text-muted);">Abre esta página en tu celular para usar la cámara trasera.</p>
             <div id="lector-camara" style="width: 100%; max-width: 400px; margin: 0 auto;"></div>
-            
-        </div>
+          </div>
 
-        <div class="qr-layout">
           <div class="admin-card qr-card">
             <h3 class="admin-card-title">Verificar por código</h3>
             <div class="form-group">
@@ -326,7 +316,6 @@
                 </button>
               </div>
             </div>
-
             <div class="qr-result" id="qr-result" hidden>
               <div class="qr-result-card" id="qr-result-content">
                 <div class="qr-result-icon">
@@ -365,7 +354,9 @@
     </main>
   </div>
 
-  <!-- ===== MODAL: CREAR / EDITAR EVENTO ===== -->
+  <!-- ===== MODALES ===== -->
+
+  <!-- MODAL: CREAR / EDITAR EVENTO -->
   <div class="modal-overlay" id="modal-evento" role="dialog" aria-modal="true" aria-labelledby="modal-evento-title" hidden>
     <div class="modal">
       <div class="modal-header">
@@ -377,12 +368,10 @@
       <div class="modal-body">
         <form id="form-evento" novalidate>
           <input type="hidden" id="ev-id" name="id">
-
           <div class="form-group">
             <label for="ev-nombre" class="form-label">Nombre del evento <span class="required">*</span></label>
             <input type="text" id="ev-nombre" class="form-input" placeholder="Ej. Regresa a Casa – Tijuana 2026">
           </div>
-      
           <div class="form-group">
             <label for="ev-descripcion" class="form-label">Descripción</label>
             <textarea id="ev-descripcion" class="form-input" rows="3" placeholder="Descripción del evento..."></textarea>
@@ -422,7 +411,7 @@
     </div>
   </div>
 
-  <!-- ===== MODAL: RECORDATORIO ===== -->
+  <!-- MODAL: RECORDATORIO -->
   <div class="modal-overlay" id="modal-recordatorio" role="dialog" aria-modal="true" aria-labelledby="modal-rec-title" hidden>
     <div class="modal modal--sm">
       <div class="modal-header">
@@ -450,18 +439,16 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-ghost" onclick="closeAdminModal('modal-recordatorio')">Cancelar</button>
-          
           <button type="button" id="btn-enviar-rec" class="btn btn-primary" onclick="enviarCorreosRecordatorio()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             <span>Enviar Recordatorio</span>
           </button>
-          
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ===== MODAL: DETALLE ASISTENTE ===== -->
+  <!-- MODAL: DETALLE ASISTENTE -->
   <div class="modal-overlay" id="modal-asistente" role="dialog" aria-modal="true" aria-labelledby="modal-asi-title" hidden>
     <div class="modal modal--sm">
       <div class="modal-header">
@@ -495,7 +482,7 @@
     </div>
   </div>
 
-  <!-- ===== MODAL: FAQ ===== -->
+  <!-- MODAL: FAQ -->
   <div class="modal-overlay" id="modal-faq" role="dialog" aria-modal="true" aria-labelledby="modal-faq-title" hidden>
     <div class="modal modal--sm">
       <div class="modal-header">
@@ -532,7 +519,8 @@
       </div>
     </div>
   </div>
-  
+
+  <!-- MODAL: EVENTO CREADO -->
   <div class="modal-overlay" id="modal-evento-exito" role="dialog" aria-modal="true" hidden>
     <div class="modal modal--sm">
       <div class="modal-header">
@@ -541,19 +529,16 @@
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
-      <div class="modal-body modal-body--center" style="align-items: center; text-align: center;">
+      <div class="modal-body modal-body--center">
         <p class="modal-event-name" style="margin-bottom: var(--space-4);">¡El evento se ha creado correctamente!</p>
-        
         <div id="qrcode-container" style="display: flex; justify-content: center; background: white; padding: 10px; border-radius: 8px; margin-bottom: var(--space-4);"></div>
-        
         <div class="form-group" style="width: 100%; text-align: left;">
           <label class="form-label">Link del formulario:</label>
-          <div class="qr-input-row" style="display: flex; gap: 10px;">
+          <div class="qr-input-row">
             <input type="text" id="event-link-input" class="form-input" readonly>
             <button type="button" class="btn btn-secondary btn-sm" onclick="copyEventLink()">Copiar</button>
           </div>
         </div>
-
         <div class="modal-footer" style="width: 100%; margin-top: var(--space-4); padding: 0;">
           <button type="button" class="btn btn-primary" onclick="downloadQR()" style="width: 100%; justify-content: center;">Descargar QR</button>
         </div>
@@ -561,52 +546,74 @@
     </div>
   </div>
 
+  <!-- MODAL: ÉXITO GENÉRICO -->
   <div class="modal-overlay" id="modal-exito" role="dialog" aria-modal="true" hidden>
     <div class="modal modal--sm" style="text-align: center; padding: 30px 20px;">
-      <div style="color: #00713d; margin-bottom: 15px; display: flex; justify-content: center;">
-        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-          <polyline points="22 4 12 14.01 9 11.01"></polyline>
-        </svg>
+      <div style="color: var(--uabc-verde); margin-bottom: 15px; display: flex; justify-content: center;">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
       </div>
-      <h2 class="modal-title" style="margin-bottom: 10px; font-size: 1.5rem;">¡Completado!</h2>
-      <p id="mensaje-exito" style="color: #666; margin-bottom: 25px; line-height: 1.5;">
-        Los correos se han enviado correctamente.
-      </p>
-      <button type="button" class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="document.getElementById('modal-exito').hidden = true;">
-        Aceptar
-      </button>
+      <h2 class="modal-title" style="margin-bottom: 10px;">¡Completado!</h2>
+      <p id="mensaje-exito" style="color: var(--color-text-muted); margin-bottom: 25px; line-height: 1.5;">Los correos se han enviado correctamente.</p>
+      <button type="button" class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="document.getElementById('modal-exito').hidden = true;">Aceptar</button>
     </div>
   </div>
 
+  <!-- MODAL: CONFIRMAR ELIMINAR -->
   <div class="modal-overlay" id="modal-confirmar-eliminar" role="dialog" aria-modal="true" hidden>
     <div class="modal modal--sm" style="text-align: center; padding: 30px 20px;">
-      
-      <div style="color: #d32f2f; margin-bottom: 15px; display: flex; justify-content: center;">
-        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="15" y1="9" x2="9" y2="15"></line>
-          <line x1="9" y1="9" x2="15" y2="15"></line>
-        </svg>
+      <div style="color: var(--color-error); margin-bottom: 15px; display: flex; justify-content: center;">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
       </div>
-      
-      <h2 class="modal-title" style="margin-bottom: 10px; font-size: 1.5rem;">¿Estás seguro?</h2>
-      <p style="color: #666; margin-bottom: 25px; line-height: 1.5;">
-        Esta acción no se puede deshacer. El registro será eliminado permanentemente de la base de datos.
-      </p>
-      
-      <div style="display: flex; gap: 10px; justify-content: center;">
+      <h2 class="modal-title" style="margin-bottom: 10px;">¿Estás seguro?</h2>
+      <p style="color: var(--color-text-muted); margin-bottom: 25px; line-height: 1.5;">Esta acción no se puede deshacer. El registro será eliminado permanentemente de la base de datos.</p>
+      <div style="display: flex; gap: 10px;">
         <button type="button" class="btn btn-ghost" onclick="closeAdminModal('modal-confirmar-eliminar')" style="flex: 1;">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="btn-confirmar-eliminar" style="flex: 1; background-color: #d32f2f; border-color: #d32f2f;" onclick="ejecutarEliminarFaq()">
-          Eliminar
-        </button>
+        <button type="button" class="btn btn-primary" id="btn-confirmar-eliminar" style="flex: 1; background-color: var(--color-error); border-color: var(--color-error);" onclick="ejecutarEliminarFaq()">Eliminar</button>
       </div>
-
     </div>
   </div>
 
   <script src="../assets/js/main.js"></script>
   <script src="../assets/js/admin.js"></script>
   <script src="../assets/js/qr-scanner.js"></script>
+
+  <script>
+    (function () {
+      var sidebar  = document.getElementById('admin-sidebar');
+      var overlay  = document.getElementById('sidebar-overlay');
+      var toggle   = document.getElementById('sidebar-toggle');
+      var closeBtn = document.getElementById('sidebar-close-btn');
+
+      function openSidebar() {
+        sidebar.classList.add('open');
+        overlay.classList.add('active');
+        toggle.setAttribute('aria-expanded', 'true');
+      }
+
+      function closeSidebar() {
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+        toggle.setAttribute('aria-expanded', 'false');
+      }
+
+      // Botón hamburguesa abre/cierra
+      toggle.addEventListener('click', function () {
+        sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
+      });
+
+      // Botón X dentro del sidebar cierra
+      closeBtn.addEventListener('click', closeSidebar);
+
+      // Clic en el overlay (zona de contenido) cierra sidebar
+      overlay.addEventListener('click', closeSidebar);
+
+      // Cierra sidebar al hacer clic en un ítem de nav (solo en móvil)
+      document.querySelectorAll('.sidebar-link[data-section]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          if (window.innerWidth <= 900) closeSidebar();
+        });
+      });
+    })();
+  </script>
 </body>
 </html>
