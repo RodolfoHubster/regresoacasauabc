@@ -36,49 +36,18 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           Admin
         </a>
-
-        <!-- Botón hamburguesa: solo visible en móvil -->
-        <button
-          class="nav-hamburger"
-          id="nav-hamburger"
-          aria-label="Abrir menú de navegación"
-          aria-expanded="false"
-          aria-controls="mobile-nav"
-        >
-          <span class="hamburger-bar"></span>
-          <span class="hamburger-bar"></span>
-          <span class="hamburger-bar"></span>
-        </button>
       </div>
 
     </div>
 
     <div class="header-gold-line" aria-hidden="true"></div>
 
-    <!-- NAV desktop -->
     <nav class="site-nav" aria-label="Navegación principal">
       <ul role="list" class="nav-list">
         <li><a href="#inicio" class="nav-link active">Inicio</a></li>
         <li><a href="#eventos" class="nav-link">Eventos</a></li>
         <li><a href="#faq" class="nav-link">Preguntas Frecuentes</a></li>
         <li><a href="#contacto" class="nav-link">Contacto</a></li>
-      </ul>
-    </nav>
-
-    <!-- NAV móvil (panel desplegable) -->
-    <nav class="mobile-nav" id="mobile-nav" aria-label="Menú móvil" aria-hidden="true">
-      <ul role="list" class="mobile-nav-list">
-        <li><a href="#inicio"   class="mobile-nav-link">Inicio</a></li>
-        <li><a href="#eventos"  class="mobile-nav-link">Eventos</a></li>
-        <li><a href="#faq"      class="mobile-nav-link">Preguntas Frecuentes</a></li>
-        <li><a href="#contacto" class="mobile-nav-link">Contacto</a></li>
-        <!-- Enlace Admin: siempre en el menú móvil, destacado visualmente -->
-        <li class="mobile-nav-admin-item">
-          <a href="admin/login.html" class="mobile-nav-link mobile-nav-link--admin">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            Acceso Admin
-          </a>
-        </li>
       </ul>
     </nav>
   </header>
@@ -163,12 +132,12 @@
     <div class="container">
       <div class="footer-inner">
         <p class="footer-copy">© 2025 Universidad Autónoma de Baja California · Dirección de Egresados</p>
-        <p class="footer-tagline">Por la realización plena del ser</p>
+        <p class="footer-tagline">Por la realización plena del ser humano</p>
       </div>
     </div>
   </footer>
 
-  <!-- MODAL REGISTRO -->
+  <!-- MODAL: Registro -->
   <div class="modal-overlay" id="modal-registro" role="dialog" aria-modal="true" aria-labelledby="modal-registro-title" hidden>
     <div class="modal">
       <div class="modal-header">
@@ -181,15 +150,43 @@
         <form id="form-registro" novalidate>
           <input type="hidden" id="field-evento" name="evento">
           <input type="hidden" id="field-evento-id" name="evento_id">
-          
+
           <div class="form-row">
-            <div class="form-group"><label for="field-nombre" class="form-label">Nombre <span class="required" aria-hidden="true">*</span></label><input type="text" id="field-nombre" name="nombre" class="form-input" placeholder="Tu nombre" required autocomplete="given-name"><span class="form-error" id="error-nombre" aria-live="polite"></span></div>
-            <div class="form-group"><label for="field-apellidos" class="form-label">Apellidos <span class="required" aria-hidden="true">*</span></label><input type="text" id="field-apellidos" name="apellidos" class="form-input" placeholder="Tus apellidos" required autocomplete="family-name"><span class="form-error" id="error-apellidos" aria-live="polite"></span></div>
+            <div class="form-group">
+              <label for="field-nombre" class="form-label">Nombre <span class="required" aria-hidden="true">*</span></label>
+              <input type="text" id="field-nombre" name="nombre" class="form-input" placeholder="Tu nombre" required autocomplete="given-name">
+              <span class="form-error" id="error-nombre" aria-live="polite"></span>
+            </div>
+            <div class="form-group">
+              <label for="field-apellidos" class="form-label">Apellidos <span class="required" aria-hidden="true">*</span></label>
+              <input type="text" id="field-apellidos" name="apellidos" class="form-input" placeholder="Tus apellidos" required autocomplete="family-name">
+              <span class="form-error" id="error-apellidos" aria-live="polite"></span>
+            </div>
           </div>
-          
-          <div class="form-group"><label for="field-email" class="form-label">Correo electrónico <span class="required" aria-hidden="true">*</span></label><input type="email" id="field-email" name="email" class="form-input" placeholder="correo@ejemplo.com" required autocomplete="email"><span class="form-error" id="error-email" aria-live="polite"></span></div>
-          <div class="form-group"><label for="field-telefono" class="form-label">Número de teléfono <span class="optional">(opcional)</span></label><input type="tel" id="field-telefono" name="telefono" class="form-input" placeholder="664 000 0000" autocomplete="tel"></div>
-          
+
+          <div class="form-group">
+            <label for="field-email" class="form-label">Correo electrónico <span class="required" aria-hidden="true">*</span></label>
+            <input type="email" id="field-email" name="email" class="form-input" placeholder="correo@ejemplo.com" required autocomplete="email">
+            <span class="form-error" id="error-email" aria-live="polite"></span>
+          </div>
+
+          <!-- CORREGIDO: type="tel" + inputmode="tel" + pattern para bloquear letras -->
+          <div class="form-group">
+            <label for="field-telefono" class="form-label">Número de teléfono <span class="optional">(opcional)</span></label>
+            <input
+              type="tel"
+              id="field-telefono"
+              name="telefono"
+              class="form-input"
+              placeholder="664 000 0000"
+              autocomplete="tel"
+              inputmode="tel"
+              pattern="[0-9+\-\s()]*"
+              title="Solo se permiten números, espacios, guiones y paréntesis"
+            >
+            <span class="form-error" id="error-telefono" aria-live="polite"></span>
+          </div>
+
           <div class="form-group">
             <label for="field-campus" class="form-label">Campus de egreso <span class="required" aria-hidden="true">*</span></label>
             <select id="field-campus" name="campus" class="form-select" required>
@@ -218,8 +215,23 @@
           </div>
 
           <div class="form-row">
-            <div class="form-group"><label for="field-generacion" class="form-label">Generación <span class="required" aria-hidden="true">*</span></label><input type="text" id="field-generacion" name="generacion" class="form-input" placeholder="Ej. 2015-2020" required><span class="form-error" id="error-generacion" aria-live="polite"></span></div>
-            <div class="form-group"><label for="field-tipo" class="form-label">Tipo de asistente <span class="required" aria-hidden="true">*</span></label><select id="field-tipo" name="tipo" class="form-select" required><option value="">Selecciona...</option><option value="egresado">Egresado</option><option value="estudiante">Estudiante</option><option value="docente">Docente</option><option value="administrativo">Administrativo</option><option value="invitado">Invitado especial</option></select><span class="form-error" id="error-tipo" aria-live="polite"></span></div>
+            <div class="form-group">
+              <label for="field-generacion" class="form-label">Generación <span class="required" aria-hidden="true">*</span></label>
+              <input type="text" id="field-generacion" name="generacion" class="form-input" placeholder="Ej. 2015-2020" required>
+              <span class="form-error" id="error-generacion" aria-live="polite"></span>
+            </div>
+            <div class="form-group">
+              <label for="field-tipo" class="form-label">Tipo de asistente <span class="required" aria-hidden="true">*</span></label>
+              <select id="field-tipo" name="tipo" class="form-select" required>
+                <option value="">Selecciona...</option>
+                <option value="egresado">Egresado</option>
+                <option value="estudiante">Estudiante</option>
+                <option value="docente">Docente</option>
+                <option value="administrativo">Administrativo</option>
+                <option value="invitado">Invitado especial</option>
+              </select>
+              <span class="form-error" id="error-tipo" aria-live="polite"></span>
+            </div>
           </div>
 
           <div class="modal-footer">
@@ -231,7 +243,7 @@
     </div>
   </div>
 
-  <!-- MODAL CONFIRMACIÓN -->
+  <!-- MODAL: Confirmación -->
   <div class="modal-overlay" id="modal-confirmacion" role="dialog" aria-modal="true" aria-labelledby="modal-confirm-title" hidden>
     <div class="modal modal--sm">
       <div class="modal-header">
@@ -246,7 +258,7 @@
     </div>
   </div>
 
-  <!-- MODAL INFO TIJUANA -->
+  <!-- MODAL: Info Tijuana (estático, de respaldo) -->
   <div class="modal-overlay" id="info-tijuana" role="dialog" aria-modal="true" aria-labelledby="info-tijuana-title" hidden>
     <div class="modal modal--info">
       <div class="modal-header">
@@ -276,7 +288,7 @@
     </div>
   </div>
 
-  <!-- MODAL INFO MEXICALI -->
+  <!-- MODAL: Info Mexicali (estático, de respaldo) -->
   <div class="modal-overlay" id="info-mexicali" role="dialog" aria-modal="true" aria-labelledby="info-mexicali-title" hidden>
     <div class="modal modal--info">
       <div class="modal-header">

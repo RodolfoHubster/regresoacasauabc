@@ -1,5 +1,31 @@
 /* registro.js – Validación y envío del formulario de registro */
 
+/**
+ * Valida que el número de teléfono sea válido o esté vacío (es opcional).
+ * Exportada como función nombrada para que los tests unitarios puedan importarla.
+ * Acepta: vacío, solo dígitos, formatos con espacios/guiones/paréntesis, prefijo +52 etc.
+ * Rechaza: letras, caracteres especiales (!, @, #...), números muy cortos.
+ * @param {string} valor
+ * @returns {boolean}
+ */
+function validarTelefono(valor) {
+  // Campo opcional: vacío o solo espacios es válido
+  const limpio = typeof valor === 'string' ? valor.trim() : '';
+  if (limpio === '') return true;
+
+  // Rechazar si contiene letras
+  if (/[a-zA-Z]/.test(limpio)) return false;
+
+  // Rechazar caracteres no permitidos (sólo se aceptan dígitos, +, -, espacios y paréntesis)
+  if (/[^0-9+\-\s()]/.test(limpio)) return false;
+
+  // Extraer solo los dígitos para verificar longitud mínima
+  const soloDigitos = limpio.replace(/[^0-9]/g, '');
+  if (soloDigitos.length < 7) return false;
+
+  return true;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('form-registro');
   if (!form) return;
@@ -19,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (campusSelect && facultadSelect && carreraSelect) {
     campusSelect.addEventListener('change', function() {
         const campusId = this.value;
-        
+
         facultadSelect.innerHTML = '<option value="">Selecciona tu facultad</option>';
         carreraSelect.innerHTML = '<option value="">Primero selecciona una facultad</option>';
         carreraSelect.disabled = true;
@@ -71,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function validarFormulario() {
-  // Verificar que el evento_id esté presente antes de validar el resto
+  // Verificar que el evento_id esté presente
   const eventoId = document.getElementById('field-evento-id');
   if (!eventoId || !eventoId.value) {
     alert('Error: No se detectó el evento. Por favor cierra este formulario y vuelve a hacer clic en "Registrarme".');
@@ -79,6 +105,8 @@ function validarFormulario() {
   }
 
   let valido = true;
+
+  // --- Campos obligatorios ---
   const campos = [
     { id: 'field-nombre',     errorId: 'error-nombre',     msg: 'El nombre es requerido.' },
     { id: 'field-apellidos',  errorId: 'error-apellidos',  msg: 'Los apellidos son requeridos.' },
@@ -108,6 +136,7 @@ function validarFormulario() {
     }
   });
 
+  // --- Validar formato de correo ---
   const emailInput = document.getElementById('field-email');
   const emailError = document.getElementById('error-email');
   if (emailInput && emailInput.value.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value)) {
@@ -116,6 +145,23 @@ function validarFormulario() {
     emailInput.style.borderColor = 'var(--color-error)';
     valido = false;
   }
+
+  // --- Validar teléfono (CONECTADO: antes este bloque no existía) ---
+  const telefonoInput = document.getElementById('field-telefono');
+  const telefonoError = document.getElementById('error-telefono');
+  if (telefonoInput && telefonoError) {
+    if (!validarTelefono(telefonoInput.value)) {
+      telefonoError.textContent = 'Ingresa solo números. Formato válido: 664 000 0000 o +52 664 000 0000.';
+      telefonoInput.setAttribute('aria-invalid', 'true');
+      telefonoInput.style.borderColor = 'var(--color-error)';
+      valido = false;
+    } else {
+      telefonoError.textContent = '';
+      telefonoInput.removeAttribute('aria-invalid');
+      telefonoInput.style.borderColor = '';
+    }
+  }
+
   return valido;
 }
 
@@ -123,7 +169,6 @@ function enviarRegistro() {
   const form = document.getElementById('form-registro');
   const datos = new FormData(form);
 
-  // DEBUG: Verificar que evento_id llega con valor
   console.log('[registro.js] evento_id enviado:', datos.get('evento_id'));
 
   const btnSubmit = form.querySelector('button[type="submit"]');
@@ -132,19 +177,19 @@ function enviarRegistro() {
   btnSubmit.disabled = true;
   btnSubmit.textContent = 'Guardando registro...';
 
-  fetch('php/procesar_registro.php', { 
-      method: 'POST', 
-      body: datos 
+  fetch('php/procesar_registro.php', {
+      method: 'POST',
+      body: datos
   })
   .then(response => response.json())
-  .then(res => { 
+  .then(res => {
       btnSubmit.disabled = false;
       btnSubmit.textContent = textoOriginal;
 
-      if(res.status === 'success') {
+      if (res.status === 'success') {
           closeModal('modal-registro');
           form.reset();
-          
+
           const inputs = form.querySelectorAll('.form-input, .form-select');
           inputs.forEach(input => {
               input.style.borderColor = '';
@@ -154,24 +199,29 @@ function enviarRegistro() {
 
           const facultadSelect = document.getElementById('field-facultad');
           const carreraSelect = document.getElementById('field-carrera');
-          if(facultadSelect) {
+          if (facultadSelect) {
               facultadSelect.innerHTML = '<option value="">Primero selecciona un campus</option>';
               facultadSelect.disabled = true;
           }
-          if(carreraSelect) {
+          if (carreraSelect) {
               carreraSelect.innerHTML = '<option value="">Primero selecciona una facultad</option>';
               carreraSelect.disabled = true;
           }
 
           setTimeout(() => openModal('modal-confirmacion'), 200);
       } else {
-          alert("Ocurrió un error al guardar: " + res.message);
+          alert('Ocurrió un error al guardar: ' + res.message);
       }
   })
   .catch(error => {
       btnSubmit.disabled = false;
       btnSubmit.textContent = textoOriginal;
       console.error('[registro.js] Error de red:', error);
-      alert("Error de comunicación con el servidor.");
+      alert('Error de comunicación con el servidor.');
   });
+}
+
+// Exportar para tests unitarios (compatibilidad CommonJS + navegador)
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { validarTelefono };
 }
