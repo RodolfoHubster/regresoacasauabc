@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('form-registro');
   if (!form) return;
 
-  // Lógica para validar y enviar
   form.addEventListener('submit', (e) => {
     e.preventDefault();
     if (validarFormulario()) {
@@ -18,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const carreraSelect = document.getElementById('field-carrera');
 
   if (campusSelect && facultadSelect && carreraSelect) {
-    // Escuchar cambio en Campus
     campusSelect.addEventListener('change', function() {
         const campusId = this.value;
         
@@ -46,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Escuchar cambio en Facultad
     facultadSelect.addEventListener('change', function() {
         const facultadId = this.value;
         carreraSelect.innerHTML = '<option value="">Selecciona tu carrera</option>';
@@ -74,6 +71,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function validarFormulario() {
+  // Verificar que el evento_id esté presente antes de validar el resto
+  const eventoId = document.getElementById('field-evento-id');
+  if (!eventoId || !eventoId.value) {
+    alert('Error: No se detectó el evento. Por favor cierra este formulario y vuelve a hacer clic en "Registrarme".');
+    return false;
+  }
+
   let valido = true;
   const campos = [
     { id: 'field-nombre',     errorId: 'error-nombre',     msg: 'El nombre es requerido.' },
@@ -118,6 +122,10 @@ function validarFormulario() {
 function enviarRegistro() {
   const form = document.getElementById('form-registro');
   const datos = new FormData(form);
+
+  // DEBUG: Verificar que evento_id llega con valor
+  console.log('[registro.js] evento_id enviado:', datos.get('evento_id'));
+
   const btnSubmit = form.querySelector('button[type="submit"]');
   const textoOriginal = btnSubmit.textContent;
 
@@ -137,7 +145,6 @@ function enviarRegistro() {
           closeModal('modal-registro');
           form.reset();
           
-          // Reset de estilos y selects
           const inputs = form.querySelectorAll('.form-input, .form-select');
           inputs.forEach(input => {
               input.style.borderColor = '';
@@ -164,6 +171,7 @@ function enviarRegistro() {
   .catch(error => {
       btnSubmit.disabled = false;
       btnSubmit.textContent = textoOriginal;
+      console.error('[registro.js] Error de red:', error);
       alert("Error de comunicación con el servidor.");
   });
 }

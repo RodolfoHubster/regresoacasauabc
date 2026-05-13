@@ -5,7 +5,6 @@ require_once __DIR__ . '/../admin/php/conexion.php';
 
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
-use Juancarlos\Regresoacasauabc\Http\RequestValidator;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -13,53 +12,63 @@ header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        // --- NUEVO: Recibir el ID del evento ---
-        $evento_id = $_POST['evento_id'] ?? ''; 
-        
-        $nombre = $_POST['nombre'] ?? '';
-        $apellidos = $_POST['apellidos'] ?? '';
-        $correo = $_POST['email'] ?? ''; 
-        $telefono = $_POST['telefono'] ?? null;
-        $campus_id = $_POST['campus'] ?? '';
-        $facultad_id = $_POST['facultad'] ?? '';
-        $carrera_id = $_POST['carrera'] ?? '';
-        $generacion = $_POST['generacion'] ?? '';
-        $tipo_asistente = $_POST['tipo'] ?? '';
+        $evento_id = isset($_POST['evento_id']) ? trim($_POST['evento_id']) : '';
+        $nombre    = isset($_POST['nombre'])    ? trim($_POST['nombre'])    : '';
+        $apellidos = isset($_POST['apellidos']) ? trim($_POST['apellidos']) : '';
+        $correo    = isset($_POST['email'])     ? trim($_POST['email'])     : '';
+        $telefono  = isset($_POST['telefono'])  ? trim($_POST['telefono'])  : null;
+        $campus_id    = isset($_POST['campus'])   ? trim($_POST['campus'])   : '';
+        $facultad_id  = isset($_POST['facultad']) ? trim($_POST['facultad']) : '';
+        $carrera_id   = isset($_POST['carrera'])  ? trim($_POST['carrera'])  : '';
+        $generacion   = isset($_POST['generacion']) ? trim($_POST['generacion']) : '';
+        $tipo_asistente = isset($_POST['tipo'])   ? trim($_POST['tipo'])     : '';
 
-        // Validar que el evento_id no esté vacío
-        if (!RequestValidator::hasRequiredRegistrationFields([
-            'nombre' => $nombre,
-            'email' => $correo,
-            'campus' => $campus_id,
-            'evento_id' => $evento_id
-        ])) {
-            throw new Exception("Faltan campos obligatorios (incluyendo el ID del evento).");
+        // Validaciones con mensajes específicos
+        if (empty($evento_id)) {
+            throw new Exception('No se recibió el ID del evento. Vuelve a abrir el formulario desde el botón "Registrarme" del evento.');
+        }
+        if (empty($nombre) || empty($apellidos)) {
+            throw new Exception('El nombre y apellidos son obligatorios.');
+        }
+        if (empty($correo)) {
+            throw new Exception('El correo electrónico es obligatorio.');
+        }
+        if (empty($campus_id)) {
+            throw new Exception('Debes seleccionar tu campus de egreso.');
         }
 
-        // 1. Generar un código único
+        // Verificar que el evento existe en la BD
+        $stmtEvento = $conexion->prepare("SELECT id, nombre FROM evento WHERE id = :id LIMIT 1");
+        $stmtEvento->execute([':id' => $evento_id]);
+        $eventoData = $stmtEvento->fetch(PDO::FETCH_ASSOC);
+        if (!$eventoData) {
+            throw new Exception('El evento seleccionado no existe o ya no está disponible.');
+        }
+
+        // Generar un código único de QR
         $qr_codigo = 'UABC-' . strtoupper(uniqid());
 
-        // 2. Guardar en la base de datos (Se añadió evento_id)
+        // Guardar en la base de datos
         $sql = "INSERT INTO registro_asistente 
                 (evento_id, qr_codigo, nombre, apellidos, correo, telefono, campus_id, facultad_id, carrera_id, generacion, tipo_asistente) 
                 VALUES (:evento_id, :qr_codigo, :nombre, :apellidos, :correo, :telefono, :campus_id, :facultad_id, :carrera_id, :generacion, :tipo_asistente)";
         
         $stmt = $conexion->prepare($sql);
         $stmt->execute([
-            ':evento_id' => $evento_id, // Vinculamos el asistente al evento
-            ':qr_codigo' => $qr_codigo,
-            ':nombre' => $nombre,
-            ':apellidos' => $apellidos,
-            ':correo' => $correo,
-            ':telefono' => $telefono,
-            ':campus_id' => $campus_id,
-            ':facultad_id' => $facultad_id,
-            ':carrera_id' => $carrera_id,
-            ':generacion' => $generacion,
+            ':evento_id'      => $evento_id,
+            ':qr_codigo'      => $qr_codigo,
+            ':nombre'         => $nombre,
+            ':apellidos'      => $apellidos,
+            ':correo'         => $correo,
+            ':telefono'       => $telefono ?: null,
+            ':campus_id'      => $campus_id,
+            ':facultad_id'    => $facultad_id ?: null,
+            ':carrera_id'     => $carrera_id ?: null,
+            ':generacion'     => $generacion,
             ':tipo_asistente' => $tipo_asistente
         ]);
 
-        // 3. Generar la imagen del código QR
+        // Generar imagen del QR
         $qr = new QrCode($qr_codigo);
         $writer = new PngWriter();
         $result = $writer->write($qr);
@@ -67,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $qr_path = sys_get_temp_dir() . '/' . $qr_codigo . '.png';
         $result->saveToFile($qr_path);
 
-        // 4. Enviar el correo con PHPMailer
+        // Enviar correo con PHPMailer
         $mail = new PHPMailer(true);
         $mail->isSMTP();
         $mail->Host       = $_ENV['MAIL_HOST'];
@@ -82,30 +91,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $mail->addAddress($correo, $nombre . ' ' . $apellidos);
         $mail->addAttachment($qr_path, 'Tu_Codigo_QR.png');
 
+        $nombreEvento = $eventoData['nombre'];
+
         $mail->isHTML(true);
-        $mail->Subject = '¡Registro Confirmado! - Regresa a Casa UABC';
+        $mail->Subject = '¡Registro Confirmado! – ' . $nombreEvento;
         $mail->Body    = "
             <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;'>
-                <h2 style='color: #00713d;'>¡Hola $nombre!</h2>
-                <p>Tu registro para el evento ha sido exitoso.</p>
-                <p>Adjunto encontrarás tu <strong>Código QR de acceso</strong>.</p>
-                <p>Tu código manual: <strong>$qr_codigo</strong></p>
-                <br>
-                <p>¡Te esperamos!</p>
+                <div style='background:#002855; padding:20px; text-align:center;'>
+                    <h1 style='color:#C8972B; margin:0;'>Regresa a Casa</h1>
+                    <p style='color:#fff; margin:4px 0 0;'>Universidad Autónoma de Baja California</p>
+                </div>
+                <div style='padding:24px;'>
+                    <h2 style='color:#002855;'>¡Hola, $nombre!</h2>
+                    <p>Tu registro para el evento <strong>$nombreEvento</strong> fue exitoso.</p>
+                    <p>Adjunto encontrarás tu <strong>Código QR de acceso</strong>. Preséntalo el día del evento desde tu celular, tablet o impreso.</p>
+                    <p style='background:#f5f5f5; padding:12px; border-radius:6px; font-family:monospace;'>Código: <strong>$qr_codigo</strong></p>
+                    <p>¡Te esperamos!</p>
+                </div>
+                <div style='background:#002855; padding:12px; text-align:center;'>
+                    <p style='color:#C8972B; margin:0; font-size:12px;'>© UABC · Dirección de Egresados</p>
+                </div>
             </div>
         ";
 
         $mail->send();
 
-        // Actualizamos estado de envío
-        $conexion->query("UPDATE registro_asistente SET correo_enviado = 1 WHERE qr_codigo = '$qr_codigo'");
-        unlink($qr_path);
+        // Marcar correo como enviado
+        $stmtUpdate = $conexion->prepare("UPDATE registro_asistente SET correo_enviado = 1 WHERE qr_codigo = :qr");
+        $stmtUpdate->execute([':qr' => $qr_codigo]);
+        
+        if (file_exists($qr_path)) unlink($qr_path);
 
         echo json_encode(['status' => 'success', 'message' => '¡Registro guardado y correo enviado!']);
 
     } catch (Exception $e) {
-        error_log("Error de registro/correo: " . $e->getMessage());
+        error_log('[procesar_registro] ' . $e->getMessage());
         echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
     }
+} else {
+    echo json_encode(['status' => 'error', 'message' => 'Método no permitido.']);
 }
 ?>
