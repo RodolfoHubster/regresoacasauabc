@@ -25,7 +25,7 @@
     <div class="sidebar-header">
       <!-- Solo logo, sin texto "Regresa a Casa / Panel Admin" -->
       <a href="../index.html" class="sidebar-logo" aria-label="Ir al sitio público">
-        <img src="../assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="36" height="36" loading="lazy">
+        <img src="../assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="128" height="128" loading="lazy">
       </a>
       <!-- Botón X para cerrar sidebar en móvil -->
       <button class="sidebar-close" id="sidebar-close-btn" aria-label="Cerrar menú">
