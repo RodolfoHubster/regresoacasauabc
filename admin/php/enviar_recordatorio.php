@@ -1,6 +1,5 @@
 <?php
-// Dar tiempo extra a PHP porque enviar múltiples correos puede tardar varios segundos/minutos
-set_time_limit(300); 
+set_time_limit(300);
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/conexion.php';
@@ -9,24 +8,22 @@ use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use Juancarlos\Regresoacasauabc\QrCode\QrCodeValidator;
 
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $tipo = $_POST['tipo'] ?? 'todos';
+    $tipo               = $_POST['tipo']    ?? 'todos';
     $mensajePersonalizado = trim($_POST['mensaje'] ?? '');
-    
+
     try {
-        // 1. Decidir a quién enviarle el correo
         if ($tipo === 'sin-qr') {
-            // Solo a los que no se les pudo enviar el correo la primera vez
             $sql = "SELECT * FROM registro_asistente WHERE correo_enviado = 0";
         } else {
-            // A TODOS los que NO han asistido aún
             $sql = "SELECT * FROM registro_asistente WHERE asistencia = 0";
         }
 
-        $stmt = $conexion->query($sql);
+        $stmt       = $conexion->query($sql);
         $asistentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         if (count($asistentes) === 0) {
@@ -34,81 +31,101 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        // 2. Preparar el servidor de correos (Se conecta una sola vez para ser más rápido)
         $mail = new PHPMailer(true);
         $mail->isSMTP();
-        $mail->Host       = $_ENV['MAIL_HOST'];
-        $mail->SMTPAuth   = true;
-        $mail->Username   = $_ENV['MAIL_USER'];
-        $mail->Password   = $_ENV['MAIL_PASS'];
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-        $mail->Port       = $_ENV['MAIL_PORT'];
-        $mail->CharSet    = 'UTF-8';
+        $mail->Host          = $_ENV['MAIL_HOST'];
+        $mail->SMTPAuth      = true;
+        $mail->Username      = $_ENV['MAIL_USER'];
+        $mail->Password      = $_ENV['MAIL_PASS'];
+        $mail->SMTPSecure    = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port          = $_ENV['MAIL_PORT'];
+        $mail->CharSet       = 'UTF-8';
+        $mail->SMTPKeepAlive = true;
         $mail->setFrom($_ENV['MAIL_USER'], 'Regreso a Casa UABC');
-        
-        // Mantener la conexión viva (SMTP KeepAlive) para envíos masivos
-        $mail->SMTPKeepAlive = true; 
 
         $correosEnviadosExitosamente = 0;
         $writer = new PngWriter();
 
-        // 3. Recorrer a cada asistente y mandarle su correo
         foreach ($asistentes as $persona) {
             try {
-                // Generar el QR de esta persona
                 $qr_codigo = $persona['qr_codigo'];
-                if (empty($qr_codigo)) {
-                    // Si por algún error antiguo no tiene código, se lo creamos
-                    $qr_codigo = 'UABC-' . strtoupper(uniqid());
-                    $conexion->query("UPDATE registro_asistente SET qr_codigo = '$qr_codigo' WHERE id = " . $persona['id']);
+
+                // Reparar QRs huérfanos con el formato correcto
+                if (empty($qr_codigo) || !QrCodeValidator::isValidCode($qr_codigo)) {
+                    // Obtener clave del campus para armar el código
+                    $stmtCampus = $conexion->prepare(
+                        "SELECT campus_clave FROM evento e
+                         INNER JOIN registro_asistente r ON r.evento_id = e.id
+                         WHERE r.id = :id LIMIT 1"
+                    );
+                    $stmtCampus->execute([':id' => $persona['id']]);
+                    $campusRow   = $stmtCampus->fetch(PDO::FETCH_ASSOC);
+                    $campusClave = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $campusRow['campus_clave'] ?? 'TJ'), 0, 3));
+                    if (strlen($campusClave) < 2) {
+                        $campusClave = 'TJ';
+                    }
+
+                    do {
+                        $secuencia = str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
+                        $qr_codigo = 'UABC-' . $campusClave . '-' . date('Y') . '-' . $secuencia;
+                        $checkStmt = $conexion->prepare("SELECT id FROM registro_asistente WHERE qr_codigo = :qr LIMIT 1");
+                        $checkStmt->execute([':qr' => $qr_codigo]);
+                    } while ($checkStmt->fetch());
+
+                    $conexion->prepare("UPDATE registro_asistente SET qr_codigo = :qr WHERE id = :id")
+                             ->execute([':qr' => $qr_codigo, ':id' => $persona['id']]);
                 }
 
-                $qr = new QrCode($qr_codigo);
-                $result = $writer->write($qr);
+                $qr      = new QrCode($qr_codigo);
+                $result  = $writer->write($qr);
                 $qr_path = sys_get_temp_dir() . '/' . $qr_codigo . '.png';
                 $result->saveToFile($qr_path);
 
-                // Configurar el correo para esta persona
-                $mail->clearAddresses(); // Limpiar el destinatario anterior
-                $mail->clearAttachments(); // Limpiar el QR anterior
-                
+                $mail->clearAddresses();
+                $mail->clearAttachments();
                 $mail->addAddress($persona['correo'], $persona['nombre']);
                 $mail->addAttachment($qr_path, 'Tu_Acceso_QR.png');
 
                 $mail->isHTML(true);
                 $mail->Subject = 'Recordatorio: Regresa a Casa UABC';
-                
-                // Construir el cuerpo del correo
-                $bodyHtml = "<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px;'>";
-                $bodyHtml .= "<h2 style='color: #00713d;'>¡Hola " . $persona['nombre'] . "!</h2>";
-                
-                if (!empty($mensajePersonalizado)) {
-                    $bodyHtml .= "<p style='padding: 10px; background-color: #f1f8f5; border-left: 4px solid #00713d;'>" . nl2br(htmlspecialchars($mensajePersonalizado)) . "</p>";
+
+                $bodyHtml  = "<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px;'>";
+                $bodyHtml .= "<div style='background:#002855; padding:16px; text-align:center;'>";
+                $bodyHtml .= "<h1 style='color:#C8972B; margin:0;'>Regresa a Casa</h1>";
+                $bodyHtml .= "<p style='color:#fff; margin:4px 0 0;'>Universidad Autónoma de Baja California</p></div>";
+                $bodyHtml .= "<div style='padding:24px;'>";
+                $bodyHtml .= "<h2 style='color:#002855;'>¡Hola, " . htmlspecialchars($persona['nombre']) . "!</h2>";
+
+                if ($mensajePersonalizado !== '') {
+                    $bodyHtml .= "<p style='padding:10px; background:#eef2f8; border-left:4px solid #002855;'>" . nl2br(htmlspecialchars($mensajePersonalizado)) . "</p>";
                 }
-                
-                $bodyHtml .= "<p>Este es un recordatorio de que tu registro sigue activo.</p>";
-                $bodyHtml .= "<p>Adjunto a este correo encontrarás tu <strong>Código QR de acceso</strong>. Por favor, llévalo en tu celular para agilizar tu entrada.</p>";
-                $bodyHtml .= "<p>Tu código manual es: <strong>$qr_codigo</strong></p><br><p>¡Te esperamos!</p></div>";
+
+                $bodyHtml .= "<p>Este es un recordatorio: tu registro está confirmado.</p>";
+                $bodyHtml .= "<p>Adjunto encontrarás tu <strong>Código QR de acceso</strong>. Llévalo en tu celular o impreso.</p>";
+                $bodyHtml .= "<p style='background:#f5f5f5; padding:10px; border-radius:4px; font-family:monospace;'>Código: <strong>" . htmlspecialchars($qr_codigo) . "</strong></p>";
+                $bodyHtml .= "<p>¡Te esperamos!</p></div>";
+                $bodyHtml .= "<div style='background:#002855; padding:10px; text-align:center;'>";
+                $bodyHtml .= "<p style='color:#C8972B; margin:0; font-size:12px;'>© UABC · Dirección de Egresados</p></div></div>";
 
                 $mail->Body = $bodyHtml;
-
-                // Enviar
                 $mail->send();
-                
-                // Marcar como enviado en la BD por si antes estaba en 0
-                $conexion->query("UPDATE registro_asistente SET correo_enviado = 1 WHERE id = " . $persona['id']);
+
+                $conexion->prepare("UPDATE registro_asistente SET correo_enviado = 1 WHERE id = :id")
+                         ->execute([':id' => $persona['id']]);
+
                 $correosEnviadosExitosamente++;
 
-                // Borrar imagen temporal
-                unlink($qr_path);
+                if (file_exists($qr_path)) {
+                    unlink($qr_path);
+                }
 
             } catch (Exception $e) {
-                error_log("Error enviando recordatorio a " . $persona['correo'] . ": " . $mail->ErrorInfo);
-                continue; // Si falla uno, que siga con el siguiente
+                error_log('[enviar_recordatorio] ' . $persona['correo'] . ': ' . $e->getMessage());
+                continue;
             }
         }
-        
-        $mail->smtpClose(); // Cerrar conexión SMTP
+
+        $mail->smtpClose();
 
         echo json_encode(['status' => 'success', 'enviados' => $correosEnviadosExitosamente]);
 

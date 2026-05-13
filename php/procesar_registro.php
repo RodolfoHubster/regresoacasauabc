@@ -7,52 +7,106 @@ use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use Juancarlos\Regresoacasauabc\Http\RequestValidator;
+use Juancarlos\Regresoacasauabc\Http\TelefonoValidator;
+use Juancarlos\Regresoacasauabc\Event\EventoStatusValidator;
+use Juancarlos\Regresoacasauabc\QrCode\QrCodeValidator;
 
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        $evento_id = isset($_POST['evento_id']) ? trim($_POST['evento_id']) : '';
-        $nombre    = isset($_POST['nombre'])    ? trim($_POST['nombre'])    : '';
-        $apellidos = isset($_POST['apellidos']) ? trim($_POST['apellidos']) : '';
-        $correo    = isset($_POST['email'])     ? trim($_POST['email'])     : '';
-        $telefono  = isset($_POST['telefono'])  ? trim($_POST['telefono'])  : null;
-        $campus_id    = isset($_POST['campus'])   ? trim($_POST['campus'])   : '';
-        $facultad_id  = isset($_POST['facultad']) ? trim($_POST['facultad']) : '';
-        $carrera_id   = isset($_POST['carrera'])  ? trim($_POST['carrera'])  : '';
-        $generacion   = isset($_POST['generacion']) ? trim($_POST['generacion']) : '';
-        $tipo_asistente = isset($_POST['tipo'])   ? trim($_POST['tipo'])     : '';
+        $evento_id      = trim($_POST['evento_id']      ?? '');
+        $nombre         = trim($_POST['nombre']         ?? '');
+        $apellidos      = trim($_POST['apellidos']      ?? '');
+        $correo         = trim($_POST['email']          ?? '');
+        $telefono       = trim($_POST['telefono']       ?? '');
+        $campus_id      = trim($_POST['campus']         ?? '');
+        $facultad_id    = trim($_POST['facultad']       ?? '');
+        $carrera_id     = trim($_POST['carrera']        ?? '');
+        $generacion     = trim($_POST['generacion']     ?? '');
+        $tipo_asistente = trim($_POST['tipo']           ?? '');
 
-        // Validaciones con mensajes específicos
-        if (empty($evento_id)) {
-            throw new Exception('No se recibió el ID del evento. Vuelve a abrir el formulario desde el botón "Registrarme" del evento.');
-        }
-        if (empty($nombre) || empty($apellidos)) {
-            throw new Exception('El nombre y apellidos son obligatorios.');
-        }
-        if (empty($correo)) {
-            throw new Exception('El correo electrónico es obligatorio.');
-        }
-        if (empty($campus_id)) {
-            throw new Exception('Debes seleccionar tu campus de egreso.');
+        // --- 1. Campos obligatorios completos ---
+        if (!RequestValidator::hasRequiredRegistrationFields([
+            'nombre'         => $nombre,
+            'apellidos'      => $apellidos,
+            'email'          => $correo,
+            'campus'         => $campus_id,
+            'facultad'       => $facultad_id,
+            'carrera'        => $carrera_id,
+            'generacion'     => $generacion,
+            'tipo_asistente' => $tipo_asistente,
+            'evento_id'      => $evento_id,
+        ])) {
+            throw new Exception('Faltan datos obligatorios. Revisa que todos los campos estén llenos.');
         }
 
-        // Verificar que el evento existe en la BD
-        $stmtEvento = $conexion->prepare("SELECT id, nombre FROM evento WHERE id = :id LIMIT 1");
+        // --- 2. Formato de correo ---
+        if (!RequestValidator::isValidEmail($correo)) {
+            throw new Exception('El correo electrónico no tiene un formato válido.');
+        }
+
+        // --- 3. Generación (año numérico entre 1960 y el año actual) ---
+        if (!RequestValidator::isValidGeneracion($generacion)) {
+            throw new Exception('La generación debe ser un año entre 1960 y ' . date('Y') . '.');
+        }
+
+        // --- 4. Tipo de asistente permitido ---
+        if (!RequestValidator::isValidTipoAsistente($tipo_asistente)) {
+            throw new Exception('El tipo de asistente no es válido. Valores permitidos: egresado, docente, administrativo.');
+        }
+
+        // --- 5. Teléfono opcional, pero si viene debe tener formato correcto ---
+        if (!TelefonoValidator::isValidOrEmpty($telefono)) {
+            throw new Exception('El número de teléfono no tiene un formato válido (7–15 dígitos).');
+        }
+
+        // --- 6. Verificar que el evento existe y está activo ---
+        $stmtEvento = $conexion->prepare(
+            "SELECT id, nombre, fecha, estado, campus_clave FROM evento WHERE id = :id LIMIT 1"
+        );
         $stmtEvento->execute([':id' => $evento_id]);
         $eventoData = $stmtEvento->fetch(PDO::FETCH_ASSOC);
+
         if (!$eventoData) {
             throw new Exception('El evento seleccionado no existe o ya no está disponible.');
         }
 
-        // Generar un código único de QR
-        $qr_codigo = 'UABC-' . strtoupper(uniqid());
+        if (!EventoStatusValidator::allowsRegistration($eventoData['estado'])) {
+            throw new Exception('Este evento no acepta nuevos registros (estado: ' . $eventoData['estado'] . ').');
+        }
 
-        // Guardar en la base de datos
+        // --- 7. Generar código QR con formato UABC-{CAMPUS}-{AÑO}-{SEQ 5 dígitos} ---
+        $campusClave = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $eventoData['campus_clave'] ?? 'TJ'), 0, 3));
+        if (strlen($campusClave) < 2) {
+            $campusClave = 'TJ';
+        }
+        $anio      = date('Y');
+        $secuencia = str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
+        $qr_codigo = 'UABC-' . $campusClave . '-' . $anio . '-' . $secuencia;
+
+        // Garantizar unicidad en BD
+        $checkStmt = $conexion->prepare("SELECT id FROM registro_asistente WHERE qr_codigo = :qr LIMIT 1");
+        $checkStmt->execute([':qr' => $qr_codigo]);
+        while ($checkStmt->fetch()) {
+            $secuencia = str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
+            $qr_codigo = 'UABC-' . $campusClave . '-' . $anio . '-' . $secuencia;
+            $checkStmt->execute([':qr' => $qr_codigo]);
+        }
+
+        // Validar formato final con QrCodeValidator
+        if (!QrCodeValidator::isValidCode($qr_codigo)) {
+            throw new Exception('Error interno al generar el código QR. Intenta de nuevo.');
+        }
+
+        // --- 8. Guardar en la base de datos ---
         $sql = "INSERT INTO registro_asistente 
-                (evento_id, qr_codigo, nombre, apellidos, correo, telefono, campus_id, facultad_id, carrera_id, generacion, tipo_asistente) 
-                VALUES (:evento_id, :qr_codigo, :nombre, :apellidos, :correo, :telefono, :campus_id, :facultad_id, :carrera_id, :generacion, :tipo_asistente)";
-        
+                (evento_id, qr_codigo, nombre, apellidos, correo, telefono,
+                 campus_id, facultad_id, carrera_id, generacion, tipo_asistente) 
+                VALUES (:evento_id, :qr_codigo, :nombre, :apellidos, :correo, :telefono,
+                        :campus_id, :facultad_id, :carrera_id, :generacion, :tipo_asistente)";
+
         $stmt = $conexion->prepare($sql);
         $stmt->execute([
             ':evento_id'      => $evento_id,
@@ -60,23 +114,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':nombre'         => $nombre,
             ':apellidos'      => $apellidos,
             ':correo'         => $correo,
-            ':telefono'       => $telefono ?: null,
+            ':telefono'       => $telefono !== '' ? $telefono : null,
             ':campus_id'      => $campus_id,
-            ':facultad_id'    => $facultad_id ?: null,
-            ':carrera_id'     => $carrera_id ?: null,
+            ':facultad_id'    => $facultad_id !== '' ? $facultad_id : null,
+            ':carrera_id'     => $carrera_id !== '' ? $carrera_id : null,
             ':generacion'     => $generacion,
-            ':tipo_asistente' => $tipo_asistente
+            ':tipo_asistente' => $tipo_asistente,
         ]);
 
-        // Generar imagen del QR
-        $qr = new QrCode($qr_codigo);
+        // --- 9. Generar imagen QR y enviar correo ---
+        $qr     = new QrCode($qr_codigo);
         $writer = new PngWriter();
         $result = $writer->write($qr);
-        
+
         $qr_path = sys_get_temp_dir() . '/' . $qr_codigo . '.png';
         $result->saveToFile($qr_path);
 
-        // Enviar correo con PHPMailer
         $mail = new PHPMailer(true);
         $mail->isSMTP();
         $mail->Host       = $_ENV['MAIL_HOST'];
@@ -116,11 +169,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $mail->send();
 
-        // Marcar correo como enviado
-        $stmtUpdate = $conexion->prepare("UPDATE registro_asistente SET correo_enviado = 1 WHERE qr_codigo = :qr");
+        $stmtUpdate = $conexion->prepare(
+            "UPDATE registro_asistente SET correo_enviado = 1 WHERE qr_codigo = :qr"
+        );
         $stmtUpdate->execute([':qr' => $qr_codigo]);
-        
-        if (file_exists($qr_path)) unlink($qr_path);
+
+        if (file_exists($qr_path)) {
+            unlink($qr_path);
+        }
 
         echo json_encode(['status' => 'success', 'message' => '¡Registro guardado y correo enviado!']);
 

@@ -1,53 +1,64 @@
 <?php
-require_once 'conexion.php';
+require_once __DIR__ . '/conexion.php';
 require_once __DIR__ . '/../../vendor/autoload.php';
 
 use Juancarlos\Regresoacasauabc\Http\RequestValidator;
+use Juancarlos\Regresoacasauabc\Event\EventoStatusValidator;
 
 header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        $nombre = $_POST['nombre'] ?? '';
-        $descripcion = $_POST['descripcion'] ?? '';
-        $fecha = $_POST['fecha'] ?? '';
-        $hora = $_POST['hora'] ?? '';
-        $ubicacion = $_POST['ubicacion'] ?? '';
-        $imagen = $_POST['imagen'] ?? '';
-        $estado = $_POST['estado'] ?? 'activo';
+        $nombre      = trim($_POST['nombre']      ?? '');
+        $descripcion = trim($_POST['descripcion'] ?? '');
+        $fecha       = trim($_POST['fecha']       ?? '');
+        $hora        = trim($_POST['hora']        ?? '');
+        $ubicacion   = trim($_POST['ubicacion']   ?? '');
+        $imagen      = trim($_POST['imagen']      ?? '');
+        $estado      = trim($_POST['estado']      ?? 'proximo');
 
-        // Validar que los campos requeridos no vengan vacíos
+        // --- Campos obligatorios ---
         if (!RequestValidator::hasRequiredEventFields([
-            'nombre' => $nombre,
-            'fecha' => $fecha,
-            'hora' => $hora,
-            'ubicacion' => $ubicacion
+            'nombre'    => $nombre,
+            'fecha'     => $fecha,
+            'hora'      => $hora,
+            'ubicacion' => $ubicacion,
         ])) {
-            echo json_encode(['status' => 'error', 'message' => 'Faltan campos obligatorios.']);
+            echo json_encode(['status' => 'error', 'message' => 'Faltan campos obligatorios (nombre, fecha, hora, ubicación).']);
             exit;
         }
 
-        $sql = "INSERT INTO evento (nombre, descripcion, fecha, hora, ubicacion, imagen, estado) 
-                VALUES (:nombre, :descripcion, :fecha, :hora, :ubicacion, :imagen, :estado)";
-        
+        // --- Fecha debe ser hoy o en el futuro ---
+        if (!RequestValidator::isFutureOrTodayDate($fecha)) {
+            echo json_encode(['status' => 'error', 'message' => 'La fecha del evento debe ser hoy o en el futuro (formato YYYY-MM-DD).']);
+            exit;
+        }
+
+        // --- Estado válido ---
+        if (!EventoStatusValidator::isValidStatus($estado)) {
+            echo json_encode(['status' => 'error', 'message' => 'Estado no válido. Valores permitidos: activo, proximo, cerrado.']);
+            exit;
+        }
+
+        $sql  = "INSERT INTO evento (nombre, descripcion, fecha, hora, ubicacion, imagen, estado)
+                 VALUES (:nombre, :descripcion, :fecha, :hora, :ubicacion, :imagen, :estado)";
         $stmt = $conexion->prepare($sql);
         $stmt->execute([
-            ':nombre' => $nombre,
+            ':nombre'      => $nombre,
             ':descripcion' => $descripcion,
-            ':fecha' => $fecha,
-            ':hora' => $hora,
-            ':ubicacion' => $ubicacion,
-            ':imagen' => $imagen,
-            ':estado' => $estado
+            ':fecha'       => $fecha,
+            ':hora'        => $hora,
+            ':ubicacion'   => $ubicacion,
+            ':imagen'      => $imagen,
+            ':estado'      => $estado,
         ]);
 
-        // Obtenemos el ID que la base de datos le acaba de asignar al evento
         $eventId = $conexion->lastInsertId();
 
         echo json_encode([
-            'status' => 'success', 
+            'status'  => 'success',
             'message' => 'Evento creado con éxito',
-            'eventId' => $eventId
+            'eventId' => $eventId,
         ]);
 
     } catch (Exception $e) {
