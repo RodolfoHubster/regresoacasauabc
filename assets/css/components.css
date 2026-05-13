@@ -128,7 +128,7 @@
 
 /* ── Botón Hamburguesa ── */
 .nav-hamburger {
-  display: none;   /* oculto en desktop */
+  display: none;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -158,7 +158,6 @@
   transform-origin: center;
 }
 
-/* Estado abierto: anima a X */
 .nav-hamburger[aria-expanded="true"] .hamburger-bar:nth-child(1) {
   transform: translateY(7px) rotate(45deg);
 }
@@ -170,7 +169,6 @@
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* ── Línea dorada ── */
 .header-gold-line {
   height: 3px;
   background: var(--uabc-dorado);
@@ -220,7 +218,7 @@
    ===================================================== */
 
 .mobile-nav {
-  display: none;          /* oculto siempre en desktop */
+  display: none;
   background: var(--uabc-verde-oscuro);
   overflow: hidden;
   max-height: 0;
@@ -228,7 +226,7 @@
 }
 
 .mobile-nav.is-open {
-  max-height: 380px;  /* ampliado para incluir item Admin */
+  max-height: 380px;
   padding-block: var(--space-2);
 }
 
@@ -258,15 +256,12 @@
   border-left-color: var(--uabc-dorado);
 }
 
-/* ── Ítem Admin en menú móvil ── */
-/* Separador visual arriba del ítem Admin */
 .mobile-nav-admin-item {
   border-top: 1px solid rgba(255,255,255,0.12);
   margin-top: var(--space-1);
   padding-top: var(--space-1);
 }
 
-/* El enlace Admin tiene acento dorado siempre visible */
 .mobile-nav-link--admin {
   display: flex;
   align-items: center;
@@ -867,7 +862,7 @@
 }
 
 /* =====================================================
-   FORMULARIO
+   FORMULARIO BASE
    ===================================================== */
 
 .form-row {
@@ -892,7 +887,7 @@
   font-size: var(--text-sm);
   color: var(--color-text);
   background: var(--color-surface);
-  transition: border-color 0.16s, box-shadow 0.16s;
+  transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
   width: 100%;
 }
 
@@ -905,10 +900,107 @@
   box-shadow: 0 0 0 3px rgba(26,107,42,0.15);
 }
 
-.form-input.is-error,
-.form-select.is-error { border-color: var(--color-error); }
+.form-error {
+  font-size: var(--text-xs);
+  color: var(--color-error);
+  min-height: 1.2em;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  line-height: 1.3;
+  transition: opacity 0.18s;
+}
 
-.form-error { font-size: var(--text-xs); color: var(--color-error); min-height: 1em; }
+/* =====================================================
+   VALIDACIÓN EN TIEMPO REAL
+   ===================================================== */
+
+/* ── Wrapper relativo para el ícono de estado ── */
+.form-group {
+  position: relative;
+}
+
+/* El icono de estado se inyecta via JS dentro de .form-input-wrap */
+.form-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.form-input-wrap .form-input,
+.form-input-wrap .form-select {
+  padding-right: 2.5rem; /* espacio para el ícono */
+}
+
+/* ícono de estado (check ✔ o X ✘) */
+.input-status-icon {
+  position: absolute;
+  right: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  flex-shrink: 0;
+}
+
+/* ── Estado ERROR ── */
+.form-input.input--error,
+.form-select.input--error {
+  border-color: var(--color-error);
+  background: rgba(161, 44, 123, 0.04);
+  box-shadow: 0 0 0 3px rgba(161, 44, 123, 0.10);
+}
+
+.form-input.input--error:focus,
+.form-select.input--error:focus {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px rgba(161, 44, 123, 0.18);
+}
+
+/* El ícono X aparece en error */
+.input--error ~ .input-status-icon { opacity: 1; color: var(--color-error); }
+
+/* Mensaje de error animado */
+.form-error:not(:empty) {
+  animation: errorSlideIn 0.2s ease-out;
+}
+
+@keyframes errorSlideIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Estado OK ── */
+.form-input.input--ok,
+.form-select.input--ok {
+  border-color: var(--color-success);
+  background: rgba(67, 122, 34, 0.03);
+  box-shadow: none;
+}
+
+.form-input.input--ok:focus,
+.form-select.input--ok:focus {
+  border-color: var(--color-success);
+  box-shadow: 0 0 0 3px rgba(67, 122, 34, 0.12);
+}
+
+/* El ícono check aparece en ok */
+.input--ok ~ .input-status-icon { opacity: 1; color: var(--color-success); }
+
+/* ── Hint bajo el campo (texto de ayuda antes del error) ── */
+.form-hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+  min-height: 1.2em;
+  line-height: 1.3;
+}
+
+/* Ocultar hint cuando hay un error visible */
+.form-error:not(:empty) + .form-hint,
+.form-group:has(.form-error:not(:empty)) .form-hint {
+  display: none;
+}
 
 /* =====================================================
    CONFIRMACIÓN
@@ -926,7 +1018,6 @@
 
 /* =====================================================
    RESPONSIVE – WIDE (≤ 1430px)
-   header-university rompe a 2 líneas.
    ===================================================== */
 
 @media (max-width: 1430px) {
@@ -944,7 +1035,6 @@
 
 /* =====================================================
    RESPONSIVE – SEMI-WIDE (≤ 1250px)
-   header-dept (Comunidad de egresadas…) rompe a 2 líneas.
    ===================================================== */
 
 @media (max-width: 1250px) {
@@ -972,7 +1062,6 @@
 
 @media (max-width: 815px) {
 
-  /* ── Header ── */
   .header-inner {
     padding: var(--space-2) var(--space-4);
     min-height: 60px;
@@ -982,7 +1071,6 @@
   .header-logo-img { height: 36px; }
   .header-university { display: none; }
 
-  /* header-dept: 2 líneas máximo, sin desbordarse */
   .header-dept {
     font-size: var(--text-xs);
     white-space: normal;
@@ -997,46 +1085,33 @@
 
   .btn-header-admin { padding: var(--space-1) var(--space-3); font-size: var(--text-xs); }
 
-  /* ── Hamburguesa visible ── */
   .nav-hamburger { display: flex; }
+  .site-nav      { display: none; }
+  .mobile-nav    { display: block; }
 
-  /* ── Nav desktop oculto ── */
-  .site-nav { display: none; }
-
-  /* ── Nav móvil activo ── */
-  .mobile-nav { display: block; }
-
-  /* ── Contenedores ── */
   .container { padding-inline: var(--space-4); }
 
-  /* ── Hero ── */
   .hero-section { padding-block: var(--space-12) var(--space-10); }
   .hero-title   { font-size: var(--text-xl); }
   .hero-desc    { font-size: var(--text-sm); }
   .btn-lg       { width: 100%; justify-content: center; font-size: var(--text-sm); padding: var(--space-3) var(--space-5); }
 
-  /* ── Section headers ── */
   .section-header { margin-bottom: var(--space-6); }
   .section-title  { font-size: var(--text-lg); }
 
-  /* ── Events grid ── */
   .events-grid { grid-template-columns: 1fr; gap: var(--space-5); }
   .event-card-actions { grid-template-columns: 1fr; gap: var(--space-2); }
   .event-card-actions .btn { width: 100%; justify-content: center; }
 
-  /* ── FAQ ── */
   .faq-trigger  { padding: var(--space-4); font-size: var(--text-sm); }
   .faq-answer   { padding: 0 var(--space-4) var(--space-4); }
 
-  /* ── Contacto ── */
-  .contact-card { padding: var(--space-8) var(--space-5); }
+  .contact-card  { padding: var(--space-8) var(--space-5); }
   .contact-title { font-size: var(--text-lg); }
 
-  /* ── Footer ── */
   .site-footer  { padding-block: var(--space-5); margin-top: var(--space-8); }
   .footer-copy  { font-size: var(--text-xs); text-align: center; }
 
-  /* ── Modales ── */
   .modal-overlay { padding: var(--space-3); align-items: flex-end; }
   .modal {
     max-width: 100%;
@@ -1054,27 +1129,20 @@
   }
   .modal-footer .btn { width: 100%; justify-content: center; }
 
-  /* ── Info modal highlights ── */
   .info-highlights { grid-template-columns: 1fr; gap: var(--space-2); }
   .info-banner     { height: 150px; }
 
-  /* ── Formulario ── */
   .form-row { grid-template-columns: 1fr; }
   .form-input, .form-select { font-size: var(--text-base); }
 }
 
 /* =====================================================
    RESPONSIVE – MÓVIL CHICO  (≤ 512px)
-   Ocultar btn-header-admin del header; el acceso Admin
-   queda solo en el menú hamburguesa.
-   header-dept ("Comunidad de egresadas…") se mantiene.
    ===================================================== */
 
 @media (max-width: 512px) {
-  /* Oculta el botón Admin del header */
   .btn-header-admin { display: none; }
 
-  /* header-dept sigue visible: texto más compacto */
   .header-dept {
     font-size: var(--text-xs);
     white-space: normal;
@@ -1096,7 +1164,7 @@
    ===================================================== */
 
 @media (max-width: 400px) {
-  .header-dept { display: flex; }  /* solo logo en pantallas muy chicas */
+  .header-dept { display: flex; }
 }
 
 /* =====================================================
@@ -1104,5 +1172,5 @@
    ===================================================== */
 
 @media (max-width: 320px) {
-  .header-dept { display: none; }  /* solo logo en pantallas muy chicas */
+  .header-dept { display: none; }
 }
