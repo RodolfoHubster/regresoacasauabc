@@ -141,11 +141,6 @@ main.p-container {
    TABLA
    ===================================================== */
 
-/*
-  FIX #1: overflow-x:auto en lugar de overflow:hidden
-  Antes: overflow:hidden bloqueaba el scroll horizontal en tablets.
-  Ahora: la tabla puede scrollearse cuando es más ancha que el contenedor.
-*/
 .admin-table-wrapper {
   overflow-x: auto;
   overflow-y: visible;
@@ -154,11 +149,6 @@ main.p-container {
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 
-/*
-  FIX #2: min-width:700px en la tabla
-  Sin esto, la tabla colapsa sus columnas antes de que el scroll se active.
-  Se resetea a unset en móvil (<=640px) para que el modo card funcione.
-*/
 .admin-table {
   width: 100%;
   border-collapse: collapse;
@@ -168,7 +158,6 @@ main.p-container {
   min-width: 700px;
 }
 
-/* THEAD — fondo gris claro, NO verde */
 .admin-table thead {
   background: #f0f0f0;
   border-bottom: 2px solid rgba(0,0,0,0.10);
@@ -219,11 +208,6 @@ th.sortable:hover {
   background: #e8e8e8;
 }
 
-/*
-  FIX #3: tamaño fijo en .sort-icon
-  Sin width/height en el contenedor, el SVG heredaba el 100% del <th>
-  y se mostraba gigante (las flechas enormes que se ven en el screenshot).
-*/
 .sort-icon {
   display: inline-flex;
   align-items: center;
@@ -322,15 +306,19 @@ th.sort-desc .sort-svg { transform: rotate(180deg); }
 }
 
 /* =====================================================
+   FIX: respetar atributo [hidden] nativo del navegador.
+   Sin esto, display:flex en .table-empty sobreescribe hidden=true
+   del JS y el empty-state aparece siempre aunque haya datos.
+   ===================================================== */
+[hidden] { display: none !important; }
+
+/* =====================================================
    RESPONSIVE — TABLET (<=900px)
-   Tabla scrolleable horizontalmente gracias al min-width + overflow-x:auto
-   Hint visual: sombra en los bordes cuando hay contenido oculto
    ===================================================== */
 
 @media (max-width: 900px) {
   .filter-group { min-width: 140px; }
 
-  /* Sombra scroll: indica que hay contenido a la derecha/izquierda */
   .admin-table-wrapper {
     background:
       linear-gradient(to right, var(--color-surface) 30%, rgba(255,255,255,0)),
@@ -360,10 +348,8 @@ th.sort-desc .sort-svg { transform: rotate(180deg); }
   .filter-group { min-width: 100%; flex: unset; }
   .filter-count { padding-top: 0; align-self: flex-start; }
 
-  /* Reset min-width para activar modo card (la tabla deja de ser tabla) */
   .admin-table { min-width: unset; }
 
-  /* Tabla → Cards */
   .admin-table,
   .admin-table thead,
   .admin-table tbody,
@@ -373,7 +359,6 @@ th.sort-desc .sort-svg { transform: rotate(180deg); }
     display: block;
   }
 
-  /* Ocultar thead — los labels vienen del data-label en cada <td> */
   .admin-table thead tr { display: none; }
 
   .admin-table tbody tr {
@@ -401,7 +386,6 @@ th.sort-desc .sort-svg { transform: rotate(180deg); }
 
   .admin-table td:last-child { border-bottom: none; }
 
-  /* Label automático desde el atributo data-label de cada <td> */
   .admin-table td::before {
     content: attr(data-label);
     font-weight: 700;
@@ -424,7 +408,6 @@ th.sort-desc .sort-svg { transform: rotate(180deg); }
     color: var(--uabc-verde);
   }
 
-  /* En modo card desactivamos el hint de sombra scroll */
   .admin-table-wrapper {
     background: var(--color-surface);
     overflow-x: visible;
