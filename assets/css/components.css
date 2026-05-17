@@ -329,6 +329,10 @@
   color: var(--uabc-blanco);
 }
 
+.hero-alumni-img {
+  margin-inline: auto;
+}
+
 .hero-card {
   text-align: center;
   max-width: 640px;

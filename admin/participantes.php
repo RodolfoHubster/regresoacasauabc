@@ -19,8 +19,7 @@
                 Volver al Panel
             </a>
             <h1 id="event-title">Participantes</h1>
-            <p id="event-meta">Cargando información del evento...</p>
-        </div>
+                </div>
     </header>
 
     <main class="p-container">
