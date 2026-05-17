@@ -20,8 +20,8 @@
     <div class="header-inner">
 
       <div class="header-left">
-        <a href="https://www.uabc.mx/" target="_blank" rel="noopener" class="header-logo" aria-label="UABC Principal" style="display: flex; align-items: center; gap: 12px; text-decoration: none; margin-left: 15px;">
-          <img src="assets/images/LogoUabc.png" alt="Logo UABC" width="50" height="64" style="object-fit: contain;" loading="eager" class="header-logo-img">
+        <a href="https://www.uabc.mx/" target="_blank" rel="noopener" class="header-logo" aria-label="UABC Principal">
+          <img src="assets/images/LogoUabc.png" alt="Logo UABC" width="50" height="64" loading="eager" class="header-logo-img">
         </a>
       </div>
 
@@ -35,7 +35,6 @@
           Admin
         </a>
 
-        <!-- Botón hamburguesa: solo visible en móvil -->
         <button
           class="nav-hamburger"
           id="nav-hamburger"
@@ -70,7 +69,6 @@
         <li><a href="#eventos"  class="mobile-nav-link">Eventos</a></li>
         <li><a href="#faq"      class="mobile-nav-link">Preguntas Frecuentes</a></li>
         <li><a href="#contacto" class="mobile-nav-link">Contacto</a></li>
-        <!-- Enlace Admin: siempre en el menú móvil, destacado visualmente -->
         <li class="mobile-nav-admin-item">
           <a href="admin/login.html" class="mobile-nav-link mobile-nav-link--admin">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -89,9 +87,10 @@
           <h1 class="hero-title">Bienvenido a <span class="text-gold">Regresa a Casa</span></h1>
           <p class="hero-desc">El espacio oficial para egresadas y egresados UABC.
               Reencuéntrate con tu generación, revive momentos universitarios y celebra el orgullo de ser Cimarrón.</p>
+          <a href="#eventos" class="btn btn-primary hero-cta">Ver Eventos</a>
         </div>
-        <div style="width: 100%; display: flex; justify-content: center; margin-top: 30px; margin-bottom: 20px;">
-          <img src="assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="150" style="filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.3));">
+        <div class="hero-logo-wrapper">
+          <img src="assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="150" height="150" loading="eager" class="hero-alumni-img" style="filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.3));">
         </div>
       </div>
     </section>
@@ -165,11 +164,11 @@
       <div class="footer-inner">
         <p class="footer-copy">© 2026 Universidad Autónoma de Baja California  Coordinación General de Vinculación y Cooperación Académica</p>
         <p class="footer-tagline">Por la realización plena del ser</p>
-        <div style="margin-top: 20px; font-size: 0.85rem; opacity: 0.8;">
-          <p>Plataforma desarrollada por: 
+        <div class="footer-credits">
+          <p>Plataforma desarrollada por:
             Rodolfo Huitron Leyva.
             Josue Fernando Robledo Zuñiga.
-            Juan Carlos Cruz Hernandez. </p>
+            Juan Carlos Cruz Hernandez.</p>
         </div>
       </div>
     </div>
@@ -188,15 +187,16 @@
         <form id="form-registro" novalidate>
           <input type="hidden" id="field-evento" name="evento">
           <input type="hidden" id="field-evento-id" name="evento_id">
-          
+          <input type="hidden" id="field-tipo" name="tipo" value="egresado">
+
           <div class="form-row">
             <div class="form-group"><label for="field-nombre" class="form-label">Nombre <span class="required" aria-hidden="true">*</span></label><input type="text" id="field-nombre" name="nombre" class="form-input" placeholder="Tu nombre" required autocomplete="given-name"><span class="form-error" id="error-nombre" aria-live="polite"></span></div>
             <div class="form-group"><label for="field-apellidos" class="form-label">Apellidos <span class="required" aria-hidden="true">*</span></label><input type="text" id="field-apellidos" name="apellidos" class="form-input" placeholder="Tus apellidos" required autocomplete="family-name"><span class="form-error" id="error-apellidos" aria-live="polite"></span></div>
           </div>
-          
+
           <div class="form-group"><label for="field-email" class="form-label">Correo electrónico <span class="required" aria-hidden="true">*</span></label><input type="email" id="field-email" name="email" class="form-input" placeholder="correo@ejemplo.com" required autocomplete="email"><span class="form-error" id="error-email" aria-live="polite"></span></div>
           <div class="form-group"><label for="field-telefono" class="form-label">Número de teléfono <span class="optional">(opcional)</span></label><input type="tel" id="field-telefono" name="telefono" class="form-input" placeholder="664 000 0000" autocomplete="tel"></div>
-          
+
           <div class="form-group">
             <label for="field-campus" class="form-label">Campus de egreso <span class="required" aria-hidden="true">*</span></label>
             <select id="field-campus" name="campus" class="form-select" required>
@@ -225,9 +225,10 @@
             <span class="form-error" id="error-carrera" aria-live="polite"></span>
           </div>
 
-          <div class="form-row">
-            <div class="form-group"><label for="field-generacion" class="form-label">Generación <span class="required" aria-hidden="true">*</span></label><input type="text" id="field-generacion" name="generacion" class="form-input" placeholder="Ej. 2015-2020" required><span class="form-error" id="error-generacion" aria-live="polite"></span></div>
-            <input type="hidden" id="field-tipo" name="tipo" value="egresado">
+          <div class="form-group">
+            <label for="field-generacion" class="form-label">Generación <span class="required" aria-hidden="true">*</span></label>
+            <input type="text" id="field-generacion" name="generacion" class="form-input" placeholder="Ej. 2015-2020" required>
+            <span class="form-error" id="error-generacion" aria-live="polite"></span>
           </div>
 
           <div class="modal-footer">
