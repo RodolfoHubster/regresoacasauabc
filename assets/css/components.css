@@ -324,54 +324,34 @@
    ===================================================== */
 
 .hero-section {
-  background: linear-gradient(135deg, var(--uabc-verde) 0%, var(--uabc-verde-oscuro) 100%);
-  padding-block: clamp(var(--space-12), 6vw, var(--space-20));
+  background: var(--uabc-verde);
+  padding-block: clamp(var(--space-16), 8vw, var(--space-20));
   color: var(--uabc-blanco);
 }
 
-.hero-section .container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-10);
-}
-
 .hero-card {
-  flex: 1;
-  max-width: 580px;
   text-align: center;
+  max-width: 640px;
+  margin-inline: auto;
 }
 
 .hero-title {
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 4vw, 3rem);
+  font-size: var(--text-2xl);
   font-weight: 800;
   color: var(--uabc-blanco);
   margin-bottom: var(--space-4);
-  line-height: 1.2;
+  line-height: 1.15;
 }
 
 .text-gold { color: var(--uabc-dorado); }
 
 .hero-desc {
-  font-size: clamp(1rem, 1.5vw, 1.15rem);
-  color: rgba(255,255,255,0.9);
-  margin-bottom: var(--space-6);
-  max-width: 55ch;
+  font-size: var(--text-base);
+  color: rgba(255,255,255,0.85);
+  margin-bottom: var(--space-8);
+  max-width: 52ch;
   margin-inline: auto;
-  line-height: 1.6;
-}
-
-.hero-logo-wrapper {
-  flex-shrink: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.hero-alumni-img {
-  max-width: 150px;
-  height: auto;
 }
 
 /* =====================================================
@@ -408,17 +388,6 @@
 .btn-primary:hover {
   background: var(--uabc-verde-oscuro);
   border-color: var(--uabc-verde-oscuro);
-}
-
-.hero-cta {
-  background: var(--uabc-blanco);
-  color: var(--uabc-verde);
-  border-color: var(--uabc-blanco);
-  font-weight: 700;
-}
-.hero-cta:hover {
-  background: rgba(255,255,255,0.88);
-  border-color: rgba(255,255,255,0.88);
 }
 
 .btn-outline-primary {
@@ -946,10 +915,12 @@
    VALIDACIÓN EN TIEMPO REAL
    ===================================================== */
 
+/* ── Wrapper relativo para el ícono de estado ── */
 .form-group {
   position: relative;
 }
 
+/* El icono de estado se inyecta via JS dentro de .form-input-wrap */
 .form-input-wrap {
   position: relative;
   display: flex;
@@ -958,9 +929,10 @@
 
 .form-input-wrap .form-input,
 .form-input-wrap .form-select {
-  padding-right: 2.5rem;
+  padding-right: 2.5rem; /* espacio para el ícono */
 }
 
+/* ícono de estado (check ✔ o X ✘) */
 .input-status-icon {
   position: absolute;
   right: var(--space-3);
@@ -972,6 +944,7 @@
   flex-shrink: 0;
 }
 
+/* ── Estado ERROR ── */
 .form-input.input--error,
 .form-select.input--error {
   border-color: var(--color-error);
@@ -985,8 +958,10 @@
   box-shadow: 0 0 0 3px rgba(161, 44, 123, 0.18);
 }
 
+/* El ícono X aparece en error */
 .input--error ~ .input-status-icon { opacity: 1; color: var(--color-error); }
 
+/* Mensaje de error animado */
 .form-error:not(:empty) {
   animation: errorSlideIn 0.2s ease-out;
 }
@@ -996,6 +971,7 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 
+/* ── Estado OK ── */
 .form-input.input--ok,
 .form-select.input--ok {
   border-color: var(--color-success);
@@ -1009,8 +985,10 @@
   box-shadow: 0 0 0 3px rgba(67, 122, 34, 0.12);
 }
 
+/* El ícono check aparece en ok */
 .input--ok ~ .input-status-icon { opacity: 1; color: var(--color-success); }
 
+/* ── Hint bajo el campo (texto de ayuda antes del error) ── */
 .form-hint {
   font-size: var(--text-xs);
   color: var(--color-text-faint);
@@ -1018,6 +996,7 @@
   line-height: 1.3;
 }
 
+/* Ocultar hint cuando hay un error visible */
 .form-error:not(:empty) + .form-hint,
 .form-group:has(.form-error:not(:empty)) .form-hint {
   display: none;
@@ -1112,16 +1091,9 @@
 
   .container { padding-inline: var(--space-4); }
 
-  /* Hero móvil: apila verticalmente y centra */
-  .hero-section .container {
-    flex-direction: column;
-    text-align: center;
-  }
-  .hero-card { max-width: 100%; }
   .hero-section { padding-block: var(--space-12) var(--space-10); }
   .hero-title   { font-size: var(--text-xl); }
-  .hero-desc    { font-size: var(--text-sm); max-width: 100%; }
-  .hero-logo-wrapper { margin-top: var(--space-4); }
+  .hero-desc    { font-size: var(--text-sm); }
   .btn-lg       { width: 100%; justify-content: center; font-size: var(--text-sm); padding: var(--space-3) var(--space-5); }
 
   .section-header { margin-bottom: var(--space-6); }
