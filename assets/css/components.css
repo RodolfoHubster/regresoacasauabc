@@ -332,13 +332,14 @@
 .hero-section .container {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-8);
+  justify-content: center;
+  gap: var(--space-10);
 }
 
 .hero-card {
   flex: 1;
-  text-align: left;
+  max-width: 580px;
+  text-align: center;
 }
 
 .hero-title {
@@ -357,6 +358,7 @@
   color: rgba(255,255,255,0.9);
   margin-bottom: var(--space-6);
   max-width: 55ch;
+  margin-inline: auto;
   line-height: 1.6;
 }
 
@@ -406,6 +408,17 @@
 .btn-primary:hover {
   background: var(--uabc-verde-oscuro);
   border-color: var(--uabc-verde-oscuro);
+}
+
+.hero-cta {
+  background: var(--uabc-blanco);
+  color: var(--uabc-verde);
+  border-color: var(--uabc-blanco);
+  font-weight: 700;
+}
+.hero-cta:hover {
+  background: rgba(255,255,255,0.88);
+  border-color: rgba(255,255,255,0.88);
 }
 
 .btn-outline-primary {
@@ -1099,11 +1112,12 @@
 
   .container { padding-inline: var(--space-4); }
 
-  /* Hero móvil: apila verticalmente */
+  /* Hero móvil: apila verticalmente y centra */
   .hero-section .container {
     flex-direction: column;
     text-align: center;
   }
+  .hero-card { max-width: 100%; }
   .hero-section { padding-block: var(--space-12) var(--space-10); }
   .hero-title   { font-size: var(--text-xl); }
   .hero-desc    { font-size: var(--text-sm); max-width: 100%; }
