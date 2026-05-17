@@ -24,7 +24,7 @@
   <aside class="admin-sidebar" id="admin-sidebar" aria-label="Menú de administración">
     <div class="sidebar-header">
       <!-- Solo logo, sin texto "Regresa a Casa / Panel Admin" -->
-      <a href="../index.html" class="sidebar-logo" aria-label="Ir al sitio público">
+      <a href="php/logout.php" class="sidebar-logo" aria-label="Ir al sitio público">
         <img src="../assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="128" height="128" loading="lazy">
       </a>
       <!-- Botón X para cerrar sidebar en móvil -->
@@ -112,7 +112,7 @@
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             </div>
             <div class="kpi-data">
-              <span class="kpi-value" data-kpi="total-registros">248</span>
+              <span class="kpi-value" data-kpi="total-registros"></span>
               <span class="kpi-label">Total Registros</span>
             </div>
           </div>
@@ -121,7 +121,7 @@
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </div>
             <div class="kpi-data">
-              <span class="kpi-value" data-kpi="total-eventos">3</span>
+              <span class="kpi-value" data-kpi="total-eventos"></span>
               <span class="kpi-label">Eventos Activos</span>
             </div>
           </div>
@@ -130,7 +130,7 @@
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
             </div>
             <div class="kpi-data">
-              <span class="kpi-value" data-kpi="confirmados">231</span>
+              <span class="kpi-value" data-kpi="confirmados"></span>
               <span class="kpi-label">QR Confirmados</span>
             </div>
           </div>
@@ -139,7 +139,7 @@
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             </div>
             <div class="kpi-data">
-              <span class="kpi-value" data-kpi="correos">248</span>
+              <span class="kpi-value" data-kpi="correos"></span>
               <span class="kpi-label">Correos Enviados</span>
             </div>
           </div>
@@ -369,6 +369,13 @@
         <form id="form-evento" novalidate>
           <input type="hidden" id="ev-id" name="id">
           <div class="form-group">
+            <label for="field-campus-evento" class="form-label">Campus del Evento <span class="required" aria-hidden="true">*</span></label>
+            <select id="field-campus-evento" name="campus_id" class="form-select" required>
+              <option value="">Cargando campus disponibles...</option>
+            </select>
+            <span class="form-error" id="error-campus-evento" aria-live="polite"></span>
+          </div>
+          <div class="form-group">
             <label for="ev-nombre" class="form-label">Nombre del evento <span class="required">*</span></label>
             <input type="text" id="ev-nombre" class="form-input" placeholder="Ej. Regresa a Casa – Tijuana 2026">
           </div>
@@ -391,8 +398,10 @@
             <input type="text" id="ev-ubicacion" class="form-input" placeholder="Ej. Campus Tijuana – Auditorio Central">
           </div>
           <div class="form-group">
-            <label for="ev-imagen" class="form-label">URL de imagen del evento</label>
-            <input type="url" id="ev-imagen" class="form-input" placeholder="https://...">
+            <label for="ev-imagen" class="form-label">Banner del evento (Opcional)</label>
+            <input type="file" id="ev-imagen" class="form-input" accept="image/png, image/jpeg, image/jpg, image/webp">
+            <input type="hidden" id="ev-imagen-actual">
+            <small style="color: #666;">Selecciona una imagen desde tu dispositivo.</small>
           </div>
           <div class="form-group">
             <label for="ev-estado" class="form-label">Estado</label>
@@ -572,6 +581,30 @@
       </div>
     </div>
   </div>
+
+  <div class="modal-overlay" id="modal-confirmar-eliminar-evento" role="dialog" aria-modal="true" hidden>
+    <div class="modal modal--sm" style="text-align: center; padding: 30px 20px;">
+      <div style="color: var(--color-error); margin-bottom: 15px; display: flex; justify-content: center;">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      </div>
+      <h2 class="modal-title" style="margin-bottom: 10px;">¿Eliminar evento?</h2>
+      <p id="texto-confirmar-eliminar-evento" style="color: var(--color-text-muted); margin-bottom: 25px; line-height: 1.5;">Esta acción no se puede deshacer. El evento y su imagen asociada serán eliminados permanentemente de la base de datos y de Cloudinary.</p>
+      <div style="display: flex; gap: 10px;">
+        <button type="button" class="btn btn-ghost" onclick="closeAdminModal('modal-confirmar-eliminar-evento')" style="flex: 1;">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btn-confirmar-eliminar-evento" style="flex: 1; background-color: var(--color-error); border-color: var(--color-error);" onclick="ejecutarEliminarEvento()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.AppConfig = {
+      // Escribe directamente tu Cloud Name (ejemplo: "drhxxyz")
+      cloudinaryCloudName: "dy3hqtqmb", 
+      
+      // Escribe directamente el nombre de tu preset
+      cloudinaryPreset: "eventos_uabc" 
+    };
+  </script>
 
   <script src="../assets/js/main.js"></script>
   <script src="../assets/js/admin.js"></script>

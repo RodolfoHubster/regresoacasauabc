@@ -74,12 +74,16 @@ function openModalEvento(id) {
     const evento = eventosCargados.find(e => e.id == id);
     if (evento) {
       if (idInput) idInput.value = evento.id;
+      document.getElementById('field-campus-evento').value = evento.campus_id || '';
       document.getElementById('ev-nombre').value = evento.nombre;
       document.getElementById('ev-descripcion').value = evento.descripcion;
       document.getElementById('ev-fecha').value = evento.fecha;
       document.getElementById('ev-hora').value = evento.hora;
       document.getElementById('ev-ubicacion').value = evento.ubicacion;
-      document.getElementById('ev-imagen').value = evento.imagen;
+      // Limpiamos el input de archivo por si había algo seleccionado antes
+      document.getElementById('ev-imagen').value = ""; 
+      // Guardamos la URL de la imagen actual en el campo oculto
+      document.getElementById('ev-imagen-actual').value = evento.imagen || '';
       document.getElementById('ev-estado').value = evento.estado;
     }
   } else {
@@ -90,7 +94,7 @@ function openModalEvento(id) {
 
 function openModalRecordatorio(evento) {
   const label = document.getElementById('modal-rec-evento');
-  if (label) label.textContent = '📅 ' + evento;
+  if (label) label.textContent = ' ' + evento;
   openAdminModal('modal-recordatorio');
 }
 
@@ -114,7 +118,6 @@ function confirmarEliminarFaq(id) {
 
 // ─── FUNCIONES DE QR ───
 
-// Función para cuando se CREA un evento nuevo
 // Función para cuando se CREA un evento nuevo
 function showSuccessWithQR(eventId) {
   const container = document.getElementById('qrcode-container');
@@ -235,57 +238,92 @@ document.addEventListener('DOMContentLoaded', () => {
   // 1. Manejo del formulario de EVENTOS
   const formEvento = document.getElementById('form-evento');
   if (formEvento) {
-    formEvento.addEventListener('submit', (e) => {
+    formEvento.addEventListener('submit', async (e) => { // <-- Se agregó "async"
       e.preventDefault();
       
       const idInput = document.getElementById('ev-id');
       const id = idInput ? idInput.value : "";
-      
-      const formData = new FormData();
-      if (id) formData.append('id', id);
-      formData.append('nombre', document.getElementById('ev-nombre').value);
-      formData.append('descripcion', document.getElementById('ev-descripcion').value);
-      formData.append('fecha', document.getElementById('ev-fecha').value);
-      formData.append('hora', document.getElementById('ev-hora').value);
-      formData.append('ubicacion', document.getElementById('ev-ubicacion').value);
-      formData.append('imagen', document.getElementById('ev-imagen').value);
-      formData.append('estado', document.getElementById('ev-estado').value);
-
       const btnSubmit = formEvento.querySelector('button[type="submit"]');
       const originalText = btnSubmit.textContent;
+
       btnSubmit.disabled = true;
-      btnSubmit.textContent = id ? 'Actualizando...' : 'Guardando...';
+      btnSubmit.textContent = 'Subiendo imagen...'; // Avisamos al usuario
 
-      const url = id ? 'php/actualizar_evento.php' : 'php/crear_evento.php';
+      try {
+          // Por defecto, tomamos la imagen que ya tenía (si estamos editando)
+          let imageUrl = document.getElementById('ev-imagen-actual').value;
 
-      fetch(url, {
-        method: 'POST',
-        body: formData
-      })
-      .then(res => res.json())
-      .then(data => {
-        btnSubmit.disabled = false;
-        btnSubmit.textContent = originalText;
+          // 1. ¿El usuario seleccionó un archivo nuevo?
+          const fileInput = document.getElementById('ev-imagen');
+          if (fileInput.files.length > 0) {
+              const file = fileInput.files[0];
+              
+              // Preparamos los datos para Cloudinary
+              const cloudinaryData = new FormData();
+              cloudinaryData.append('file', file);
+              
+              cloudinaryData.append('upload_preset', window.AppConfig.cloudinaryPreset); 
 
-        if (data.status === 'success') {
-          if (!id) {
-            showSuccessWithQR('EVT-' + data.eventId);
-          } else {
-            alert('Evento actualizado con éxito');
-            closeAdminModal('modal-evento');
+              const cloudResponse = await fetch(`https://api.cloudinary.com/v1_1/${window.AppConfig.cloudinaryCloudName}/image/upload`, {
+                    method: 'POST',
+                    body: cloudinaryData
+                });
+
+              if (!cloudResponse.ok) throw new Error("Error al subir la imagen a Cloudinary");
+
+              const cloudResult = await cloudResponse.json();
+              imageUrl = cloudResult.secure_url; // ¡Obtenemos la URL de Cloudinary!
           }
-          formEvento.reset();
-          loadEventos(); 
-        } else {
-          alert('Error: ' + data.message);
-        }
-      })
-      .catch(error => {
-        btnSubmit.disabled = false;
-        btnSubmit.textContent = originalText;
-        console.error('Error:', error);
-        alert('Hubo un problema de conexión.');
-      });
+
+          btnSubmit.textContent = id ? 'Actualizando BD...' : 'Guardando BD...';
+
+          // 2. Ahora sí, preparamos los datos para TU base de datos
+          const formData = new FormData();
+          if (id) formData.append('id', id);
+          formData.append('campus_id', document.getElementById('field-campus-evento').value);
+          formData.append('nombre', document.getElementById('ev-nombre').value);
+          formData.append('descripcion', document.getElementById('ev-descripcion').value);
+          formData.append('fecha', document.getElementById('ev-fecha').value);
+          formData.append('hora', document.getElementById('ev-hora').value);
+          formData.append('ubicacion', document.getElementById('ev-ubicacion').value);
+          formData.append('estado', document.getElementById('ev-estado').value);
+          
+          // Agregamos la URL final (la nueva de Cloudinary o la que ya tenía)
+          formData.append('imagen', imageUrl);
+
+          const url = id ? 'php/actualizar_evento.php' : 'php/crear_evento.php';
+
+          const dbResponse = await fetch(url, { method: 'POST', body: formData });
+          const dbData = await dbResponse.json();
+
+          if (dbData.status === 'success') {
+            if (!id) {
+              showSuccessWithQR('EVT-' + dbData.eventId);
+            } else {
+              // 1. Cerramos el modal de edición
+              closeAdminModal('modal-evento');
+              
+              // 2. Abrimos el modal de éxito con el mensaje personalizado
+              const modalExito = document.getElementById('modal-exito');
+              const msjExito = document.getElementById('mensaje-exito');
+              if (modalExito && msjExito) {
+                  msjExito.textContent = 'El evento se ha actualizado correctamente.';
+                  modalExito.hidden = false;
+              }
+            }
+            formEvento.reset();
+            loadEventos(); 
+          } else {
+            alert('Error BD: ' + dbData.message);
+          }
+      } catch (error) {
+          console.error('Error general:', error);
+          alert('Hubo un problema: ' + error.message);
+      } finally {
+          // Devolvemos el botón a la normalidad pase lo que pase
+          btnSubmit.disabled = false;
+          btnSubmit.textContent = originalText;
+      }
     });
   }
 });   
@@ -530,35 +568,64 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
+// Variable global para saber qué ID de evento vamos a borrar cuando se confirme la acción
+let idEventoAEliminar = null;
+
+// 1. Esta función se ejecuta al darle clic al botón "Eliminar" de la tarjeta del evento
 function confirmarEliminar(id, nombre) {
-    if (confirm(`¿Estás seguro de que deseas eliminar el evento "${nombre}"? Esta acción no se puede deshacer.`)) {
-        eliminarEvento(id);
+    idEventoAEliminar = id; // Guardamos el ID temporalmente
+    
+    // Personalizamos el texto del modal dinámicamente con el nombre del evento
+    const textoModal = document.getElementById('texto-confirmar-eliminar-evento');
+    if (textoModal) {
+        textoModal.innerHTML = `¿Estás seguro de que deseas eliminar el evento <strong>"${nombre}"</strong>? Esta acción no se puede deshacer y removerá permanentemente su imagen en Cloudinary.`;
     }
+    
+    openAdminModal('modal-confirmar-eliminar-evento'); // Abrimos el modal elegante
 }
 
-async function eliminarEvento(id) {
+// 2. Esta función se ejecuta al darle clic al botón rojo "Eliminar" DENTRO del modal
+async function ejecutarEliminarEvento() {
+    if (!idEventoAEliminar) return;
+
+    const btn = document.getElementById('btn-confirmar-eliminar-evento');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = 'Eliminando...';
+    btn.disabled = true;
+
     try {
         const response = await fetch('php/eliminar_evento.php', {
             method: 'POST',
-            // Enviamos el ID en un formato que el PHP pueda leer fácilmente
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id: id })
+            body: JSON.stringify({ id: idEventoAEliminar })
         });
         
-        // Verificamos si la respuesta es OK antes de intentar convertir a JSON
         if (!response.ok) throw new Error('Error en la respuesta del servidor');
         
         const result = await response.json();
         
         if (result.status === 'success') {
-            alert(result.message);
-            loadEventos(); // Es mejor llamar a la función que recarga los eventos que recargar toda la página
+            closeAdminModal('modal-confirmar-eliminar-evento'); // Cerramos el modal de advertencia
+            loadEventos(); // Recargamos instantáneamente las tarjetas del panel sin recargar la página
+            
+            // Mostramos el modal de éxito con la palomita verde que ya tienes integrado
+            const modalExito = document.getElementById('modal-exito');
+            const msjExito = document.getElementById('mensaje-exito');
+            if (modalExito && msjExito) {
+                msjExito.textContent = 'El evento y su imagen de Cloudinary han sido eliminados correctamente.';
+                modalExito.hidden = false;
+            }
         } else {
-            alert('Error: ' + result.message);
+            alert('Error al eliminar: ' + result.message);
         }
     } catch (error) {
         console.error('Error al eliminar:', error);
-        alert('Ocurrió un error al intentar eliminar el evento.');
+        alert('Ocurrió un error al intentar conectar con el servidor.');
+    } finally {
+        // Regresamos el botón y la variable a su estado original
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        idEventoAEliminar = null; 
     }
 }
 
@@ -858,3 +925,40 @@ function irARegistrosConFiltro(nombreEvento) {
         select.dispatchEvent(new Event('change'));
     }
 }
+
+function loadCampusForm() {
+  const selectCampus = document.getElementById('field-campus-evento');
+  if (!selectCampus) return;
+
+  // Hacemos la petición a nuestro nuevo archivo PHP
+  fetch('php/get_campus.php')
+    .then(res => {
+      if (!res.ok) throw new Error('Error al conectar con get_campus.php');
+      return res.json();
+    })
+    .then(result => {
+      if (result.status === 'success') {
+        // Limpiamos el select y ponemos la opción por defecto
+        selectCampus.innerHTML = '<option value="">Selecciona el campus</option>';
+        
+        // Iteramos los campus que vienen de la base de datos
+        result.data.forEach(campus => {
+          const option = document.createElement('option');
+          option.value = campus.id; // El ID numérico (1, 2, 3)
+          option.textContent = campus.nombre; // El nombre del campus (Tijuana, Ensenada, etc.)
+          selectCampus.appendChild(option);
+        });
+      } else {
+        selectCampus.innerHTML = '<option value="">Error al cargar los campus</option>';
+      }
+    })
+    .catch(err => {
+      console.error("Error crítico al cargar campus:", err);
+      selectCampus.innerHTML = '<option value="">Error de conexión</option>';
+    });
+}
+
+// Aseguramos que la función se ejecute en cuanto cargue el documento
+document.addEventListener('DOMContentLoaded', () => {
+  loadCampusForm();
+});
