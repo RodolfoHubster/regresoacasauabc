@@ -1,6 +1,9 @@
 /* registro.js – Validación en tiempo real + envío del formulario */
 
 /* ─── REGLAS DE VALIDACIÓN ──────────────────────────────────────────────── */
+// FIX: 'field-tipo' removido de REGLAS — es un input hidden con valor fijo
+// ('egresado'), nunca estará vacío y no requiere validación. Su span #error-tipo
+// sigue existiendo en el HTML para evitar fallo silencioso en validarCampo().
 const REGLAS = {
   'field-nombre': {
     requerido: true,
@@ -64,10 +67,6 @@ const REGLAS = {
       vacio:  'La generación es requerida.',
       regex:  'Formato válido: 2015 o 2015-2020.',
     }
-  },
-  'field-tipo': {
-    requerido: true,
-    msgs: { vacio: 'Selecciona el tipo de asistente.' }
   },
 };
 
@@ -153,7 +152,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 opt.textContent = `${f.codigo || ''} - ${f.nombre}`;
                 facultadSelect.appendChild(opt);
               });
-              // ELIMINAMOS LA LÍNEA QUE AGREGABA "OTRA" A LA FACULTAD AQUÍ
             }
           })
           .catch(err => console.error('Error cargando facultades:', err));
@@ -166,7 +164,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const facultadId = this.value;
       carreraSelect.innerHTML = '<option value="">Selecciona tu carrera</option>';
 
-      // Como la facultad ya no puede ser "otra", volvemos a la validación normal
       if (facultadId) {
         carreraSelect.disabled = false;
         fetch(`php/get_carreras.php?facultad_id=${facultadId}`)
@@ -179,7 +176,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 opt.textContent = c.nombre;
                 carreraSelect.appendChild(opt);
               });
-              // SÍ MANTENEMOS LA OPCIÓN "OTRA" EN LA CARRERA
               carreraSelect.insertAdjacentHTML('beforeend', '<option value="otra" style="font-weight: bold; color: var(--uabc-verde);">Otra (Escribir manual)</option>');
             }
           })
@@ -251,28 +247,30 @@ function resetFormulario(form) {
   const car = document.getElementById('field-carrera');
   if (fac) { fac.innerHTML = '<option value="">Primero selecciona un campus</option>'; fac.disabled = true; }
   if (car) { car.innerHTML = '<option value="">Primero selecciona una facultad</option>'; car.disabled = true; }
+
+  // Ocultar input de carrera manual al resetear
+  const otraInput = document.getElementById('field-carrera-otra');
+  if (otraInput) {
+    otraInput.classList.remove('is-visible');
+    otraInput.required = false;
+    otraInput.value = '';
+  }
 }
 
-// Mostrar/Ocultar input de "Otra Carrera"
+// ─── Mostrar/Ocultar input de "Otra Carrera" ───
 const selectCarrera = document.getElementById('field-carrera');
 if (selectCarrera) {
-    selectCarrera.addEventListener('change', function() {
-        const inputOtra = document.getElementById('field-carrera-otra');
-        // Validamos que la caja de texto realmente exista antes de cambiar su estilo
-        if (inputOtra) {
-            if (this.value === 'otra') {
-                inputOtra.style.display = 'block';
-                inputOtra.required = true;
-            } else {
-                inputOtra.style.display = 'none';
-                inputOtra.required = false;
-                inputOtra.value = '';
-            }
-        }
-    });
+  selectCarrera.addEventListener('change', function () {
+    const inputOtra = document.getElementById('field-carrera-otra');
+    if (inputOtra) {
+      if (this.value === 'otra') {
+        inputOtra.classList.add('is-visible');
+        inputOtra.required = true;
+      } else {
+        inputOtra.classList.remove('is-visible');
+        inputOtra.required = false;
+        inputOtra.value = '';
+      }
+    }
+  });
 }
-
-// Inyectar la opción "Otra" después de cargar datos del servidor (interceptando las peticiones fetch si es necesario)
-// Si ya tienes funciones como cargarFacultades(), asegúrate de agregar esto al final de tu ciclo de llenado:
-// selectFacultad.insertAdjacentHTML('beforeend', '<option value="otra">Otra...</option>');
-// selectCarrera.insertAdjacentHTML('beforeend', '<option value="otra">Otra...</option>');

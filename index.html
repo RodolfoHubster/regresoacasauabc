@@ -20,8 +20,9 @@
     <div class="header-inner">
 
       <div class="header-left">
-        <a href="https://www.uabc.mx/" target="_blank" rel="noopener" class="header-logo" aria-label="UABC Principal" style="display: flex; align-items: center; gap: 12px; text-decoration: none; margin-left: 15px;">
-          <img src="assets/images/LogoUabc.png" alt="Logo UABC" width="50" height="64" style="object-fit: contain;" loading="eager" class="header-logo-img">
+        <!-- FIX: removidos inline styles; estilos ya definidos en .header-logo y .header-left en components.css -->
+        <a href="https://www.uabc.mx/" target="_blank" rel="noopener" class="header-logo" aria-label="UABC Principal">
+          <img src="assets/images/LogoUabc.png" alt="Logo UABC" width="50" height="64" loading="eager" class="header-logo-img">
         </a>
       </div>
 
@@ -89,9 +90,12 @@
           <h1 class="hero-title">Bienvenido a <span class="text-gold">Regresa a Casa</span></h1>
           <p class="hero-desc">El espacio oficial para egresadas y egresados UABC.
               Reencuéntrate con tu generación, revive momentos universitarios y celebra el orgullo de ser Cimarrón.</p>
+          <!-- FIX: CTA visible en móvil desde el hero, sin esperar carga de eventos -->
+          <a href="#eventos" class="btn btn-lg hero-cta">Ver Eventos</a>
         </div>
-        <div style="width: 100%; display: flex; justify-content: center; margin-top: 30px; margin-bottom: 20px;">
-          <img src="assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="150" style="filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.3));">
+        <!-- FIX: inline styles movidos a .hero-alumni-wrap en components.css; height explícito para evitar CLS -->
+        <div class="hero-alumni-wrap">
+          <img src="assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="150" height="150" loading="eager" class="hero-alumni-img">
         </div>
       </div>
     </section>
@@ -165,12 +169,11 @@
       <div class="footer-inner">
         <p class="footer-copy">© 2026 Universidad Autónoma de Baja California  Coordinación General de Vinculación y Cooperación Académica</p>
         <p class="footer-tagline">Por la realización plena del ser</p>
-        <div style="margin-top: 20px; font-size: 0.85rem; opacity: 0.8;">
-          <p>Plataforma desarrollada por: 
-            Rodolfo Huitron Leyva.
-            Josue Fernando Robledo Zuñiga.
-            Juan Carlos Cruz Hernandez. </p>
-        </div>
+        <!-- FIX: inline styles del footer movidos a .footer-credits en components.css -->
+        <p class="footer-credits">Plataforma desarrollada por:
+          Rodolfo Huitron Leyva.
+          Josue Fernando Robledo Zuñiga.
+          Juan Carlos Cruz Hernandez.</p>
       </div>
     </div>
   </footer>
@@ -188,15 +191,15 @@
         <form id="form-registro" novalidate>
           <input type="hidden" id="field-evento" name="evento">
           <input type="hidden" id="field-evento-id" name="evento_id">
-          
+
           <div class="form-row">
             <div class="form-group"><label for="field-nombre" class="form-label">Nombre <span class="required" aria-hidden="true">*</span></label><input type="text" id="field-nombre" name="nombre" class="form-input" placeholder="Tu nombre" required autocomplete="given-name"><span class="form-error" id="error-nombre" aria-live="polite"></span></div>
             <div class="form-group"><label for="field-apellidos" class="form-label">Apellidos <span class="required" aria-hidden="true">*</span></label><input type="text" id="field-apellidos" name="apellidos" class="form-input" placeholder="Tus apellidos" required autocomplete="family-name"><span class="form-error" id="error-apellidos" aria-live="polite"></span></div>
           </div>
-          
+
           <div class="form-group"><label for="field-email" class="form-label">Correo electrónico <span class="required" aria-hidden="true">*</span></label><input type="email" id="field-email" name="email" class="form-input" placeholder="correo@ejemplo.com" required autocomplete="email"><span class="form-error" id="error-email" aria-live="polite"></span></div>
           <div class="form-group"><label for="field-telefono" class="form-label">Número de teléfono <span class="optional">(opcional)</span></label><input type="tel" id="field-telefono" name="telefono" class="form-input" placeholder="664 000 0000" autocomplete="tel"></div>
-          
+
           <div class="form-group">
             <label for="field-campus" class="form-label">Campus de egreso <span class="required" aria-hidden="true">*</span></label>
             <select id="field-campus" name="campus" class="form-select" required>
@@ -221,14 +224,21 @@
             <select id="field-carrera" name="carrera" class="form-select" required disabled>
               <option value="">Primero selecciona una facultad</option>
             </select>
-            <input type="text" id="field-carrera-otra" name="carrera_otra" class="form-input" placeholder="Escribe el nombre de tu carrera" style="display: none; margin-top: 10px;">
+            <!-- FIX: inline style movido; se controla con clase .is-visible via JS -->
+            <input type="text" id="field-carrera-otra" name="carrera_otra" class="form-input carrera-otra-input" placeholder="Escribe el nombre de tu carrera">
             <span class="form-error" id="error-carrera" aria-live="polite"></span>
           </div>
 
-          <div class="form-row">
-            <div class="form-group"><label for="field-generacion" class="form-label">Generación <span class="required" aria-hidden="true">*</span></label><input type="text" id="field-generacion" name="generacion" class="form-input" placeholder="Ej. 2015-2020" required><span class="form-error" id="error-generacion" aria-live="polite"></span></div>
-            <input type="hidden" id="field-tipo" name="tipo" value="egresado">
+          <!-- FIX: field-generacion fuera del form-row (su par field-tipo es hidden, quedaba huérfano en escritorio) -->
+          <div class="form-group">
+            <label for="field-generacion" class="form-label">Generación <span class="required" aria-hidden="true">*</span></label>
+            <input type="text" id="field-generacion" name="generacion" class="form-input" placeholder="Ej. 2015-2020" required>
+            <span class="form-error" id="error-generacion" aria-live="polite"></span>
           </div>
+
+          <!-- FIX: campo hidden con valor fijo; span error-tipo presente para evitar fallo silencioso en JS -->
+          <input type="hidden" id="field-tipo" name="tipo" value="egresado">
+          <span class="form-error" id="error-tipo" aria-live="polite" hidden></span>
 
           <div class="modal-footer">
             <button type="button" class="btn btn-ghost" onclick="closeModal('modal-registro')">Cancelar</button>
