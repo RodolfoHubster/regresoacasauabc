@@ -130,13 +130,13 @@
           <tr><td colspan="8" class="loading-cell">Cargando asistentes...</td></tr>
         </tbody>
       </table>
+    </div>
 
-      <!-- Empty state -->
-      <div class="table-empty" id="table-empty" hidden>
-        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        <p>No se encontraron registros con los filtros aplicados.</p>
-        <button class="btn btn-ghost" id="btn-clear-filters">Limpiar filtros</button>
-      </div>
+    <!-- Empty state — FUERA del table-wrapper para evitar apilamiento -->
+    <div class="table-empty" id="table-empty" hidden>
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <p>No se encontraron registros con los filtros aplicados.</p>
+      <button class="btn btn-ghost" id="btn-clear-filters">Limpiar filtros</button>
     </div>
 
   </main>
@@ -156,17 +156,23 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Estado ──
   let allData   = [];
   let sortCol   = -1;
-  let sortDir   = 'asc'; // 'asc' | 'desc'
+  let sortDir   = 'asc';
 
-  const tbody     = document.getElementById('tabla-asistentes');
-  const emptyBox  = document.getElementById('table-empty');
-  const countEl   = document.getElementById('result-count');
+  const tbody        = document.getElementById('tabla-asistentes');
+  const tableWrapper = document.querySelector('.admin-table-wrapper');
+  const tabla        = document.getElementById('tabla-principal');
+  const emptyBox     = document.getElementById('table-empty');
+  const countEl      = document.getElementById('result-count');
 
   // Filtros
   const inputNombre  = document.getElementById('search-nombre');
   const selTipo      = document.getElementById('filter-tipo');
   const selEstatus   = document.getElementById('filter-estatus');
   const selQr        = document.getElementById('filter-qr');
+
+  // ── Helpers de visibilidad ──
+  function showTable()  { tableWrapper.hidden = false; emptyBox.hidden = true;  }
+  function showEmpty()  { tableWrapper.hidden = true;  emptyBox.hidden = false; }
 
   // ── Fetch ──
   fetch(`php/get_asistentes_evento.php?evento_id=${eventoId}`)
@@ -186,17 +192,14 @@ document.addEventListener('DOMContentLoaded', () => {
   // ── Render ──
   function renderTable(data) {
     tbody.innerHTML = '';
-    const tableWrapper = document.querySelector('.admin-table-wrapper');
 
     if (data.length === 0) {
-      emptyBox.hidden = false;
-      tableWrapper.querySelector('table').style.display = 'none';
+      showEmpty();
       countEl.textContent = '0';
       return;
     }
 
-    emptyBox.hidden = true;
-    tableWrapper.querySelector('table').style.display = '';
+    showTable();
     countEl.textContent = data.length;
 
     data.forEach(a => {
@@ -204,11 +207,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const carrera  = a.carrera_nombre  || a.carrera_otra  || 'N/A';
       const nombre   = `${a.apellidos || ''}, ${a.nombre || ''}`;
       const estatus  = a.estatus || 'pendiente';
-      // FIX: el campo en BD es correo_enviado, no qr_enviado
       const qr       = a.correo_enviado == 1 ? 'enviado' : 'no_enviado';
       const tipo     = a.tipo_asistente || 'N/A';
 
-      // badges
       const badgeEstatus = `<span class="badge badge--${estatus}">${capitalize(estatus)}</span>`;
       const badgeQr      = qr === 'enviado'
         ? `<span class="badge badge--success">Enviado</span>`
@@ -226,7 +227,6 @@ document.addEventListener('DOMContentLoaded', () => {
         <td data-label="Estatus">${badgeEstatus}</td>
         <td data-label="QR">${badgeQr}</td>
       `;
-      // guardar valores originales para sort/filter
       tr.dataset.nombre  = nombre.toLowerCase();
       tr.dataset.correo  = (a.correo || '').toLowerCase();
       tr.dataset.tipo    = tipo.toLowerCase();
@@ -258,8 +258,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     countEl.textContent = visible;
-    emptyBox.hidden = visible > 0;
-    document.querySelector('#tabla-principal').style.display = visible === 0 ? 'none' : '';
+
+    if (visible === 0) {
+      showEmpty();
+    } else {
+      showTable();
+    }
   }
 
   inputNombre.addEventListener('input',  applyFilters);
@@ -287,13 +291,11 @@ document.addEventListener('DOMContentLoaded', () => {
         sortDir = 'asc';
       }
 
-      // Actualizar clases de iconos
       document.querySelectorAll('th.sortable').forEach(t => {
         t.classList.remove('sort-asc', 'sort-desc');
       });
       th.classList.add(sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
 
-      // Ordenar filas visibles
       const rows = Array.from(tbody.querySelectorAll('tr:not([hidden])'));
       rows.sort((a, b) => {
         const tdA = a.querySelectorAll('td')[col];
