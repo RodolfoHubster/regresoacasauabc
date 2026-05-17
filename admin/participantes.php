@@ -204,7 +204,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const carrera  = a.carrera_nombre  || a.carrera_otra  || 'N/A';
       const nombre   = `${a.apellidos || ''}, ${a.nombre || ''}`;
       const estatus  = a.estatus || 'pendiente';
-      const qr       = a.qr_enviado == 1 ? 'enviado' : 'no_enviado';
+      // FIX: el campo en BD es correo_enviado, no qr_enviado
+      const qr       = a.correo_enviado == 1 ? 'enviado' : 'no_enviado';
       const tipo     = a.tipo_asistente || 'N/A';
 
       // badges
