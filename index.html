@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Regresa a Casa – UABC</title>
+  <link rel="icon" href="assets/images/Alumni.ico" type="image/x-icon">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -19,12 +20,9 @@
     <div class="header-inner">
 
       <div class="header-left">
-        <a href="index.html" class="header-logo" aria-label="Regresa a Casa UABC – Inicio">
-          <img src="assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="64" height="64" loading="eager" class="header-logo-img">
+        <a href="https://www.uabc.mx/" target="_blank" rel="noopener" class="header-logo" aria-label="UABC Principal" style="display: flex; align-items: center; gap: 12px; text-decoration: none; margin-left: 15px;">
+          <img src="assets/images/LogoUabc.png" alt="Logo UABC" width="50" height="64" style="object-fit: contain;" loading="eager" class="header-logo-img">
         </a>
-        <div class="header-left-text">
-          <p class="header-dept">Comunidad de egresadas y egresados de la UABC</p>
-        </div>
       </div>
 
       <div class="header-center">
@@ -89,8 +87,11 @@
       <div class="container">
         <div class="hero-card">
           <h1 class="hero-title">Bienvenido a <span class="text-gold">Regresa a Casa</span></h1>
-          <p class="hero-desc">El espacio oficial para egresados UABC. Consulta los eventos disponibles, regístrate fácilmente y recibe tu QR de confirmación directo en tu correo.</p>
-          <a href="#eventos" class="btn btn-primary btn-lg">Ver Eventos Disponibles</a>
+          <p class="hero-desc">El espacio oficial para egresadas y egresados UABC.
+              Reencuéntrate con tu generación, revive momentos universitarios y celebra el orgullo de ser Cimarrón.</p>
+        </div>
+        <div style="width: 100%; display: flex; justify-content: center; margin-top: 30px; margin-bottom: 20px;">
+          <img src="assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="150" style="filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.3));">
         </div>
       </div>
     </section>
@@ -162,8 +163,14 @@
   <footer class="site-footer">
     <div class="container">
       <div class="footer-inner">
-        <p class="footer-copy">© 2025 Universidad Autónoma de Baja California · Dirección de Egresados</p>
+        <p class="footer-copy">© 2026 Universidad Autónoma de Baja California  Coordinación General de Vinculación y Cooperación Académica</p>
         <p class="footer-tagline">Por la realización plena del ser</p>
+        <div style="margin-top: 20px; font-size: 0.85rem; opacity: 0.8;">
+          <p>Plataforma desarrollada por: 
+            Rodolfo Huitron Leyva.
+            Josue Fernando Robledo Zuñiga.
+            Juan Carlos Cruz Hernandez. </p>
+        </div>
       </div>
     </div>
   </footer>
@@ -214,12 +221,13 @@
             <select id="field-carrera" name="carrera" class="form-select" required disabled>
               <option value="">Primero selecciona una facultad</option>
             </select>
+            <input type="text" id="field-carrera-otra" name="carrera_otra" class="form-input" placeholder="Escribe el nombre de tu carrera" style="display: none; margin-top: 10px;">
             <span class="form-error" id="error-carrera" aria-live="polite"></span>
           </div>
 
           <div class="form-row">
             <div class="form-group"><label for="field-generacion" class="form-label">Generación <span class="required" aria-hidden="true">*</span></label><input type="text" id="field-generacion" name="generacion" class="form-input" placeholder="Ej. 2015-2020" required><span class="form-error" id="error-generacion" aria-live="polite"></span></div>
-            <div class="form-group"><label for="field-tipo" class="form-label">Tipo de asistente <span class="required" aria-hidden="true">*</span></label><select id="field-tipo" name="tipo" class="form-select" required><option value="">Selecciona...</option><option value="egresado">Egresado</option><option value="estudiante">Estudiante</option><option value="docente">Docente</option><option value="administrativo">Administrativo</option><option value="invitado">Invitado especial</option></select><span class="form-error" id="error-tipo" aria-live="polite"></span></div>
+            <input type="hidden" id="field-tipo" name="tipo" value="egresado">
           </div>
 
           <div class="modal-footer">
@@ -246,61 +254,25 @@
     </div>
   </div>
 
-  <!-- MODAL INFO TIJUANA -->
-  <div class="modal-overlay" id="info-tijuana" role="dialog" aria-modal="true" aria-labelledby="info-tijuana-title" hidden>
+  <div class="modal-overlay" id="modal-info-dinamico" role="dialog" aria-modal="true" aria-labelledby="info-dinamico-title" hidden>
     <div class="modal modal--info">
       <div class="modal-header">
-        <h2 class="modal-title" id="info-tijuana-title">Regresa a Casa – Tijuana 2025</h2>
-        <button class="modal-close" onclick="closeModal('info-tijuana')" aria-label="Cerrar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        <h2 class="modal-title" id="info-dinamico-title">Cargando...</h2>
+        <button class="modal-close" onclick="closeModal('modal-info-dinamico')" aria-label="Cerrar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       </div>
       <div class="modal-body">
-        <img src="assets/images/486642144_1054752733356249_5093856031880116704_n.jpg" alt="Banner Tijuana 2025" class="info-banner" loading="lazy">
+        <img src="" id="info-dinamico-img" alt="Banner del Evento" class="info-banner" loading="lazy">
         <div class="info-highlights">
-          <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><div><span class="info-highlight-label">Fecha y hora</span><span class="info-highlight-value">15 de Agosto, 2025 · 10:00 AM</span></div></div>
-          <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><div><span class="info-highlight-label">Ubicación</span><span class="info-highlight-value">Campus Tijuana – Auditorio Central</span></div></div>
-          <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><div><span class="info-highlight-label">Acceso</span><span class="info-highlight-value">Puertas abren a las 9:30 AM</span></div></div>
-          <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg><div><span class="info-highlight-label">Estacionamiento</span><span class="info-highlight-value">Gratuito para egresados registrados</span></div></div>
+          <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><div><span class="info-highlight-label">Fecha y hora</span><span class="info-highlight-value" id="info-dinamico-fecha"></span></div></div>
+          <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><div><span class="info-highlight-label">Ubicación</span><span class="info-highlight-value" id="info-dinamico-ubicacion"></span></div></div>
         </div>
         <div class="info-rich-content">
           <h3>Acerca del evento</h3>
-          <p>El evento <strong>Regresa a Casa</strong> es el reencuentro oficial de egresados UABC del campus Tijuana.</p>
-          <h3>Programa destacado</h3>
-          <ul><li>Bienvenida institucional por el Rector</li><li>Panel de egresados exitosos</li><li>Networking y convivio</li><li>Reconocimientos a generaciones especiales</li></ul>
-          <div class="info-callout"><strong>Vestimenta recomendada:</strong> Semiformal. Los colores institucionales (verde y dorado) son bienvenidos.</div>
+          <p id="info-dinamico-desc"></p>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-ghost" onclick="closeModal('info-tijuana')">Cerrar</button>
-          <button class="btn btn-primary" onclick="closeModal('info-tijuana'); openModal('modal-registro', 'Regresa a Casa – Tijuana 2025', 'assets/images/486642144_1054752733356249_5093856031880116704_n.jpg')">Registrarme a este evento</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- MODAL INFO MEXICALI -->
-  <div class="modal-overlay" id="info-mexicali" role="dialog" aria-modal="true" aria-labelledby="info-mexicali-title" hidden>
-    <div class="modal modal--info">
-      <div class="modal-header">
-        <h2 class="modal-title" id="info-mexicali-title">Regresa a Casa – Mexicali 2025</h2>
-        <button class="modal-close" onclick="closeModal('info-mexicali')" aria-label="Cerrar"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-      </div>
-      <div class="modal-body">
-        <img src="assets/images/egresados-tijuana2.jpg" alt="Banner Mexicali 2025" class="info-banner" loading="lazy">
-        <div class="info-highlights">
-          <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><div><span class="info-highlight-label">Fecha y hora</span><span class="info-highlight-value">22 de Octubre, 2025 · 9:00 AM</span></div></div>
-          <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><div><span class="info-highlight-label">Ubicación</span><span class="info-highlight-value">Campus Mexicali – Centro de Convenciones</span></div></div>
-          <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><div><span class="info-highlight-label">Acceso</span><span class="info-highlight-value">Puertas abren a las 8:30 AM</span></div></div>
-          <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg><div><span class="info-highlight-label">Estacionamiento</span><span class="info-highlight-value">Gratuito para egresados registrados</span></div></div>
-        </div>
-        <div class="info-rich-content">
-          <h3>Acerca del evento</h3>
-          <p>Celebración anual de egresados en el campus Mexicali. Talleres, conferencias y actividades de integración.</p>
-          <h3>Programa destacado</h3>
-          <ul><li>Talleres de desarrollo profesional</li><li>Conferencias de egresados destacados</li><li>Mesa de oportunidades laborales</li><li>Actividades culturales y convivio</li></ul>
-          <div class="info-callout"><strong>Vestimenta recomendada:</strong> Semiformal. No se permite ropa deportiva ni de playa.</div>
-        </div>
-        <div class="modal-footer">
-          <button class="btn btn-ghost" onclick="closeModal('info-mexicali')">Cerrar</button>
-          <button class="btn btn-primary" onclick="closeModal('info-mexicali'); openModal('modal-registro', 'Regresa a Casa – Mexicali 2025', 'assets/images/egresados-tijuana2.jpg')">Registrarme a este evento</button>
+          <button class="btn btn-ghost" onclick="closeModal('modal-info-dinamico')">Cerrar</button>
+          <button id="info-dinamico-btn-registro" class="btn btn-primary">Registrarme a este evento</button>
         </div>
       </div>
     </div>

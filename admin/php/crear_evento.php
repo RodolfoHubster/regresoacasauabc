@@ -5,6 +5,7 @@ header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
+        $campus_id = $_POST['campus_id'] ?? null;
         $nombre = $_POST['nombre'] ?? '';
         $descripcion = $_POST['descripcion'] ?? '';
         $fecha = $_POST['fecha'] ?? '';
@@ -19,11 +20,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        $sql = "INSERT INTO evento (nombre, descripcion, fecha, hora, ubicacion, imagen, estado) 
-                VALUES (:nombre, :descripcion, :fecha, :hora, :ubicacion, :imagen, :estado)";
+        $sql = "INSERT INTO evento (campus_id, nombre, descripcion, fecha, hora, ubicacion, imagen, estado) 
+                VALUES (:campus_id, :nombre, :descripcion, :fecha, :hora, :ubicacion, :imagen, :estado)";
         
         $stmt = $conexion->prepare($sql);
         $stmt->execute([
+            ':campus_id' => $campus_id,
             ':nombre' => $nombre,
             ':descripcion' => $descripcion,
             ':fecha' => $fecha,

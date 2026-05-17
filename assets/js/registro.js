@@ -153,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 opt.textContent = `${f.codigo || ''} - ${f.nombre}`;
                 facultadSelect.appendChild(opt);
               });
+              // ELIMINAMOS LA LÍNEA QUE AGREGABA "OTRA" A LA FACULTAD AQUÍ
             }
           })
           .catch(err => console.error('Error cargando facultades:', err));
@@ -165,6 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const facultadId = this.value;
       carreraSelect.innerHTML = '<option value="">Selecciona tu carrera</option>';
 
+      // Como la facultad ya no puede ser "otra", volvemos a la validación normal
       if (facultadId) {
         carreraSelect.disabled = false;
         fetch(`php/get_carreras.php?facultad_id=${facultadId}`)
@@ -177,6 +179,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 opt.textContent = c.nombre;
                 carreraSelect.appendChild(opt);
               });
+              // SÍ MANTENEMOS LA OPCIÓN "OTRA" EN LA CARRERA
+              carreraSelect.insertAdjacentHTML('beforeend', '<option value="otra" style="font-weight: bold; color: var(--uabc-verde);">Otra (Escribir manual)</option>');
             }
           })
           .catch(err => console.error('Error cargando carreras:', err));
@@ -248,3 +252,27 @@ function resetFormulario(form) {
   if (fac) { fac.innerHTML = '<option value="">Primero selecciona un campus</option>'; fac.disabled = true; }
   if (car) { car.innerHTML = '<option value="">Primero selecciona una facultad</option>'; car.disabled = true; }
 }
+
+// Mostrar/Ocultar input de "Otra Carrera"
+const selectCarrera = document.getElementById('field-carrera');
+if (selectCarrera) {
+    selectCarrera.addEventListener('change', function() {
+        const inputOtra = document.getElementById('field-carrera-otra');
+        // Validamos que la caja de texto realmente exista antes de cambiar su estilo
+        if (inputOtra) {
+            if (this.value === 'otra') {
+                inputOtra.style.display = 'block';
+                inputOtra.required = true;
+            } else {
+                inputOtra.style.display = 'none';
+                inputOtra.required = false;
+                inputOtra.value = '';
+            }
+        }
+    });
+}
+
+// Inyectar la opción "Otra" después de cargar datos del servidor (interceptando las peticiones fetch si es necesario)
+// Si ya tienes funciones como cargarFacultades(), asegúrate de agregar esto al final de tu ciclo de llenado:
+// selectFacultad.insertAdjacentHTML('beforeend', '<option value="otra">Otra...</option>');
+// selectCarrera.insertAdjacentHTML('beforeend', '<option value="otra">Otra...</option>');

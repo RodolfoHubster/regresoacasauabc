@@ -26,16 +26,16 @@ function loadPublicEventos() {
 
         result.data.forEach(evento => {
           const isProximo = evento.estado === 'proximo';
-          const isCerrado = evento.estado === 'cerrado';
+          if (evento.estado === 'cerrado') return;
           
           let badgeClass = '';
           let badgeText = 'Disponible';
           if (isProximo) { badgeClass = 'event-badge--pronto'; badgeText = 'Próximamente'; }
-          if (isCerrado) { badgeClass = 'event-badge--cerrado'; badgeText = 'Cerrado'; }
+          
 
-          const btnText = isProximo ? 'Próximamente' : (isCerrado ? 'Cerrado' : 'Registrarme');
-          const btnDisabled = (isProximo || isCerrado) ? 'disabled' : '';
-          const btnClass = (isProximo || isCerrado) ? 'btn-secondary' : 'btn-primary';
+          const btnText = isProximo ? 'Próximamente' : 'Registrarme';
+          const btnDisabled = isProximo ? 'disabled' : '';
+          const btnClass = isProximo ? 'btn-secondary' : 'btn-primary';
 
           const imgUrl = evento.imagen || 'assets/images/download.jpg';
 
@@ -59,7 +59,7 @@ function loadPublicEventos() {
                 </ul>
                 <p class="event-card-desc">${evento.descripcion || 'Sin descripción'}</p>
                 <div class="event-card-actions">
-                  <button class="btn btn-outline-primary" ${btnDisabled}>Información</button>
+                  <button class="btn btn-outline-primary" ${btnDisabled} onclick="openModalInfo(${evento.id})">Información</button>
                   <button class="btn ${btnClass} btn-registrar" ${btnDisabled} data-id="${evento.id}" onclick="openModalRegistro(${evento.id})">${btnText}</button>
                 </div>
               </div>
@@ -93,7 +93,7 @@ function openModalRegistro(id) {
   const banner = document.getElementById('modal-event-banner');
   const label  = document.getElementById('modal-event-label');
   if (banner && evento.imagen) banner.style.backgroundImage = `url('${evento.imagen}')`;
-  if (label) label.textContent = '📅 ' + evento.nombre;
+  if (label) label.textContent = ' ' + evento.nombre;
 
   const hiddenName = document.getElementById('field-evento');
   const hiddenId = document.getElementById('field-evento-id');
@@ -156,3 +156,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+
+// Nueva función para abrir el modal dinámico de información
+function openModalInfo(id) {
+  // Buscamos el evento en la lista cargada de la BD
+  const evento = publicEventos.find(e => e.id == id);
+  if (!evento) return;
+
+  // Llenamos los datos dinámicamente en el HTML
+  document.getElementById('info-dinamico-title').textContent = evento.nombre;
+  document.getElementById('info-dinamico-img').src = evento.imagen || 'assets/images/download.jpg';
+  document.getElementById('info-dinamico-fecha').textContent = `${evento.fecha} · ${evento.hora}`;
+  document.getElementById('info-dinamico-ubicacion').textContent = evento.ubicacion;
+  document.getElementById('info-dinamico-desc').textContent = evento.descripcion || 'Sin descripción detallada disponible.';
+
+  // Configuramos el botón verde para que abra el registro de ESTE evento en particular
+  const btnRegistro = document.getElementById('info-dinamico-btn-registro');
+  btnRegistro.onclick = () => {
+    closeModal('modal-info-dinamico');
+    openModalRegistro(evento.id);
+  };
+
+  // Finalmente, abrimos el modal
+  openModal('modal-info-dinamico');
+}
