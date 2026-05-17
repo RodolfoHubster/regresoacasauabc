@@ -74,13 +74,18 @@
                     // Dentro del fetch de cargarParticipantes...
                     // Busca esta parte en el script de participantes.html
                     result.data.forEach(asistente => {
+                        // Validamos de dónde viene el nombre de la facultad y carrera
+                        const nombreFacultad = asistente.facultad_nombre || asistente.facultad_otra || 'No especificada';
+                        const nombreCarrera = asistente.carrera_nombre || asistente.carrera_otra || 'No especificada';
+
                         const row = `
                             <tr>
                                 <td><strong>${asistente.apellidos}, ${asistente.nombre}</strong></td>
                                 <td>${asistente.correo}</td>
                                 <td>${asistente.campus_nombre || 'N/A'}</td>
-                                <td>${asistente.facultad_nombre || 'N/A'}</td> <td>${asistente.carrera_nombre || 'N/A'}</td>
-                                <td><span class="badge badge--gray">${asistente.tipo_asistente}</span></td>
+                                <td>${nombreFacultad}</td> 
+                                <td>${nombreCarrera}</td>
+                                <td><span class="badge badge--gray">${asistente.tipo_asistente || 'N/A'}</span></td>
                             </tr>
                         `;
                         tbody.innerHTML += row;

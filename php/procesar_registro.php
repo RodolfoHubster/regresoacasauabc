@@ -20,8 +20,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $campus_id = $_POST['campus'] ?? '';
         $facultad_id = $_POST['facultad'] ?? '';
         $carrera_id = $_POST['carrera'] ?? '';
+        $carrera_input = $_POST['carrera'] ?? '';
+        $carrera_id = ($carrera_input === 'otra' || empty($carrera_input)) ? null : $carrera_input;
+        $facultad_otra = null;
+        $carrera_otra = $_POST['carrera_otra'] ?? null;
         $generacion = $_POST['generacion'] ?? '';
-        $tipo_asistente = $_POST['tipo'] ?? '';
+        $tipo_asistente = $_POST['tipo'] ?? 'egresado';
 
         // Validar que el evento_id no esté vacío
         if (empty($nombre) || empty($correo) || empty($campus_id) || empty($evento_id)) {
@@ -54,8 +58,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // 2. Guardar en la base de datos
         $sql = "INSERT INTO registro_asistente 
-                (evento_id, qr_codigo, nombre, apellidos, correo, telefono, campus_id, facultad_id, carrera_id, generacion, tipo_asistente) 
-                VALUES (:evento_id, :qr_codigo, :nombre, :apellidos, :correo, :telefono, :campus_id, :facultad_id, :carrera_id, :generacion, :tipo_asistente)";
+                (evento_id, qr_codigo, nombre, apellidos, correo, telefono, campus_id, facultad_id, facultad_otra, carrera_id, carrera_otra, generacion, tipo_asistente) 
+                VALUES (:evento_id, :qr_codigo, :nombre, :apellidos, :correo, :telefono, :campus_id, :facultad_id, :facultad_otra, :carrera_id, :carrera_otra, :generacion, :tipo_asistente)";
         
         $stmt = $conexion->prepare($sql);
         $stmt->execute([
@@ -67,7 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':telefono' => $telefono,
             ':campus_id' => $campus_id,
             ':facultad_id' => $facultad_id,
+            ':facultad_otra' => $facultad_otra, // NUEVA VARIABLE
             ':carrera_id' => $carrera_id,
+            ':carrera_otra' => $carrera_otra, // NUEVA VARIABLE
             ':generacion' => $generacion,
             ':tipo_asistente' => $tipo_asistente
         ]);
@@ -136,9 +142,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             
                             <tr>
                                 <td align="center" class="header-bg" style="background-color: #00723F; background: linear-gradient(#00723F, #00723F); padding: 30px 20px; color: #ffffff;">
-                                    <img src="https://cimahub-fcitec.tij.uabc.mx/img/LogoUabc.png" alt="Logo UABC" width="80" style="display: block; margin-bottom: 15px;">
+                                    <img src="https://cimahub-fcitec.tij.uabc.mx/regresoacasauabc/assets/images/LogoUabc.png" alt="Logo UABC" width="80" style="display: block; margin-bottom: 15px;">
                                     <h2 style="margin: 0; font-size: 20px; font-weight: normal; color: #ffffff;">Universidad Autónoma de Baja California</h2>
-                                    <p class="text-gold" style="margin: 5px 0 0 0; color: #F2A900; font-size: 16px; font-weight: bold;">Comunidad de egresadas y egresados</p>
+                                    <p class="text-gold" style="margin: 5px 0 0 0; color: #F2A900; font-size: 16px; font-weight: bold;">Reencuentro de egresadas y egresados</p>
                                 </td>
                             </tr>
 

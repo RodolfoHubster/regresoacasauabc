@@ -377,7 +377,7 @@ function renderTablaAsistentes(datos) {
   tbody.innerHTML = ''; 
 
   if (datos.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No se encontraron registros para este evento.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No se encontraron registros para este filtro.</td></tr>';
       return;
   }
 
@@ -399,6 +399,9 @@ function renderTablaAsistentes(datos) {
 
       const nombreEvento = asistente.evento_nombre || 'Evento no asignado';
 
+      // NUEVO: Validamos de dónde viene el nombre de la carrera
+      const nombreCarrera = asistente.carrera_nombre || asistente.carrera || asistente.carrera_otra || 'No especificada';
+
       tr.innerHTML = `
           <td>
             <div class="user-info">
@@ -407,9 +410,9 @@ function renderTablaAsistentes(datos) {
             </div>
           </td>
           <td>${asistente.correo}</td>
-          <td>${asistente.campus}</td>
+          <td>${asistente.campus || 'N/A'}</td>
           <td>
-             <span style="font-weight: 600;">${asistente.carrera || 'N/A'}</span><br>
+             <span style="font-weight: 600;">${nombreCarrera}</span><br>
              <small style="color: #666;">Gen: ${asistente.generacion || 'N/A'}</small>
           </td>
           <td><span class="badge ${badgeTipo}">${tipoAsistente}</span></td>
