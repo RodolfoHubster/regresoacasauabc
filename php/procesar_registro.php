@@ -5,8 +5,9 @@ require_once __DIR__ . '/../admin/php/conexion.php';
 
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+use Google\Client;
+use Google\Service\Gmail;
+use Google\Service\Gmail\Message;
 
 header('Content-Type: application/json');
 
@@ -19,7 +20,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $telefono = $_POST['telefono'] ?? null;
         $campus_id = $_POST['campus'] ?? '';
         $facultad_id = $_POST['facultad'] ?? '';
-        $carrera_id = $_POST['carrera'] ?? '';
         $carrera_input = $_POST['carrera'] ?? '';
         $carrera_id = ($carrera_input === 'otra' || empty($carrera_input)) ? null : $carrera_input;
         $facultad_otra = null;
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception("Faltan campos obligatorios (incluyendo el ID del evento).");
         }
 
-        // --- NUEVO: OBTENER DATOS DEL EVENTO PARA EL CORREO ---
+        // --- OBTENER DATOS DEL EVENTO PARA EL CORREO ---
         $sql_evento = "SELECT e.*, c.nombre as campus_nombre 
                        FROM evento e 
                        LEFT JOIN campus c ON e.campus_id = c.id 
@@ -71,9 +71,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':telefono' => $telefono,
             ':campus_id' => $campus_id,
             ':facultad_id' => $facultad_id,
-            ':facultad_otra' => $facultad_otra, // NUEVA VARIABLE
+            ':facultad_otra' => $facultad_otra, 
             ':carrera_id' => $carrera_id,
-            ':carrera_otra' => $carrera_otra, // NUEVA VARIABLE
+            ':carrera_otra' => $carrera_otra, 
             ':generacion' => $generacion,
             ':tipo_asistente' => $tipo_asistente
         ]);
@@ -86,42 +86,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $qr_path = sys_get_temp_dir() . '/' . $qr_codigo . '.png';
         $result->saveToFile($qr_path);
 
-        // 4. Enviar el correo con PHPMailer
-        $mail = new PHPMailer(true);
-        $mail->isSMTP();
-        $mail->Host       = $_ENV['MAIL_HOST'];
-        $mail->SMTPAuth   = true;
-        $mail->Username   = $_ENV['MAIL_USER'];
-        $mail->Password   = $_ENV['MAIL_PASS'];
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-        $mail->Port       = $_ENV['MAIL_PORT'];
-        $mail->CharSet    = 'UTF-8';
+        // 4. PREPARAR CLIENTE DE GOOGLE GMAIL API
+        $client = new Client();
+        // Rutas absolutas a los archivos JSON en la raíz de tu proyecto
+        $client->setAuthConfig(__DIR__ . '/../credentials.json');
+        $client->setScopes([Gmail::GMAIL_SEND]);
+        $client->setAccessType('offline');
 
-        $mail->setFrom($_ENV['MAIL_USER'], 'Regreso a Casa UABC');
-        $mail->addAddress($correo, $nombre . ' ' . $apellidos);
-        
-        // Incrustamos el QR generado en el cuerpo del correo (CID) y también lo dejamos como adjunto
-        $mail->addEmbeddedImage($qr_path, 'qr_img', 'Tu_Codigo_QR.png');
+        $tokenData = json_decode(file_get_contents(__DIR__ . '/../token.json'), true);
+        $client->setAccessToken($tokenData);
 
-        $mail->isHTML(true);
+        if ($client->isAccessTokenExpired()) {
+            $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+            file_put_contents(__DIR__ . '/../token.json', json_encode($client->getAccessToken()));
+        }
+
+        $service = new Gmail($client);
+
+        // 5. CONSTRUIR EL CORREO
+        $asunto = 'Boleto para ' . $evento_data['nombre'] . ' - Reencuentro de egresadas y egresados de UABC, Campus ' . $evento_data['campus_nombre'];
         
-        // --- ASUNTO DINÁMICO ---
-        $mail->Subject = 'Boleto para ' . $evento_data['nombre'] . ' - Reencuentro de egresadas y egresados de UABC, Campus ' . $evento_data['campus_nombre'];
-        
-        // --- CUERPO DEL CORREO HTML ---
-        $mail->Body = '
+        $cuerpo_html = '
         <!DOCTYPE html>
         <html lang="es" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <meta name="color-scheme" content="light only">
-            <meta name="supported-color-schemes" content="light only">
             <title>Tu Boleto UABC</title>
             <style>
                 :root { color-scheme: light only; supported-color-schemes: light only; }
-                
-                /* Forzar estilos en clientes que ignoran las metas */
                 @media (prefers-color-scheme: dark) {
                     .body-bg { background-color: #f4f4f4 !important; }
                     .content-bg { background-color: #ffffff !important; }
@@ -142,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             
                             <tr>
                                 <td align="center" class="header-bg" style="background-color: #00723F; background: linear-gradient(#00723F, #00723F); padding: 30px 20px; color: #ffffff;">
-                                    <img src="https://cimahub-fcitec.tij.uabc.mx/regresaacasa/assets/images/LogoUabc.png" alt="Logo UABC" width="80" style="display: block; margin-bottom: 15px;">
+                                    <img src="https://cimahub-fcitec.tij.uabc.mx/regresoacasa/assets/images/LogoUabc.png" alt="Logo UABC" width="80" style="display: block; margin-bottom: 15px;">
                                     <h2 style="margin: 0; font-size: 20px; font-weight: normal; color: #ffffff;">Universidad Autónoma de Baja California</h2>
                                     <p class="text-gold" style="margin: 5px 0 0 0; color: #F2A900; font-size: 16px; font-weight: bold;">Reencuentro de egresadas y egresados</p>
                                 </td>
@@ -217,17 +210,53 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </html>
         ';
 
-        $mail->send();
+        // Construir el mensaje MIME (Multipart/Related para adjuntar e incrustar la imagen)
+        $boundary = uniqid('np');
+        $qrData = base64_encode(file_get_contents($qr_path));
+        
+        // Es importante definir el correo del remitente correctamente. Cámbialo si tu cuenta autorizada es diferente
+        $correo_remitente = 'egresados@uabc.edu.mx'; 
 
-        // Actualizamos estado de envío
+        $rawMessage = "MIME-Version: 1.0\r\n";
+        $rawMessage .= "From: Regreso a Casa UABC <$correo_remitente>\r\n";
+        $rawMessage .= "To: $nombre_completo <$correo>\r\n";
+        $rawMessage .= "Subject: =?utf-8?B?" . base64_encode($asunto) . "?=\r\n";
+        $rawMessage .= "Content-Type: multipart/related; boundary=\"$boundary\"\r\n\r\n";
+
+        // Parte HTML
+        $rawMessage .= "--$boundary\r\n";
+        $rawMessage .= "Content-Type: text/html; charset=UTF-8\r\n";
+        $rawMessage .= "Content-Transfer-Encoding: base64\r\n\r\n";
+        $rawMessage .= base64_encode($cuerpo_html) . "\r\n\r\n";
+
+        // Parte Imagen (QR incrustado)
+        $rawMessage .= "--$boundary\r\n";
+        $rawMessage .= "Content-Type: image/png; name=\"Tu_Codigo_QR.png\"\r\n";
+        $rawMessage .= "Content-Disposition: inline; filename=\"Tu_Codigo_QR.png\"\r\n";
+        $rawMessage .= "Content-Transfer-Encoding: base64\r\n";
+        $rawMessage .= "Content-ID: <qr_img>\r\n\r\n";
+        $rawMessage .= $qrData . "\r\n\r\n";
+        
+        $rawMessage .= "--$boundary--";
+
+        // Codificar el mensaje final (Base64Url requerido por Gmail API)
+        $encoded = rtrim(strtr(base64_encode($rawMessage), '+/', '-_'), '=');
+
+        $message = new Message();
+        $message->setRaw($encoded);
+
+        // 6. ENVIAR Y LIMPIAR
+        $service->users_messages->send('me', $message);
+
+        // Actualizamos estado de envío en la base de datos
         $conexion->query("UPDATE registro_asistente SET correo_enviado = 1 WHERE qr_codigo = '$qr_codigo'");
         unlink($qr_path); // Borramos el QR temporal
 
-        echo json_encode(['status' => 'success', 'message' => '¡Registro guardado y correo enviado!']);
+        echo json_encode(['status' => 'success', 'message' => '¡Registro guardado y correo enviado con éxito!']);
 
     } catch (Exception $e) {
-        error_log("Error de registro/correo: " . $e->getMessage());
-        echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+        error_log("Error de registro/correo (Google API): " . $e->getMessage());
+        echo json_encode(['status' => 'error', 'message' => "Error al procesar la solicitud: " . $e->getMessage()]);
     }
 }
 ?>
