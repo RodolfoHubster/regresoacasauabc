@@ -142,7 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             
                             <tr>
                                 <td align="center" class="header-bg" style="background-color: #00723F; background: linear-gradient(#00723F, #00723F); padding: 30px 20px; color: #ffffff;">
-                                    <img src="https://cimahub-fcitec.tij.uabc.mx/regresoacasauabc/assets/images/LogoUabc.png" alt="Logo UABC" width="80" style="display: block; margin-bottom: 15px;">
+                                    <img src="https://cimahub-fcitec.tij.uabc.mx/regresaacasa/assets/images/LogoUabc.png" alt="Logo UABC" width="80" style="display: block; margin-bottom: 15px;">
                                     <h2 style="margin: 0; font-size: 20px; font-weight: normal; color: #ffffff;">Universidad Autónoma de Baja California</h2>
                                     <p class="text-gold" style="margin: 5px 0 0 0; color: #F2A900; font-size: 16px; font-weight: bold;">Reencuentro de egresadas y egresados</p>
                                 </td>

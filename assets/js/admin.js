@@ -129,7 +129,7 @@ function showSuccessWithQR(eventId) {
   container.innerHTML = "";
   
   // Forzamos la ruta de tu carpeta específica
-  const eventUrl = `${window.location.origin}/regresoacasauabc/index.html?evento=${soloId}`;
+  const eventUrl = `${window.location.origin}/regresaacasa/index.html?evento=${soloId}`;
   linkInput.value = eventUrl;
 
   new QRCode(container, {
@@ -153,7 +153,7 @@ function verQR(id, nombre) {
   container.innerHTML = "";
   
   // Usamos directamente el ID numérico y la carpeta del proyecto
-  const eventUrl = `${window.location.origin}/regresoacasauabc/index.html?evento=${id}`;
+  const eventUrl = `${window.location.origin}/regresaacasa/index.html?evento=${id}`;
   linkInput.value = eventUrl;
 
   new QRCode(container, {
