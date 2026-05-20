@@ -56,7 +56,7 @@
 }
 
 .header-logo-img {
-  height: 52px;
+  height: 95px;
   width: auto;
   object-fit: contain;
   display: block;
@@ -454,10 +454,12 @@
 
 .event-card-img {
   position: relative;
-  height: 200px;
-  background-size: cover;
+  aspect-ratio: 4 / 1;  /* misma proporción que 800x200 */
+  height: auto;          /* quita el height fijo */
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: center;
-  background-color: var(--uabc-verde);
+  background-color: var(--uabc-verde); /* rellena los lados con el verde UABC */
 }
 
 .event-badge {
@@ -767,9 +769,12 @@
 }
 
 .modal-event-banner {
-  height: 90px;
+  width: 100%;
+  aspect-ratio: 4 / 1;   /* respeta 800x200 = proporción 4:1 */
+  height: auto;           /* quita el height fijo de 90px */
   border-radius: var(--radius-lg);
-  background-size: cover;
+  background-size: contain;
+  background-repeat: no-repeat;
   background-position: center;
   background-color: var(--uabc-verde);
 }
