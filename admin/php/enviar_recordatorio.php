@@ -7,8 +7,9 @@ require_once __DIR__ . '/conexion.php';
 
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+use Google\Client;
+use Google\Service\Gmail;
+use Google\Service\Gmail\Message;
 
 header('Content-Type: application/json');
 
@@ -34,20 +35,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         }
 
-        // 2. Preparar el servidor de correos (Se conecta una sola vez para ser más rápido)
-        $mail = new PHPMailer(true);
-        $mail->isSMTP();
-        $mail->Host       = $_ENV['MAIL_HOST'];
-        $mail->SMTPAuth   = true;
-        $mail->Username   = $_ENV['MAIL_USER'];
-        $mail->Password   = $_ENV['MAIL_PASS'];
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-        $mail->Port       = $_ENV['MAIL_PORT'];
-        $mail->CharSet    = 'UTF-8';
-        $mail->setFrom($_ENV['MAIL_USER'], 'Regreso a Casa UABC');
-        
-        // Mantener la conexión viva (SMTP KeepAlive) para envíos masivos
-        $mail->SMTPKeepAlive = true; 
+        // 2. PREPARAR CLIENTE DE GOOGLE GMAIL API (Se conecta una sola vez)
+        $client = new Client();
+        // Las rutas tienen /../../ porque estamos dentro de la subcarpeta admin/php/
+        $client->setAuthConfig(__DIR__ . '/../../credentials.json');
+        $client->setScopes([Gmail::GMAIL_SEND]);
+        $client->setAccessType('offline');
+
+        $tokenData = json_decode(file_get_contents(__DIR__ . '/../../token.json'), true);
+        $client->setAccessToken($tokenData);
+
+        if ($client->isAccessTokenExpired()) {
+            $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+            file_put_contents(__DIR__ . '/../../token.json', json_encode($client->getAccessToken()));
+        }
+
+        $service = new Gmail($client);
+        $correo_remitente = 'egresados@uabc.edu.mx'; // Cambiar si es necesario
+        $asunto = 'Recordatorio: Regresa a Casa UABC';
 
         $correosEnviadosExitosamente = 0;
         $writer = new PngWriter();
@@ -68,17 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $qr_path = sys_get_temp_dir() . '/' . $qr_codigo . '.png';
                 $result->saveToFile($qr_path);
 
-                // Configurar el correo para esta persona
-                $mail->clearAddresses(); // Limpiar el destinatario anterior
-                $mail->clearAttachments(); // Limpiar el QR anterior
-                
-                $mail->addAddress($persona['correo'], $persona['nombre']);
-                $mail->addAttachment($qr_path, 'Tu_Acceso_QR.png');
-
-                $mail->isHTML(true);
-                $mail->Subject = 'Recordatorio: Regresa a Casa UABC';
-                
-                // Construir el cuerpo del correo
+                // Construir el cuerpo del correo en HTML
                 $bodyHtml = "<div style='font-family: Arial, sans-serif; color: #333; max-width: 600px;'>";
                 $bodyHtml .= "<h2 style='color: #00713d;'>¡Hola " . $persona['nombre'] . "!</h2>";
                 
@@ -90,12 +85,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $bodyHtml .= "<p>Adjunto a este correo encontrarás tu <strong>Código QR de acceso</strong>. Por favor, llévalo en tu celular para agilizar tu entrada.</p>";
                 $bodyHtml .= "<p>Tu código manual es: <strong>$qr_codigo</strong></p><br><p>¡Te esperamos!</p></div>";
 
-                $mail->Body = $bodyHtml;
+                // --- CONSTRUIR EL MENSAJE MIME MULTIPART/MIXED (Para adjuntos normales) ---
+                $boundary = uniqid('np');
+                $qrData = base64_encode(file_get_contents($qr_path));
+                $correo_destino = $persona['correo'];
+                $nombre_destino = $persona['nombre'];
 
-                // Enviar
-                $mail->send();
+                $rawMessage = "MIME-Version: 1.0\r\n";
+                $rawMessage .= "From: Regreso a Casa UABC <$correo_remitente>\r\n";
+                $rawMessage .= "To: $nombre_destino <$correo_destino>\r\n";
+                $rawMessage .= "Subject: =?utf-8?B?" . base64_encode($asunto) . "?=\r\n";
+                $rawMessage .= "Content-Type: multipart/mixed; boundary=\"$boundary\"\r\n\r\n";
+
+                // Parte HTML
+                $rawMessage .= "--$boundary\r\n";
+                $rawMessage .= "Content-Type: text/html; charset=UTF-8\r\n";
+                $rawMessage .= "Content-Transfer-Encoding: base64\r\n\r\n";
+                $rawMessage .= base64_encode($bodyHtml) . "\r\n\r\n";
+
+                // Parte Archivo Adjunto (QR)
+                $rawMessage .= "--$boundary\r\n";
+                $rawMessage .= "Content-Type: image/png; name=\"Tu_Acceso_QR.png\"\r\n";
+                $rawMessage .= "Content-Disposition: attachment; filename=\"Tu_Acceso_QR.png\"\r\n";
+                $rawMessage .= "Content-Transfer-Encoding: base64\r\n\r\n";
+                $rawMessage .= $qrData . "\r\n\r\n";
                 
-                // Marcar como enviado en la BD por si antes estaba en 0
+                $rawMessage .= "--$boundary--";
+
+                // Codificar para la API de Google
+                $encoded = rtrim(strtr(base64_encode($rawMessage), '+/', '-_'), '=');
+
+                $message = new Message();
+                $message->setRaw($encoded);
+
+                // Enviar mediante la API
+                $service->users_messages->send('me', $message);
+                
+                // Marcar como enviado en la BD
                 $conexion->query("UPDATE registro_asistente SET correo_enviado = 1 WHERE id = " . $persona['id']);
                 $correosEnviadosExitosamente++;
 
@@ -103,17 +129,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 unlink($qr_path);
 
             } catch (Exception $e) {
-                error_log("Error enviando recordatorio a " . $persona['correo'] . ": " . $mail->ErrorInfo);
-                continue; // Si falla uno, que siga con el siguiente
+                // Si falla el envío de uno, guardamos el error en el log pero continuamos con el ciclo
+                error_log("Error enviando recordatorio a " . $persona['correo'] . " (Google API): " . $e->getMessage());
+                continue; 
             }
         }
         
-        $mail->smtpClose(); // Cerrar conexión SMTP
-
         echo json_encode(['status' => 'success', 'enviados' => $correosEnviadosExitosamente]);
 
     } catch (Exception $e) {
-        echo json_encode(['status' => 'error', 'message' => 'Error en base de datos.']);
+        error_log("Error general en recordatorios: " . $e->getMessage());
+        echo json_encode(['status' => 'error', 'message' => 'Error al procesar la solicitud de recordatorios.']);
     }
 }
 ?>
