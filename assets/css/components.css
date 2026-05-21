@@ -869,7 +869,7 @@
 
 .info-banner {
   width: 100%;
-  aspect-ratio: 16 / 9;
+  /*aspect-ratio: 16 / 9; */
   height: auto;
   object-fit: contain;
   background-color: var(--color-surface-2);
