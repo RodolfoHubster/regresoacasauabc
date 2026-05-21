@@ -77,12 +77,11 @@
   --content-narrow:  640px;
   --content-default: 960px;
   --content-wide:    1200px;
-}
 
-/* ══════════════════════════════
-   TRANSICIÓN
-══════════════════════════════ */
---transition-interactive: 180ms cubic-bezier(0.16,1,0.3,1);
+
+  /* ─── TRANSICIONES ─── */
+  --transition-interactive: 180ms cubic-bezier(0.16,1,0.3,1);
+}
 
 /* ══════════════════════════════
    CONTENEDOR
