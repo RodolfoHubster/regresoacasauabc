@@ -64,7 +64,7 @@
     border-right: 3px solid var(--uabc-dorado);
   }
   .sidebar-close { display: flex; }
-  .sidebar-toggle { display: flex; }
+  .sidebar-toggle { display: flex !important; }
 }
 
 .sidebar-header {
@@ -190,17 +190,18 @@
   flex-shrink: 0;
   min-height: 56px;
   position: relative;
-  z-index: 10;  /* queda dentro del flujo normal, sin competir con modales */
+  z-index: 10;
 }
 
+/* SIDEBAR TOGGLE — oculto en desktop, visible en móvil */
 .sidebar-toggle {
-  color: var(--uabc-blanco);
   display: none;
+  align-items: center;
+  justify-content: center;
+  color: var(--uabc-blanco);
   padding: 0;
   min-width: 44px;
   min-height: 44px;
-  align-items: center;
-  justify-content: center;
   border-radius: var(--radius-sm);
   background: transparent;
   border: none;
