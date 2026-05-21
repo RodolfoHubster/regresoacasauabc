@@ -738,9 +738,44 @@
 }
 
 /* ══════════════════════════════
+   RESPONSIVE · 480px — KPI tarjetas en columna
+══════════════════════════════ */
+@media (max-width: 480px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+  }
+  .kpi-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-3);
+  }
+  .kpi-value { font-size: var(--text-base); }
+  .kpi-icon { width: 32px; height: 32px; }
+}
+
+/* ══════════════════════════════
    RESPONSIVE · EXTRA CHICO (≤ 400px)
 ══════════════════════════════ */
 @media (max-width: 400px) {
   .kpi-grid { grid-template-columns: 1fr; }
   .admin-main { padding: var(--space-3); }
+
+  /* Sidebar header: reduce padding para que el título no se corte */
+  .sidebar-header {
+    padding: var(--space-4) var(--space-3);
+    gap: var(--space-2);
+  }
+  .sidebar-logo { gap: var(--space-2); }
+  .sidebar-logo-title { font-size: var(--text-xs); }
+  /* Oculta el subtexto — libera espacio para el título */
+  .sidebar-logo-sub { display: none; }
+}
+
+/* ══════════════════════════════
+   RESPONSIVE · 390px — KPI 1 columna
+══════════════════════════════ */
+@media (max-width: 390px) {
+  .kpi-grid { grid-template-columns: 1fr; }
 }
