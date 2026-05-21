@@ -674,6 +674,33 @@
   text-align: center;
 }
 
+.footer-inner ul,
+.footer-inner li,
+.footer-inner h3 {
+  max-width: none;
+  width: 100%;
+  text-align: center;
+}
+
+.footer-inner ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-devs {
+  margin-top: 20px;
+  font-size: 0.85rem;
+  opacity: 0.8;
+  text-align: center;
+}
+
+.integrantes-title {
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #ffbf00;
+}
+
 .footer-copy    { font-size: var(--text-sm); color: rgba(255,255,255,0.75); }
 .footer-tagline { font-size: var(--text-xs); color: rgba(255,255,255,0.45); font-style: italic; }
 
