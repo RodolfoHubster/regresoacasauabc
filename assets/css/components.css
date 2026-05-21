@@ -338,8 +338,10 @@
   color: var(--uabc-blanco);
 }
 
+/* Drop-shadow para el logo Alumni del hero — reemplaza el inline style */
 .hero-alumni-img {
   margin-inline: auto;
+  filter: drop-shadow(0px 4px 6px rgba(0, 0, 0, 0.3));
 }
 
 .hero-card {
@@ -452,6 +454,16 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
   gap: var(--space-8);
+}
+
+/* Texto de carga mientras fetch no ha respondido — reemplaza el inline style */
+.events-loading-text {
+  text-align: center;
+  width: 100%;
+  color: var(--color-text-muted);
+  grid-column: 1 / -1;
+  padding-block: var(--space-10);
+  font-size: var(--text-sm);
 }
 
 .event-card {
@@ -710,37 +722,22 @@
 .footer-copy    { font-size: var(--text-sm); color: rgba(255,255,255,0.75); }
 .footer-tagline { font-size: var(--text-xs); color: rgba(255,255,255,0.45); font-style: italic; }
 
+.footer-credits { font-size: var(--text-xs); color: rgba(255,255,255,0.4); margin-top: var(--space-1); }
+
 /* =====================================================
    MODALES — SISTEMA COMPLETO
    FIX: Desborde en móvil, safe-area, keyboard push-up
    ===================================================== */
-
-/**
- * ESTRUCTURA CORRECTA:
- *   .modal-overlay  → el fondo oscuro, cubre toda la pantalla
- *     .modal        → el panel blanco
- *       .modal-header (sticky)
- *       .modal-body   (scrollable)
- *       .modal-footer
- *
- * REGLA CLAVE: el overlay NO tiene overflow-y:auto.
- * El scroll va solo en .modal con max-height + overflow-y:auto.
- * En móvil el panel es un bottom sheet (border-radius arriba,
- * alineado al fondo) con max-height: 92dvh para dejar espacio
- * al notch/home-bar del teléfono.
- */
 
 .modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.55);
   z-index: 200;
-  /* Desktop: centra el panel */
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--space-4);
-  /* NO overflow-y:auto aquí → el scroll queda dentro del .modal */
   overscroll-behavior: contain;
 }
 
@@ -752,16 +749,12 @@
   box-shadow: var(--shadow-lg);
   width: 100%;
   max-width: 560px;
-  /* max-height con dvh para respetar barra de dirección móvil */
   max-height: min(90dvh, 90vh);
-  /* El scroll va AQUÍ, no en el overlay */
   overflow-y: auto;
   overflow-x: hidden;
   overscroll-behavior: contain;
-  /* Scroll suave en iOS */
   -webkit-overflow-scrolling: touch;
   position: relative;
-  /* Evita que el contenido interno se salga */
   contain: layout;
 }
 
@@ -774,12 +767,10 @@
   justify-content: space-between;
   padding: var(--space-5) var(--space-6);
   border-bottom: 1px solid var(--color-divider);
-  /* Sticky dentro del scroll del .modal */
   position: sticky;
   top: 0;
   background: var(--color-surface);
   z-index: 1;
-  /* Evita que el blur del sticky se pierda en iOS */
   -webkit-backdrop-filter: blur(0);
   backdrop-filter: blur(0);
 }
@@ -789,7 +780,6 @@
   font-size: var(--text-lg);
   font-weight: 700;
   color: var(--color-text);
-  /* Evitar que el título largo empuje el botón X fuera */
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -801,7 +791,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* Target táctil mínimo 44x44 */
   width: 44px;
   height: 44px;
   border-radius: var(--radius-md);
@@ -822,7 +811,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  /* Importante: NO overflow aquí. El scroll lo maneja .modal */
   min-height: 0;
 }
 
@@ -834,7 +822,6 @@
   gap: var(--space-3);
   padding: var(--space-4) var(--space-6);
   border-top: 1px solid var(--color-divider);
-  /* Sticky al fondo del panel */
   position: sticky;
   bottom: 0;
   background: var(--color-surface);
@@ -850,7 +837,6 @@
   background-repeat: no-repeat;
   background-position: center;
   background-color: var(--uabc-verde);
-  /* Evitar que se desborde si el contenedor es estrecho */
   max-width: 100%;
   flex-shrink: 0;
 }
@@ -893,7 +879,6 @@
   background: var(--color-surface-2);
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
-  /* Evita que texto largo rompa el grid */
   min-width: 0;
   overflow: hidden;
 }
@@ -916,7 +901,6 @@
   font-size: var(--text-sm);
   font-weight: 500;
   color: var(--color-text);
-  /* Texto largo que rompe el grid → cortar con ellipsis */
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
@@ -1008,6 +992,12 @@
   outline: none;
   border-color: var(--uabc-verde);
   box-shadow: 0 0 0 3px rgba(26,107,42,0.15);
+}
+
+/* Input "Otra carrera" — oculto por defecto, JS lo muestra con display:block */
+.form-input--otra-carrera {
+  display: none;
+  margin-top: var(--space-3);
 }
 
 .form-error {
@@ -1213,36 +1203,21 @@
   .site-footer  { padding-block: var(--space-5); margin-top: var(--space-8); }
   .footer-copy  { font-size: var(--text-xs); text-align: center; }
 
-  /* ==========================================================
-     MODAL MÓVIL — BOTTOM SHEET
-     El overlay cambia a align-items: flex-end para que el panel
-     quede pegado abajo. El padding-inline se mantiene en 0 para
-     que el panel ocupe todo el ancho.
-     ========================================================== */
   .modal-overlay {
-    /* Alinea el panel al fondo de la pantalla */
     align-items: flex-end;
     justify-content: stretch;
-    /* Sin padding lateral: el panel es full-width */
     padding: 0;
-    /* El scroll del overlay no se activa; solo el del .modal */
     overflow: hidden;
   }
 
   .modal {
-    /* Ocupa todo el ancho disponible */
     max-width: 100%;
     width: 100%;
-    /* Altura máxima respetando safe-area (home-bar / notch inferior) */
-    max-height: calc(92dvh - env(safe-area-inset-bottom, 0px));
-    /* Sin max-height en vh como fallback también */
     max-height: min(
       calc(92dvh - env(safe-area-inset-bottom, 0px)),
-      calc(92vh - env(safe-area-inset-bottom, 0px))
+      calc(92vh  - env(safe-area-inset-bottom, 0px))
     );
-    /* Redondear solo esquinas superiores */
     border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-    /* Padding inferior para el home-bar */
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 
@@ -1251,11 +1226,9 @@
 
   .modal-header {
     padding: var(--space-4) var(--space-4);
-    /* Handle visual (como en sheets nativas de iOS) */
     padding-top: var(--space-3);
   }
 
-  /* Handle de arrastre decorativo */
   .modal-header::before {
     content: '';
     position: absolute;
@@ -1277,17 +1250,14 @@
     flex-direction: column-reverse;
     gap: var(--space-2);
     padding: var(--space-3) var(--space-4);
-    /* Espacio extra para el home-bar al hacer sticky bottom */
     padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
   }
   .modal-footer .btn { width: 100%; justify-content: center; }
 
-  /* info-highlights: 1 columna en móvil */
   .info-highlights { grid-template-columns: 1fr; gap: var(--space-2); }
   .info-banner { aspect-ratio: 4 / 3; }
 
   .form-row { grid-template-columns: 1fr; }
-  /* font-size: 16px en inputs evita el zoom automático de iOS */
   .form-input, .form-select { font-size: 16px; }
 }
 
@@ -1313,7 +1283,6 @@
   .hero-title   { font-size: var(--text-lg); }
   .events-empty { padding: var(--space-10) var(--space-4); }
 
-  /* Modal aún más alto en pantallas muy pequeñas */
   .modal {
     max-height: min(
       calc(96dvh - env(safe-area-inset-bottom, 0px)),
