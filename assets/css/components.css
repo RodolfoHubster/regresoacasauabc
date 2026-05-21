@@ -82,6 +82,8 @@
 .header-center {
   text-align: center;
   pointer-events: none;
+  /* padding dinámico para no solapar logo ni botones en rangos intermedios */
+  padding-inline: clamp(180px, 22vw, 280px);
 }
 
 .header-university {
@@ -358,6 +360,12 @@
   margin-inline: auto;
 }
 
+/* CTA anchor visible en móvil cuando los eventos aún cargan */
+.hero-cta-anchor {
+  display: none;
+  margin-top: var(--space-4);
+}
+
 /* =====================================================
    BOTONES
    ===================================================== */
@@ -452,14 +460,16 @@
   transform: translateY(-3px);
 }
 
+/* Proporción 4:1 (800×200) con contain para no recortar el banner */
 .event-card-img {
   position: relative;
-  aspect-ratio: 4 / 1;  /* misma proporción que 800x200 */
-  height: auto;          /* quita el height fijo */
+  width: 100%;
+  aspect-ratio: 4 / 1;
+  height: auto;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  background-color: var(--uabc-verde); /* rellena los lados con el verde UABC */
+  background-color: var(--uabc-verde);
 }
 
 .event-badge {
@@ -636,6 +646,7 @@
 .contact-icon {
   width: 60px;
   height: 60px;
+  /* Fallback para Safari < 16.4 */
   background: rgba(26,107,42,0.08);
   border-radius: var(--radius-full);
   display: flex;
@@ -644,6 +655,12 @@
   margin-inline: auto;
   margin-bottom: var(--space-5);
   color: var(--uabc-verde);
+}
+
+@supports (background: color-mix(in oklch, red 10%, blue)) {
+  .contact-icon {
+    background: color-mix(in oklch, var(--uabc-verde) 10%, transparent);
+  }
 }
 
 .contact-title {
@@ -768,10 +785,11 @@
   margin-top: var(--space-2);
 }
 
+/* Proporción 4:1 (800×200) con contain – igual que .event-card-img */
 .modal-event-banner {
   width: 100%;
-  aspect-ratio: 4 / 1;   /* respeta 800x200 = proporción 4:1 */
-  height: auto;           /* quita el height fijo de 90px */
+  aspect-ratio: 4 / 1;
+  height: auto;
   border-radius: var(--radius-lg);
   background-size: contain;
   background-repeat: no-repeat;
@@ -791,10 +809,13 @@
    MODAL INFO
    ===================================================== */
 
+/* Banner fluido — aspect-ratio reemplaza height fijo para no recortar imágenes */
 .info-banner {
   width: 100%;
-  height: 200px;
-  object-fit: cover;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  object-fit: contain;
+  background-color: var(--color-surface-2);
   border-radius: var(--radius-lg);
 }
 
@@ -880,6 +901,12 @@
   gap: var(--space-4);
 }
 
+/* form-row con un solo hijo visible ocupa todo el ancho */
+.form-row > *:only-child,
+.form-row > input[type="hidden"] ~ * {
+  grid-column: 1 / -1;
+}
+
 .form-group { display: flex; flex-direction: column; gap: var(--space-1); }
 
 .form-label { font-size: var(--text-sm); font-weight: 600; color: var(--color-text); }
@@ -924,12 +951,10 @@
    VALIDACIÓN EN TIEMPO REAL
    ===================================================== */
 
-/* ── Wrapper relativo para el ícono de estado ── */
 .form-group {
   position: relative;
 }
 
-/* El icono de estado se inyecta via JS dentro de .form-input-wrap */
 .form-input-wrap {
   position: relative;
   display: flex;
@@ -938,10 +963,9 @@
 
 .form-input-wrap .form-input,
 .form-input-wrap .form-select {
-  padding-right: 2.5rem; /* espacio para el ícono */
+  padding-right: 2.5rem;
 }
 
-/* ícono de estado (check ✔ o X ✘) */
 .input-status-icon {
   position: absolute;
   right: var(--space-3);
@@ -967,10 +991,8 @@
   box-shadow: 0 0 0 3px rgba(161, 44, 123, 0.18);
 }
 
-/* El ícono X aparece en error */
 .input--error ~ .input-status-icon { opacity: 1; color: var(--color-error); }
 
-/* Mensaje de error animado */
 .form-error:not(:empty) {
   animation: errorSlideIn 0.2s ease-out;
 }
@@ -994,10 +1016,8 @@
   box-shadow: 0 0 0 3px rgba(67, 122, 34, 0.12);
 }
 
-/* El ícono check aparece en ok */
 .input--ok ~ .input-status-icon { opacity: 1; color: var(--color-success); }
 
-/* ── Hint bajo el campo (texto de ayuda antes del error) ── */
 .form-hint {
   font-size: var(--text-xs);
   color: var(--color-text-faint);
@@ -1005,7 +1025,6 @@
   line-height: 1.3;
 }
 
-/* Ocultar hint cuando hay un error visible */
 .form-error:not(:empty) + .form-hint,
 .form-group:has(.form-error:not(:empty)) .form-hint {
   display: none;
@@ -1036,9 +1055,6 @@
     line-height: 1.25;
     font-size: var(--text-sm);
     text-align: center;
-  }
-  .header-center {
-    padding-inline: 220px;
   }
 }
 
@@ -1079,6 +1095,8 @@
   .header-right { right: var(--space-4); gap: var(--space-2); }
   .header-logo-img { height: 36px; }
   .header-university { display: none; }
+  /* padding-inline del centro ya no se necesita en móvil — lo controla header-left/right absolutos */
+  .header-center { padding-inline: 0; }
 
   .header-dept {
     font-size: var(--text-xs);
@@ -1103,6 +1121,8 @@
   .hero-section { padding-block: var(--space-12) var(--space-10); }
   .hero-title   { font-size: var(--text-xl); }
   .hero-desc    { font-size: var(--text-sm); }
+  /* Mostrar CTA anchor en móvil cuando los eventos tardan en cargar */
+  .hero-cta-anchor { display: block; }
   .btn-lg       { width: 100%; justify-content: center; font-size: var(--text-sm); padding: var(--space-3) var(--space-5); }
 
   .section-header { margin-bottom: var(--space-6); }
@@ -1138,8 +1158,10 @@
   }
   .modal-footer .btn { width: 100%; justify-content: center; }
 
+  /* info-highlights: colapsa a 1 columna en ≤815px (no esperar a ≤600px) */
   .info-highlights { grid-template-columns: 1fr; gap: var(--space-2); }
-  .info-banner     { height: 150px; }
+  /* info-banner: ya usa aspect-ratio, solo ajustamos objeto */
+  .info-banner { aspect-ratio: 4 / 3; }
 
   .form-row { grid-template-columns: 1fr; }
   .form-input, .form-select { font-size: var(--text-base); }
