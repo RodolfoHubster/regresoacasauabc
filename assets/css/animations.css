@@ -1,0 +1,364 @@
+/* animations.css – Animaciones globales del proyecto
+   Estrategia: todas las animaciones respetan prefers-reduced-motion.
+   Solo se animan opacity + transform (no layout props → CLS = 0).
+   ================================================================= */
+
+/* ─────────────────────────────────────────
+   1. KEYFRAMES BASE
+───────────────────────────────────────── */
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Modal en desktop: entra desde el centro con leve escala */
+@keyframes modalEnter {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)   translateY(0); }
+}
+
+/* Modal en móvil: sube desde abajo (sheet) */
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(100%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Overlay fade */
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Hero title: sube con fade elegante */
+@keyframes heroTitle {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* KPI: número cuenta visualmente con fade */
+@keyframes kpiPop {
+  0%   { opacity: 0; transform: translateY(10px) scale(0.9); }
+  60%  { transform: translateY(-3px) scale(1.04); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Badge entrada */
+@keyframes badgePop {
+  from { opacity: 0; transform: scale(0.7); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* Spinner SVG */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Pulse suave para indicadores de estado */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+/* Check de confirmación: dibuja el ícono */
+@keyframes checkDraw {
+  from { stroke-dashoffset: 48; }
+  to   { stroke-dashoffset: 0; }
+}
+
+/* Línea dorada del header: entra desde la izquierda */
+@keyframes goldLineIn {
+  from { transform: scaleX(0); transform-origin: left; }
+  to   { transform: scaleX(1); transform-origin: left; }
+}
+
+/* ─────────────────────────────────────────
+   2. UTILIDADES DE ANIMACIÓN
+───────────────────────────────────────── */
+
+.anim-fade-in      { animation: fadeIn      0.35s ease both; }
+.anim-fade-in-up   { animation: fadeInUp    0.45s cubic-bezier(0.16,1,0.3,1) both; }
+.anim-fade-in-down { animation: fadeInDown  0.35s cubic-bezier(0.16,1,0.3,1) both; }
+.anim-fade-scale   { animation: fadeInScale 0.35s cubic-bezier(0.16,1,0.3,1) both; }
+
+/* Delays escalonados para listas */
+.anim-delay-1 { animation-delay: 0.08s; }
+.anim-delay-2 { animation-delay: 0.16s; }
+.anim-delay-3 { animation-delay: 0.24s; }
+.anim-delay-4 { animation-delay: 0.32s; }
+.anim-delay-5 { animation-delay: 0.40s; }
+
+/* ─────────────────────────────────────────
+   3. HERO
+───────────────────────────────────────── */
+
+.hero-section .hero-card {
+  animation: heroTitle 0.7s cubic-bezier(0.16,1,0.3,1) 0.1s both;
+}
+
+.hero-section .hero-alumni-img {
+  animation: fadeInScale 0.6s cubic-bezier(0.16,1,0.3,1) 0s both;
+}
+
+/* ─────────────────────────────────────────
+   4. SCROLL REVEAL
+   Se activa añadiendo .is-visible vía IntersectionObserver (main.js)
+───────────────────────────────────────── */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity  0.55s cubic-bezier(0.16,1,0.3,1),
+    transform 0.55s cubic-bezier(0.16,1,0.3,1);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Escalonado para grids de cards */
+.reveal:nth-child(2) { transition-delay: 0.08s; }
+.reveal:nth-child(3) { transition-delay: 0.16s; }
+.reveal:nth-child(4) { transition-delay: 0.24s; }
+.reveal:nth-child(5) { transition-delay: 0.32s; }
+.reveal:nth-child(6) { transition-delay: 0.40s; }
+
+/* ─────────────────────────────────────────
+   5. MODAL OVERLAY + MODAL PANEL
+───────────────────────────────────────── */
+
+/* El overlay funde al aparecer */
+.modal-overlay:not([hidden]) {
+  animation: overlayFadeIn 0.2s ease both;
+}
+
+/* Panel desktop: escala desde centro */
+.modal-overlay:not([hidden]) .modal {
+  animation: modalEnter 0.32s cubic-bezier(0.16,1,0.3,1) both;
+}
+
+/* Panel móvil: sube desde abajo (el breakpoint ya convierte el modal en sheet) */
+@media (max-width: 815px) {
+  .modal-overlay:not([hidden]) .modal {
+    animation: modalSlideUp 0.38s cubic-bezier(0.16,1,0.3,1) both;
+  }
+}
+
+/* Cierre: añadir .modal--closing desde JS para animar la salida */
+.modal--closing {
+  animation: fadeIn 0.22s ease reverse both !important;
+}
+@media (max-width: 815px) {
+  .modal--closing {
+    animation: modalSlideUp 0.28s cubic-bezier(0.7,0,1,1) reverse both !important;
+  }
+}
+
+/* ─────────────────────────────────────────
+   6. EVENT CARDS — hover elevación ya en components.css;
+      aquí añadimos entrada en load
+───────────────────────────────────────── */
+
+.event-card {
+  transition:
+    box-shadow 0.28s cubic-bezier(0.16,1,0.3,1),
+    transform  0.28s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* Cards del admin */
+.event-admin-card {
+  transition:
+    box-shadow 0.28s cubic-bezier(0.16,1,0.3,1),
+    transform  0.28s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* ─────────────────────────────────────────
+   7. KPI CARDS
+───────────────────────────────────────── */
+
+.kpi-card {
+  transition:
+    box-shadow 0.28s cubic-bezier(0.16,1,0.3,1),
+    transform  0.28s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* Entrada de KPIs cuando la sección admin carga */
+.kpi-card:nth-child(1) { animation: kpiPop 0.5s cubic-bezier(0.16,1,0.3,1) 0.05s both; }
+.kpi-card:nth-child(2) { animation: kpiPop 0.5s cubic-bezier(0.16,1,0.3,1) 0.13s both; }
+.kpi-card:nth-child(3) { animation: kpiPop 0.5s cubic-bezier(0.16,1,0.3,1) 0.21s both; }
+.kpi-card:nth-child(4) { animation: kpiPop 0.5s cubic-bezier(0.16,1,0.3,1) 0.29s both; }
+
+/* ─────────────────────────────────────────
+   8. NAV MOBILE — items escalonados
+───────────────────────────────────────── */
+
+.mobile-nav.is-open .mobile-nav-link {
+  animation: fadeInUp 0.3s cubic-bezier(0.16,1,0.3,1) both;
+}
+.mobile-nav.is-open .mobile-nav-list > li:nth-child(1) .mobile-nav-link { animation-delay: 0.04s; }
+.mobile-nav.is-open .mobile-nav-list > li:nth-child(2) .mobile-nav-link { animation-delay: 0.09s; }
+.mobile-nav.is-open .mobile-nav-list > li:nth-child(3) .mobile-nav-link { animation-delay: 0.14s; }
+.mobile-nav.is-open .mobile-nav-list > li:nth-child(4) .mobile-nav-link { animation-delay: 0.19s; }
+.mobile-nav.is-open .mobile-nav-list > li:nth-child(5) .mobile-nav-link { animation-delay: 0.24s; }
+.mobile-nav.is-open .mobile-nav-list > li:nth-child(6) .mobile-nav-link { animation-delay: 0.29s; }
+
+/* ─────────────────────────────────────────
+   9. BOTONES — ripple táctil en móvil
+───────────────────────────────────────── */
+
+.btn {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.18);
+  opacity: 0;
+  transition: opacity 0.18s;
+  border-radius: inherit;
+}
+
+.btn:active::after {
+  opacity: 1;
+}
+
+/* ─────────────────────────────────────────
+   10. SKELETON LOADER
+───────────────────────────────────────── */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-offset)   25%,
+    var(--color-surface-dynamic)  50%,
+    var(--color-surface-offset)   75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-text    { height: 1em; margin-bottom: var(--space-2); border-radius: var(--radius-sm); }
+.skeleton-text:last-child { width: 60%; }
+.skeleton-heading { height: 1.5em; width: 45%; margin-bottom: var(--space-4); }
+.skeleton-avatar  { width: 40px; height: 40px; border-radius: var(--radius-full); }
+.skeleton-image   { aspect-ratio: 4 / 1; width: 100%; }
+
+/* ─────────────────────────────────────────
+   11. SPINNER
+───────────────────────────────────────── */
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(255,255,255,0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+.spinner--green {
+  border-color: rgba(26,107,42,0.25);
+  border-top-color: var(--uabc-verde);
+}
+
+/* ─────────────────────────────────────────
+   12. STATUS DOT — pulso
+───────────────────────────────────────── */
+
+.status-dot--active {
+  animation: pulse 2.2s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────
+   13. CONFIRMACIÓN — check animado
+───────────────────────────────────────── */
+
+.confirm-check-path {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: checkDraw 0.5s cubic-bezier(0.16,1,0.3,1) 0.15s forwards;
+}
+
+/* ─────────────────────────────────────────
+   14. HEADER GOLD LINE
+───────────────────────────────────────── */
+
+.header-gold-line {
+  animation: goldLineIn 0.5s cubic-bezier(0.16,1,0.3,1) 0.2s both;
+}
+
+/* ─────────────────────────────────────────
+   15. FAQ — icon rotate ya en components.css;
+       aquí añadimos la transición del contenido
+───────────────────────────────────────── */
+
+.faq-answer {
+  transition: opacity 0.22s ease;
+}
+
+/* ─────────────────────────────────────────
+   16. BADGE POP
+───────────────────────────────────────── */
+
+.event-badge {
+  animation: badgePop 0.35s cubic-bezier(0.16,1,0.3,1) 0.3s both;
+}
+
+/* ─────────────────────────────────────────
+   17. ADMIN SIDEBAR OPEN
+───────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .admin-sidebar.open {
+    animation: none; /* La transición de transform en admin.css ya lo maneja */
+  }
+}
+
+/* ─────────────────────────────────────────
+   18. REDUCED MOTION — desactiva todo
+───────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration:        0.01ms !important;
+    animation-iteration-count: 1      !important;
+    transition-duration:       0.01ms !important;
+  }
+
+  /* Reveals aparecen inmediatamente */
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
