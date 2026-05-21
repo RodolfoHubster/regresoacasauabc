@@ -82,7 +82,6 @@
 .header-center {
   text-align: center;
   pointer-events: none;
-  /* padding dinámico para no solapar logo ni botones en rangos intermedios */
   padding-inline: clamp(180px, 22vw, 280px);
 }
 
@@ -135,8 +134,8 @@
   justify-content: center;
   align-items: center;
   gap: 5px;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   background: transparent;
   border: 1.5px solid rgba(255,255,255,0.4);
   border-radius: var(--radius-md);
@@ -144,10 +143,14 @@
   padding: 0;
   transition: background 0.18s, border-color 0.18s;
   flex-shrink: 0;
+  touch-action: manipulation;
 }
 .nav-hamburger:hover {
   background: rgba(255,255,255,0.12);
   border-color: rgba(255,255,255,0.7);
+}
+.nav-hamburger:active {
+  background: rgba(255,255,255,0.2);
 }
 
 .hamburger-bar {
@@ -250,6 +253,10 @@
   text-decoration: none;
   border-left: 3px solid transparent;
   transition: background 0.16s, color 0.16s, border-color 0.16s;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  touch-action: manipulation;
 }
 .mobile-nav-link:hover,
 .mobile-nav-link:active {
@@ -385,6 +392,9 @@
   transition: background 0.18s, color 0.18s, border-color 0.18s, box-shadow 0.18s;
   white-space: nowrap;
   line-height: 1.2;
+  min-height: 44px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .btn-lg {
@@ -450,7 +460,6 @@
   box-shadow: var(--shadow-sm);
   overflow: hidden;
   border: 1px solid var(--color-border);
-  transition: box-shadow 0.22s, transform 0.22s;
   display: flex;
   flex-direction: column;
 }
@@ -460,7 +469,6 @@
   transform: translateY(-3px);
 }
 
-/* Proporción 4:1 (800×200) con contain para no recortar el banner */
 .event-card-img {
   position: relative;
   width: 100%;
@@ -607,6 +615,9 @@
   color: var(--color-text);
   text-align: left;
   transition: background 0.16s;
+  min-height: 48px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .faq-trigger:hover { background: var(--color-surface-2); }
@@ -646,7 +657,6 @@
 .contact-icon {
   width: 60px;
   height: 60px;
-  /* Fallback para Safari < 16.4 */
   background: rgba(26,107,42,0.08);
   border-radius: var(--radius-full);
   display: flex;
@@ -701,19 +711,37 @@
 .footer-tagline { font-size: var(--text-xs); color: rgba(255,255,255,0.45); font-style: italic; }
 
 /* =====================================================
-   MODALES
+   MODALES — SISTEMA COMPLETO
+   FIX: Desborde en móvil, safe-area, keyboard push-up
    ===================================================== */
+
+/**
+ * ESTRUCTURA CORRECTA:
+ *   .modal-overlay  → el fondo oscuro, cubre toda la pantalla
+ *     .modal        → el panel blanco
+ *       .modal-header (sticky)
+ *       .modal-body   (scrollable)
+ *       .modal-footer
+ *
+ * REGLA CLAVE: el overlay NO tiene overflow-y:auto.
+ * El scroll va solo en .modal con max-height + overflow-y:auto.
+ * En móvil el panel es un bottom sheet (border-radius arriba,
+ * alineado al fondo) con max-height: 92dvh para dejar espacio
+ * al notch/home-bar del teléfono.
+ */
 
 .modal-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.55);
   z-index: 200;
+  /* Desktop: centra el panel */
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--space-4);
-  overflow-y: auto;
+  /* NO overflow-y:auto aquí → el scroll queda dentro del .modal */
+  overscroll-behavior: contain;
 }
 
 .modal-overlay[hidden] { display: none; }
@@ -724,9 +752,17 @@
   box-shadow: var(--shadow-lg);
   width: 100%;
   max-width: 560px;
-  max-height: 90vh;
+  /* max-height con dvh para respetar barra de dirección móvil */
+  max-height: min(90dvh, 90vh);
+  /* El scroll va AQUÍ, no en el overlay */
   overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  /* Scroll suave en iOS */
+  -webkit-overflow-scrolling: touch;
   position: relative;
+  /* Evita que el contenido interno se salga */
+  contain: layout;
 }
 
 .modal--sm   { max-width: 400px; }
@@ -738,10 +774,14 @@
   justify-content: space-between;
   padding: var(--space-5) var(--space-6);
   border-bottom: 1px solid var(--color-divider);
+  /* Sticky dentro del scroll del .modal */
   position: sticky;
   top: 0;
   background: var(--color-surface);
   z-index: 1;
+  /* Evita que el blur del sticky se pierda en iOS */
+  -webkit-backdrop-filter: blur(0);
+  backdrop-filter: blur(0);
 }
 
 .modal-title {
@@ -749,14 +789,21 @@
   font-size: var(--text-lg);
   font-weight: 700;
   color: var(--color-text);
+  /* Evitar que el título largo empuje el botón X fuera */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: var(--space-2);
 }
 
 .modal-close {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  /* Target táctil mínimo 44x44 */
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-md);
   border: none;
   background: transparent;
@@ -764,14 +811,19 @@
   color: var(--color-text-muted);
   transition: background 0.16s, color 0.16s;
   flex-shrink: 0;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
 .modal-close:hover { background: var(--color-surface-2); color: var(--color-text); }
+.modal-close:active { background: var(--color-surface-offset); }
 
 .modal-body {
   padding: var(--space-6);
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+  /* Importante: NO overflow aquí. El scroll lo maneja .modal */
+  min-height: 0;
 }
 
 .modal-body--center { align-items: center; text-align: center; }
@@ -780,12 +832,15 @@
   display: flex;
   justify-content: flex-end;
   gap: var(--space-3);
-  padding-top: var(--space-4);
+  padding: var(--space-4) var(--space-6);
   border-top: 1px solid var(--color-divider);
-  margin-top: var(--space-2);
+  /* Sticky al fondo del panel */
+  position: sticky;
+  bottom: 0;
+  background: var(--color-surface);
+  z-index: 1;
 }
 
-/* Proporción 4:1 (800×200) con contain – igual que .event-card-img */
 .modal-event-banner {
   width: 100%;
   aspect-ratio: 4 / 1;
@@ -795,6 +850,9 @@
   background-repeat: no-repeat;
   background-position: center;
   background-color: var(--uabc-verde);
+  /* Evitar que se desborde si el contenedor es estrecho */
+  max-width: 100%;
+  flex-shrink: 0;
 }
 
 .modal-event-name {
@@ -809,7 +867,6 @@
    MODAL INFO
    ===================================================== */
 
-/* Banner fluido — aspect-ratio reemplaza height fijo para no recortar imágenes */
 .info-banner {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -817,6 +874,9 @@
   object-fit: contain;
   background-color: var(--color-surface-2);
   border-radius: var(--radius-lg);
+  flex-shrink: 0;
+  max-width: 100%;
+  display: block;
 }
 
 .info-highlights {
@@ -833,10 +893,13 @@
   background: var(--color-surface-2);
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
+  /* Evita que texto largo rompa el grid */
+  min-width: 0;
+  overflow: hidden;
 }
 
 .info-highlight-item svg { color: var(--uabc-verde); flex-shrink: 0; margin-top: 2px; }
-.info-highlight-item div { display: flex; flex-direction: column; gap: 2px; }
+.info-highlight-item div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 
 .info-highlight-label {
   font-size: var(--text-xs);
@@ -844,12 +907,22 @@
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .info-highlight-value {
   font-size: var(--text-sm);
   font-weight: 500;
   color: var(--color-text);
+  /* Texto largo que rompe el grid → cortar con ellipsis */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .info-rich-content {
@@ -901,7 +974,6 @@
   gap: var(--space-4);
 }
 
-/* form-row con un solo hijo visible ocupa todo el ancho */
 .form-row > *:only-child,
 .form-row > input[type="hidden"] ~ * {
   grid-column: 1 / -1;
@@ -925,6 +997,8 @@
   background: var(--color-surface);
   transition: border-color 0.18s, box-shadow 0.18s, background 0.18s;
   width: 100%;
+  min-height: 44px;
+  touch-action: manipulation;
 }
 
 .form-input::placeholder { color: var(--color-text-faint); }
@@ -1095,7 +1169,6 @@
   .header-right { right: var(--space-4); gap: var(--space-2); }
   .header-logo-img { height: 36px; }
   .header-university { display: none; }
-  /* padding-inline del centro ya no se necesita en móvil — lo controla header-left/right absolutos */
   .header-center { padding-inline: 0; }
 
   .header-dept {
@@ -1121,7 +1194,6 @@
   .hero-section { padding-block: var(--space-12) var(--space-10); }
   .hero-title   { font-size: var(--text-xl); }
   .hero-desc    { font-size: var(--text-sm); }
-  /* Mostrar CTA anchor en móvil cuando los eventos tardan en cargar */
   .hero-cta-anchor { display: block; }
   .btn-lg       { width: 100%; justify-content: center; font-size: var(--text-sm); padding: var(--space-3) var(--space-5); }
 
@@ -1141,30 +1213,82 @@
   .site-footer  { padding-block: var(--space-5); margin-top: var(--space-8); }
   .footer-copy  { font-size: var(--text-xs); text-align: center; }
 
-  .modal-overlay { padding: var(--space-3); align-items: flex-end; }
-  .modal {
-    max-width: 100%;
-    max-height: 92vh;
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  /* ==========================================================
+     MODAL MÓVIL — BOTTOM SHEET
+     El overlay cambia a align-items: flex-end para que el panel
+     quede pegado abajo. El padding-inline se mantiene en 0 para
+     que el panel ocupe todo el ancho.
+     ========================================================== */
+  .modal-overlay {
+    /* Alinea el panel al fondo de la pantalla */
+    align-items: flex-end;
+    justify-content: stretch;
+    /* Sin padding lateral: el panel es full-width */
+    padding: 0;
+    /* El scroll del overlay no se activa; solo el del .modal */
+    overflow: hidden;
   }
+
+  .modal {
+    /* Ocupa todo el ancho disponible */
+    max-width: 100%;
+    width: 100%;
+    /* Altura máxima respetando safe-area (home-bar / notch inferior) */
+    max-height: calc(92dvh - env(safe-area-inset-bottom, 0px));
+    /* Sin max-height en vh como fallback también */
+    max-height: min(
+      calc(92dvh - env(safe-area-inset-bottom, 0px)),
+      calc(92vh - env(safe-area-inset-bottom, 0px))
+    );
+    /* Redondear solo esquinas superiores */
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    /* Padding inferior para el home-bar */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
   .modal--sm   { max-width: 100%; }
   .modal--info { max-width: 100%; }
-  .modal-body  { padding: var(--space-4); gap: var(--space-4); }
-  .modal-header { padding: var(--space-4); }
+
+  .modal-header {
+    padding: var(--space-4) var(--space-4);
+    /* Handle visual (como en sheets nativas de iOS) */
+    padding-top: var(--space-3);
+  }
+
+  /* Handle de arrastre decorativo */
+  .modal-header::before {
+    content: '';
+    position: absolute;
+    top: var(--space-2);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 36px;
+    height: 4px;
+    background: var(--color-border);
+    border-radius: var(--radius-full);
+    pointer-events: none;
+  }
+
   .modal-title { font-size: var(--text-base); }
+
+  .modal-body  { padding: var(--space-4); gap: var(--space-4); }
+
   .modal-footer {
     flex-direction: column-reverse;
     gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    /* Espacio extra para el home-bar al hacer sticky bottom */
+    padding-bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
   }
   .modal-footer .btn { width: 100%; justify-content: center; }
 
-  /* info-highlights: colapsa a 1 columna en ≤815px (no esperar a ≤600px) */
+  /* info-highlights: 1 columna en móvil */
   .info-highlights { grid-template-columns: 1fr; gap: var(--space-2); }
-  /* info-banner: ya usa aspect-ratio, solo ajustamos objeto */
   .info-banner { aspect-ratio: 4 / 3; }
 
   .form-row { grid-template-columns: 1fr; }
-  .form-input, .form-select { font-size: var(--text-base); }
+  /* font-size: 16px en inputs evita el zoom automático de iOS */
+  .form-input, .form-select { font-size: 16px; }
 }
 
 /* =====================================================
@@ -1188,6 +1312,14 @@
 
   .hero-title   { font-size: var(--text-lg); }
   .events-empty { padding: var(--space-10) var(--space-4); }
+
+  /* Modal aún más alto en pantallas muy pequeñas */
+  .modal {
+    max-height: min(
+      calc(96dvh - env(safe-area-inset-bottom, 0px)),
+      calc(96vh  - env(safe-area-inset-bottom, 0px))
+    );
+  }
 }
 
 /* =====================================================
