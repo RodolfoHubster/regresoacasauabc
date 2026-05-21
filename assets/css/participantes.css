@@ -183,6 +183,11 @@ main.p-container {
   vertical-align: middle;
   background: var(--color-surface);
   font-family: var(--font-body);
+  /* FIX: evita que celdas anchas (email) rompan el layout en tabla normal */
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .admin-table tbody tr:last-child td {
@@ -307,8 +312,6 @@ th.sort-desc .sort-svg { transform: rotate(180deg); }
 
 /* =====================================================
    FIX: respetar atributo [hidden] nativo del navegador.
-   Sin esto, display:flex en .table-empty sobreescribe hidden=true
-   del JS y el empty-state aparece siempre aunque haya datos.
    ===================================================== */
 [hidden] { display: none !important; }
 
@@ -377,11 +380,16 @@ th.sort-desc .sort-svg { transform: rotate(180deg); }
   .admin-table td {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start; /* flex-start para que el email largo no empuje verticalmente */
     padding: var(--space-2) 0;
     border-bottom: 1px solid rgba(0,0,0,0.07);
     font-size: var(--text-sm);
     background: transparent;
+    /* FIX desbordamiento: resetear reglas de tabla normal */
+    max-width: none;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
   }
 
   .admin-table td:last-child { border-bottom: none; }
@@ -393,8 +401,32 @@ th.sort-desc .sort-svg { transform: rotate(180deg); }
     font-size: var(--text-xs);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    flex-shrink: 0;
-    margin-right: var(--space-4);
+    /* FIX: ancho fijo para el label, el valor toma el resto */
+    flex: 0 0 auto;
+    min-width: 90px;
+    margin-right: var(--space-3);
+    padding-top: 2px; /* alinear con primera línea del valor */
+  }
+
+  /* FIX PRINCIPAL: el valor de la celda (email, nombre, etc.) puede
+     romper línea en lugar de desbordarse */
+  .admin-table td > span,
+  .admin-table td > a,
+  .admin-table td > .badge,
+  .admin-table td {
+    /* min-width:0 permite que flex shrink funcione */
+    min-width: 0;
+    /* word-break rompe emails largos como nombre@dominio.edu.mx */
+    word-break: break-all;
+    overflow-wrap: anywhere;
+    text-align: right;
+  }
+
+  /* Las badges no deben romperse, solo el texto libre */
+  .admin-table td > .badge {
+    word-break: normal;
+    overflow-wrap: normal;
+    white-space: nowrap;
   }
 
   .admin-table td:first-child {
@@ -402,6 +434,7 @@ th.sort-desc .sort-svg { transform: rotate(180deg); }
     border-bottom: 2px solid rgba(0,0,0,0.10);
     margin-bottom: var(--space-1);
     padding-bottom: var(--space-3);
+    word-break: break-word; /* nombres: break-word es más natural que break-all */
   }
 
   .admin-table td:first-child::before {
@@ -411,5 +444,73 @@ th.sort-desc .sort-svg { transform: rotate(180deg); }
   .admin-table-wrapper {
     background: var(--color-surface);
     overflow-x: visible;
+  }
+}
+
+/* =====================================================
+   RESPONSIVE — MÓVIL PEQUEÑO (<=345px)
+   Pantallas muy angostas: Galaxy Fold, iPhone SE 1a gen
+   ===================================================== */
+
+@media (max-width: 345px) {
+
+  .p-container { padding-inline: var(--space-3); }
+
+  .p-header {
+    padding-block: var(--space-4);
+  }
+
+  .p-header h1 {
+    font-size: var(--text-lg);
+  }
+
+  .p-header p {
+    font-size: var(--text-xs);
+  }
+
+  .filters-bar {
+    padding: var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .filter-input,
+  .filter-select {
+    font-size: var(--text-xs);
+    padding: var(--space-2);
+  }
+
+  .filter-count {
+    font-size: var(--text-xs);
+  }
+
+  .admin-table tbody tr {
+    margin: var(--space-3);
+    padding: var(--space-3);
+  }
+
+  .admin-table td {
+    font-size: var(--text-xs);
+    padding: var(--space-1) 0 var(--space-2);
+    /* En 345px el label y valor van en columna, no en fila */
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+
+  .admin-table td::before {
+    min-width: unset;
+    margin-right: 0;
+  }
+
+  /* En columna el valor se alinea a la izquierda */
+  .admin-table td > span,
+  .admin-table td > a,
+  .admin-table td > .badge,
+  .admin-table td {
+    text-align: left;
+  }
+
+  .admin-table td:first-child {
+    font-size: var(--text-sm);
   }
 }
