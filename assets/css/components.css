@@ -638,6 +638,14 @@
    · Header sticky con borde dorado de acento UABC
    · Scroll interno limpio con fade-out gradiente inferior
    · Focus trap, aria-modal, Escape para cerrar
+   ·
+   · z-index map (de menor a mayor):
+   ·   .site-header          100   (header del sitio público)
+   ·   .admin-topbar          10   (topbar dentro del flujo normal del admin)
+   ·   .sidebar-overlay      400   (overlay que tapa el contenido al abrir sidebar)
+   ·   .admin-sidebar         500  (sidebar en móvil: fixed encima del overlay)
+   ·   .modal-overlay        1000  (modal siempre encima de TODO)
+   ·   .skip-link            9999  (accesibilidad, siempre al frente)
    ===================================================== */
 
 /* ── Keyframes ── */
@@ -652,16 +660,20 @@
 @keyframes overlay-in  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes overlay-out { from { opacity: 1; } to { opacity: 0; } }
 
-/* ── Overlay ── */
+/* ── Overlay ──
+   z-index: 1000 → supera al sidebar (500) y su overlay (400) en todos los casos
+   position: fixed con inset:0 funciona correctamente solo cuando
+   NO hay un ancestro con transform, filter, will-change o perspective.
+   El fix en admin-body (quitar overflow:hidden) garantiza esto.
+*/
 .modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 200;
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--space-5) var(--space-4);
-  /* Fondo oscuro con micro-grano para mayor calidad visual */
   background: rgba(10, 26, 14, 0.62);
   -webkit-backdrop-filter: blur(6px) saturate(1.1);
   backdrop-filter: blur(6px) saturate(1.1);
@@ -683,21 +695,18 @@
 .modal {
   background: var(--color-surface);
   border-radius: var(--radius-xl);
-  /* Sombra de tres capas para máxima profundidad */
   box-shadow:
     0 0 0 1px rgba(255,255,255,0.06),
     0 4px 16px rgba(10,26,14,0.14),
     0 20px 60px rgba(10,26,14,0.28);
   width: 100%;
   max-width: 560px;
-  /* Altura máxima flotante — nunca llena la pantalla */
   max-height: min(82vh, 82dvh);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   position: relative;
   animation: modal-in 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
-  /* Bordes sutiles para definición en modo claro y oscuro */
   border: 1px solid rgba(255,255,255,0.09);
 }
 
@@ -712,7 +721,6 @@
   justify-content: space-between;
   gap: var(--space-4);
   padding: var(--space-5) var(--space-6);
-  /* Borde inferior con acento dorado UABC — señal de marca */
   border-bottom: 1px solid var(--color-divider);
   position: relative;
   flex-shrink: 0;
@@ -741,7 +749,6 @@
   color: var(--color-text);
   min-width: 0;
   line-height: 1.25;
-  /* Permite que títulos largos se corten limpiamente */
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -791,7 +798,6 @@
   -webkit-overflow-scrolling: touch;
   flex: 1;
   min-height: 0;
-  /* Fade inferior que indica que hay más contenido */
   mask-image: linear-gradient(
     to bottom,
     black calc(100% - 40px),
@@ -861,7 +867,6 @@
   display: block;
 }
 
-/* Grid de 4 chips con info clave del evento */
 .info-highlights {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1103,7 +1108,6 @@
   .header-university { font-size: var(--text-xs); }
   .header-center { padding-inline: 180px; }
   .events-grid { gap: var(--space-5); }
-  /* Modal info un poco más ancho */
   .modal--info { max-width: 600px; }
 }
 
@@ -1151,9 +1155,8 @@
   .footer-copy    { font-size: var(--text-xs); text-align: center; }
 
   /* ── MODALES EN MÓVIL
-     Principio: siempre flotantes, nunca full-screen.
-     Aparecen centrados con margen lateral de 16px.
-     Máximo 88% del viewport de alto → siempre queda contexto visible detrás.
+     Siempre flotantes, nunca full-screen.
+     Centrados con margen lateral, máximo 88vh → siempre queda contexto visible detrás.
   ── */
   .modal-overlay {
     padding: var(--space-4);
@@ -1162,22 +1165,17 @@
   }
 
   .modal {
-    /* Flotante: margen visible a los lados y arriba/abajo */
     width: calc(100% - var(--space-8));
     max-width: 480px;
     max-height: min(88vh, 88dvh);
-    /* Misma border-radius que en desktop — no se recorta abajo */
     border-radius: var(--radius-xl);
-    /* Animación de escala, igual que desktop */
     animation: modal-in 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
   .modal--sm   { max-width: 360px; }
   .modal--info { max-width: 480px; }
 
-  .modal-header {
-    padding: var(--space-4) var(--space-5);
-  }
+  .modal-header { padding: var(--space-4) var(--space-5); }
   .modal-title { font-size: var(--text-base); }
 
   .modal-body  { padding: var(--space-4) var(--space-5); gap: var(--space-4); }
@@ -1215,7 +1213,6 @@
   .hero-title  { font-size: var(--text-lg); }
   .events-empty { padding: var(--space-10) var(--space-4); }
 
-  /* Modal chico: márgenes de 12px para que sea cómodo */
   .modal {
     width: calc(100% - 24px);
     max-height: min(90vh, 90dvh);

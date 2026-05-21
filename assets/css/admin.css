@@ -6,25 +6,36 @@
 .admin-body {
   display: flex;
   height: 100dvh;
-  overflow: hidden;
+  /*
+   * IMPORTANTE — overflow debe estar en admin-layout, NO en admin-body.
+   * Si admin-body tiene overflow:hidden, crea un stacking context que
+   * atrapa los modales (position:fixed) dentro de él, impidiendo que
+   * z-index: 1000 del modal-overlay supere al sidebar (z-index: 300).
+   * La regla overflow:hidden se mueve a .admin-layout abajo.
+   */
   background: var(--color-bg);
 }
 
 /* ══════════════════════════════
    OVERLAY (toca fuera = cierra sidebar)
+   z-index: 400 → por encima del sidebar (300) pero por debajo del modal (1000)
 ══════════════════════════════ */
 .sidebar-overlay {
   display: none;
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.45);
-  z-index: 299;
+  z-index: 400;
   backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 .sidebar-overlay.active { display: block; }
 
 /* ══════════════════════════════
    SIDEBAR
+   z-index: 500 → por encima del sidebar-overlay (400)
+   Nota: en desktop el sidebar está en flujo normal (no fixed),
+         por lo que z-index solo aplica cuando es fixed en móvil.
 ══════════════════════════════ */
 .admin-sidebar {
   width: 240px;
@@ -36,21 +47,24 @@
   overflow-y: auto;
   overflow-x: hidden;
   transition: transform 280ms cubic-bezier(0.16,1,0.3,1);
-  /* border-right solo visible cuando el sidebar está presente en flujo normal */
   border-right: 3px solid var(--uabc-dorado);
-  z-index: 300;
+  z-index: 500;
 }
 
-/* En móvil el sidebar es fixed fuera de pantalla: ocultar el borde derecho
-   para evitar el flash dorado de 3px durante la animación de entrada */
+/* En móvil el sidebar es fixed fuera de pantalla */
 @media (max-width: 900px) {
   .admin-sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    transform: translateX(-100%);
     border-right: none;
   }
   .admin-sidebar.open {
-    /* Restaurar borde solo cuando está abierto */
+    transform: translateX(0);
     border-right: 3px solid var(--uabc-dorado);
   }
+  .sidebar-close { display: flex; }
+  .sidebar-toggle { display: flex; }
 }
 
 .sidebar-header {
@@ -135,7 +149,6 @@
   text-decoration: none;
   transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
   border-left: 3px solid transparent;
-  /* Touch target mínimo 44px */
   min-height: 44px;
 }
 .sidebar-link:hover {
@@ -154,12 +167,13 @@
 
 /* ══════════════════════════════
    LAYOUT PRINCIPAL
+   overflow:hidden aquí → no crea stacking context en admin-body
 ══════════════════════════════ */
 .admin-layout {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow: hidden;   /* ← movido de admin-body a aquí */
   min-width: 0;
 }
 
@@ -175,9 +189,10 @@
   border-bottom: 3px solid var(--uabc-dorado);
   flex-shrink: 0;
   min-height: 56px;
+  position: relative;
+  z-index: 10;  /* queda dentro del flujo normal, sin competir con modales */
 }
 
-/* sidebar-toggle: necesita display:flex cuando está activo, no display:block */
 .sidebar-toggle {
   color: var(--uabc-blanco);
   display: none;
@@ -309,8 +324,6 @@
   align-items: center;
   gap: var(--space-4);
   border: 1px solid var(--color-border);
-  box-shadow: var(--shadow-sm);
-  /* Reemplaza border-top colored (patrón "AI template") por sombra inset sutil */
   box-shadow: var(--shadow-sm), inset 0 3px 0 var(--uabc-verde);
   transition: box-shadow 180ms ease, transform 180ms ease;
 }
@@ -328,23 +341,13 @@
   flex-shrink: 0;
 }
 
-/* Fallback para Safari < 16.4 (no soporta color-mix) */
-.kpi-icon--green {
-  background: rgba(26,107,42,0.12);
-  color: var(--uabc-verde);
-}
-.kpi-icon--gold {
-  background: rgba(200,151,43,0.20);
-  color: var(--uabc-dorado-dark, #a07000);
-}
+/* Fallback Safari < 16.4 */
+.kpi-icon--green { background: rgba(26,107,42,0.12); color: var(--uabc-verde); }
+.kpi-icon--gold  { background: rgba(200,151,43,0.20); color: var(--uabc-dorado-dark, #a07000); }
 
 @supports (background: color-mix(in oklch, red 10%, blue)) {
-  .kpi-icon--green {
-    background: color-mix(in oklch, var(--uabc-verde) 12%, transparent);
-  }
-  .kpi-icon--gold {
-    background: color-mix(in oklch, var(--uabc-dorado) 20%, transparent);
-  }
+  .kpi-icon--green { background: color-mix(in oklch, var(--uabc-verde) 12%, transparent); }
+  .kpi-icon--gold  { background: color-mix(in oklch, var(--uabc-dorado) 20%, transparent); }
 }
 
 .kpi-data { display: flex; flex-direction: column; min-width: 0; }
@@ -388,10 +391,7 @@
   flex-wrap: wrap;
   align-items: flex-end;
 }
-.faq-admin-filter > div {
-  flex: 1 1 140px;
-  max-width: 240px;
-}
+.faq-admin-filter > div { flex: 1 1 140px; max-width: 240px; }
 .form-select--sm {
   padding: var(--space-2) var(--space-3);
   font-size: var(--text-sm);
@@ -406,10 +406,6 @@
   overflow-x: auto;
   border-radius: var(--radius-md);
   -webkit-overflow-scrolling: touch;
-}
-.table-wrap::after {
-  content: '';
-  display: none;
 }
 .admin-table {
   width: 100%;
@@ -437,26 +433,15 @@
   color: var(--color-text);
   vertical-align: middle;
 }
-.admin-table tbody tr {
-  transition: background 140ms ease;
-}
-/* Fallback hover tabla para Safari < 16.4 */
-.admin-table tbody tr:hover {
-  background: rgba(26,107,42,0.04);
-}
+.admin-table tbody tr { transition: background 140ms ease; }
+/* Fallback hover para Safari < 16.4 */
+.admin-table tbody tr:hover { background: rgba(26,107,42,0.04); }
 @supports (background: color-mix(in oklch, red 10%, blue)) {
-  .admin-table tbody tr:hover {
-    background: color-mix(in oklch, var(--uabc-verde) 4%, transparent);
-  }
+  .admin-table tbody tr:hover { background: color-mix(in oklch, var(--uabc-verde) 4%, transparent); }
 }
 .admin-table tbody tr:last-child td { border-bottom: none; }
 .row--muted td { color: var(--color-text-muted); }
-.td-truncate {
-  max-width: 200px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+.td-truncate { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Acciones */
 .table-actions { display: flex; gap: var(--space-2); align-items: center; }
@@ -491,7 +476,7 @@
   font-family: var(--font-display);
   white-space: nowrap;
 }
-/* Fallbacks rgba para Safari < 16.4 */
+/* Fallbacks rgba Safari < 16.4 */
 .badge--green { background: rgba(26,107,42,0.15); color: var(--uabc-verde); }
 .badge--gold  { background: rgba(200,151,43,0.25); color: var(--uabc-dorado-dark, #a07000); }
 .badge--gray  { background: rgba(0,0,0,0.06); color: var(--color-text-muted); }
@@ -501,11 +486,7 @@
   .badge--gold  { background: color-mix(in oklch, var(--uabc-dorado) 25%, transparent); }
 }
 
-.btn-sm {
-  padding: var(--space-2) var(--space-3);
-  font-size: var(--text-xs);
-  min-height: 36px;
-}
+.btn-sm { padding: var(--space-2) var(--space-3); font-size: var(--text-xs); min-height: 36px; }
 
 .status-dot {
   display: inline-block;
@@ -534,13 +515,9 @@
   overflow: hidden;
   transition: box-shadow 200ms ease, transform 200ms ease;
 }
-.event-admin-card:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
-}
+.event-admin-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
 .event-admin-card--inactive { opacity: 0.75; }
 
-/* Corrige height fijo 130px → aspect-ratio fluido con contain (no recorta) */
 .event-admin-img {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -569,47 +546,28 @@
   font-weight: 700;
   color: var(--uabc-verde);
 }
-.event-admin-meta {
-  font-size: var(--text-xs);
-  color: var(--color-text-muted);
-  max-width: none;
-}
+.event-admin-meta { font-size: var(--text-xs); color: var(--color-text-muted); max-width: none; }
 .event-admin-actions {
   display: flex;
   gap: var(--space-2);
   flex-wrap: wrap;
   margin-top: var(--space-2);
 }
-.event-admin-actions .btn {
-  flex: 1 1 auto;
-  justify-content: center;
-  min-width: 80px;
-}
+.event-admin-actions .btn { flex: 1 1 auto; justify-content: center; min-width: 80px; }
 
 .btn-secondary {
   background: var(--color-surface-2);
   color: var(--color-text-muted);
   border: 1px solid var(--color-border);
 }
-.btn-secondary:hover {
-  background: var(--color-border);
-  color: var(--color-text);
-}
+.btn-secondary:hover { background: var(--color-border); color: var(--color-text); }
 
 /* ══════════════════════════════
    QR VALIDADOR
 ══════════════════════════════ */
-.qr-layout {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-6);
-}
+.qr-layout { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); }
 .qr-card, .qr-devices-card { margin-bottom: 0; }
-.qr-input-row {
-  display: flex;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-}
+.qr-input-row { display: flex; gap: var(--space-3); flex-wrap: wrap; }
 .qr-input-row .form-input { flex: 1 1 160px; }
 .qr-input-row .btn { flex-shrink: 0; }
 
@@ -621,22 +579,14 @@
   padding: var(--space-4);
   border-radius: var(--radius-lg);
   border: 2px solid var(--uabc-verde);
-  /* Fallback rgba */
   background: rgba(26,107,42,0.08);
 }
 @supports (background: color-mix(in oklch, red 10%, blue)) {
-  .qr-result-card {
-    background: color-mix(in oklch, var(--uabc-verde) 8%, transparent);
-  }
+  .qr-result-card { background: color-mix(in oklch, var(--uabc-verde) 8%, transparent); }
 }
-.qr-result-card--error {
-  border-color: var(--color-error);
-  background: rgba(161,44,123,0.08);
-}
+.qr-result-card--error { border-color: var(--color-error); background: rgba(161,44,123,0.08); }
 @supports (background: color-mix(in oklch, red 10%, blue)) {
-  .qr-result-card--error {
-    background: color-mix(in oklch, var(--color-error) 8%, transparent);
-  }
+  .qr-result-card--error { background: color-mix(in oklch, var(--color-error) 8%, transparent); }
 }
 .qr-result-icon { color: var(--uabc-verde); flex-shrink: 0; }
 .qr-result-status { font-weight: 700; font-family: var(--font-display); color: var(--uabc-verde); font-size: var(--text-sm); max-width: none; }
@@ -663,24 +613,15 @@
 .asistente-detail { display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
 .asistente-avatar {
   width: 64px; height: 64px;
-  /* Fallback rgba */
   background: rgba(26,107,42,0.12);
   border-radius: var(--radius-full);
   display: flex; align-items: center; justify-content: center;
   color: var(--uabc-verde);
 }
 @supports (background: color-mix(in oklch, red 10%, blue)) {
-  .asistente-avatar {
-    background: color-mix(in oklch, var(--uabc-verde) 12%, transparent);
-  }
+  .asistente-avatar { background: color-mix(in oklch, var(--uabc-verde) 12%, transparent); }
 }
-.asistente-name {
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  font-weight: 700;
-  color: var(--color-text);
-  text-align: center;
-}
+.asistente-name { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; color: var(--color-text); text-align: center; }
 .asistente-fields { width: 100%; display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-2); }
 .asistente-field {
   display: flex;
@@ -706,7 +647,6 @@
   gap: var(--space-2);
   font-size: var(--text-xs);
   color: var(--color-text-muted);
-  /* Fallback rgba */
   background: rgba(200,151,43,0.12);
   padding: var(--space-3);
   border-radius: var(--radius-md);
@@ -714,9 +654,7 @@
   margin-top: var(--space-2);
 }
 @supports (background: color-mix(in oklch, red 10%, blue)) {
-  .reminder-info {
-    background: color-mix(in oklch, var(--uabc-dorado) 12%, transparent);
-  }
+  .reminder-info { background: color-mix(in oklch, var(--uabc-dorado) 12%, transparent); }
 }
 .reminder-info svg { flex-shrink: 0; color: var(--uabc-dorado-dark, #a07000); margin-top: 1px; }
 .reminder-info span { max-width: none; }
@@ -732,7 +670,6 @@
 
 /* ══════════════════════════════
    RESPONSIVE · TABLET (≤ 1100px)
-   KPIs 2x2, padding reducido
 ══════════════════════════════ */
 @media (max-width: 1100px) {
   .admin-main { padding: var(--space-5) var(--space-6); }
@@ -741,21 +678,10 @@
 
 /* ══════════════════════════════
    RESPONSIVE · MÓVIL (≤ 900px)
-   Sidebar deslizable, toggle visible
+   — El sidebar ya se maneja arriba en su bloque propio.
+   — Aquí solo ajustes de layout del contenido principal.
 ══════════════════════════════ */
 @media (max-width: 900px) {
-  .admin-sidebar {
-    position: fixed;
-    left: 0; top: 0; bottom: 0;
-    transform: translateX(-100%);
-  }
-  .admin-sidebar.open { transform: translateX(0); }
-
-  .sidebar-close { display: flex; }
-
-  /* sidebar-toggle: usar display:flex (no block) para respetar align/justify */
-  .sidebar-toggle { display: flex; }
-
   .admin-main { padding: var(--space-4) var(--space-4); }
 
   .admin-section-header {
@@ -773,28 +699,18 @@
   }
   .admin-section-actions .btn { width: 100%; justify-content: center; }
 
-  .table-filters {
-    flex-direction: column;
-    gap: var(--space-3);
-  }
-  .table-filters .form-select {
-    max-width: 100%;
-    flex: 1 1 100%;
-  }
+  .table-filters { flex-direction: column; gap: var(--space-3); }
+  .table-filters .form-select { max-width: 100%; flex: 1 1 100%; }
 
-  .faq-admin-filter {
-    flex-direction: column;
-  }
+  .faq-admin-filter { flex-direction: column; }
   .faq-admin-filter > div { max-width: 100%; }
 
   .events-admin-grid { grid-template-columns: 1fr; }
-
   .qr-layout { grid-template-columns: 1fr; gap: var(--space-4); }
 }
 
 /* ══════════════════════════════
    RESPONSIVE · MÓVIL CHICO (≤ 600px)
-   KPIs 2 columnas, botón admin solo ícono
 ══════════════════════════════ */
 @media (max-width: 600px) {
   .kpi-grid { grid-template-columns: repeat(2, 1fr); gap: var(--space-3); }
@@ -823,7 +739,6 @@
 
 /* ══════════════════════════════
    RESPONSIVE · EXTRA CHICO (≤ 400px)
-   KPIs en columna única
 ══════════════════════════════ */
 @media (max-width: 400px) {
   .kpi-grid { grid-template-columns: 1fr; }
