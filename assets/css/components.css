@@ -298,25 +298,25 @@
   color: var(--uabc-blanco);
 }
 
-/* Contenedor del hero: dos columnas centradas */
+/* Contenedor del hero: columna centrada — texto arriba, imagen abajo */
 .hero-section .container {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-12);
+  gap: var(--space-8);
+  text-align: center;
 }
 
 .hero-card {
-  text-align: left;
+  text-align: center;
   max-width: 560px;
-  flex: 1 1 auto;
 }
 
 .hero-logo-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
 }
 
 .hero-alumni-img {
@@ -341,6 +341,7 @@
   color: rgba(255,255,255,0.85);
   margin-bottom: var(--space-8);
   max-width: 52ch;
+  margin-inline: auto;
 }
 
 .hero-cta-anchor {
@@ -1124,7 +1125,6 @@
   .header-center { padding-inline: 180px; }
   .events-grid { gap: var(--space-5); }
   .modal--info { max-width: 600px; }
-  .hero-section .container { gap: var(--space-8); }
   .hero-alumni-img { width: clamp(100px, 12vw, 140px); }
 }
 
@@ -1158,14 +1158,10 @@
   /* Hero en móvil: columna centrada */
   .hero-section   { padding-block: var(--space-12) var(--space-10); }
   .hero-section .container {
-    flex-direction: column;
-    align-items: center;
     gap: var(--space-6);
-    text-align: center;
   }
   .hero-card      { text-align: center; max-width: 100%; }
   .hero-desc      { margin-inline: auto; }
-  .hero-logo-wrapper { order: -1; }
   .hero-alumni-img { width: 100px; }
 
   .hero-title     { font-size: var(--text-xl); }
