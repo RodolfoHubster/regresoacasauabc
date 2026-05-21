@@ -298,16 +298,31 @@
   color: var(--uabc-blanco);
 }
 
-.hero-alumni-img {
-  margin-inline: auto;
-  filter: drop-shadow(0px 4px 6px rgba(0,0,0,0.3));
-  margin-top: 40px;
+/* Contenedor del hero: dos columnas centradas */
+.hero-section .container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-12);
 }
 
 .hero-card {
-  text-align: center;
-  max-width: 640px;
-  margin-inline: auto;
+  text-align: left;
+  max-width: 560px;
+  flex: 1 1 auto;
+}
+
+.hero-logo-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.hero-alumni-img {
+  width: clamp(120px, 14vw, 180px);
+  height: auto;
+  filter: drop-shadow(0px 4px 16px rgba(0,0,0,0.35));
 }
 
 .hero-title {
@@ -326,7 +341,6 @@
   color: rgba(255,255,255,0.85);
   margin-bottom: var(--space-8);
   max-width: 52ch;
-  margin-inline: auto;
 }
 
 .hero-cta-anchor {
@@ -363,11 +377,11 @@
   font-size: var(--text-base);
 }
 
-.btn-primary   { background: var(--uabc-verde); color: var(--uabc-blanco); border-color: var(--uabc-verde); }
-.btn-primary:hover { background: var(--uabc-verde-oscuro); border-color: var(--uabc-verde-oscuro); }
+.btn-primary   { background: var(--uabc-dorado); color: #1a1a1a; border-color: var(--uabc-dorado); }
+.btn-primary:hover { background: #b8920a; border-color: #b8920a; color: #1a1a1a; }
 
-.btn-outline-primary { background: transparent; color: var(--uabc-verde); border-color: var(--uabc-verde); }
-.btn-outline-primary:hover { background: var(--uabc-verde); color: var(--uabc-blanco); }
+.btn-outline-primary { background: transparent; color: var(--uabc-blanco); border-color: rgba(255,255,255,0.6); }
+.btn-outline-primary:hover { background: rgba(255,255,255,0.12); border-color: var(--uabc-blanco); }
 
 .btn-secondary { background: var(--color-surface-2); color: var(--color-text-muted); border-color: var(--color-border); }
 
@@ -1110,6 +1124,8 @@
   .header-center { padding-inline: 180px; }
   .events-grid { gap: var(--space-5); }
   .modal--info { max-width: 600px; }
+  .hero-section .container { gap: var(--space-8); }
+  .hero-alumni-img { width: clamp(100px, 12vw, 140px); }
 }
 
 /* =====================================================
@@ -1138,7 +1154,20 @@
   .site-nav       { display: none; }
   .mobile-nav     { display: block; }
   .container      { padding-inline: var(--space-4); }
+
+  /* Hero en móvil: columna centrada */
   .hero-section   { padding-block: var(--space-12) var(--space-10); }
+  .hero-section .container {
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-6);
+    text-align: center;
+  }
+  .hero-card      { text-align: center; max-width: 100%; }
+  .hero-desc      { margin-inline: auto; }
+  .hero-logo-wrapper { order: -1; }
+  .hero-alumni-img { width: 100px; }
+
   .hero-title     { font-size: var(--text-xl); }
   .hero-desc      { font-size: var(--text-sm); }
   .hero-cta-anchor { display: block; }
