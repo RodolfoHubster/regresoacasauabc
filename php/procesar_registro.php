@@ -135,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             
                             <tr>
                                 <td align="center" class="header-bg" style="background-color: #00723F; background: linear-gradient(#00723F, #00723F); padding: 30px 20px; color: #ffffff;">
-                                    <img src="https://cimahub-fcitec.tij.uabc.mx/regresoacasa/assets/images/LogoUabc.png" alt="Logo UABC" width="80" style="display: block; margin-bottom: 15px;">
+                                    <img src="cid:logo_uabc" alt="Logo UABC" width="80" style="display: block; margin-bottom: 15px;">
                                     <h2 style="margin: 0; font-size: 20px; font-weight: normal; color: #ffffff;">Universidad Autónoma de Baja California</h2>
                                     <p class="text-gold" style="margin: 5px 0 0 0; color: #F2A900; font-size: 16px; font-weight: bold;">Reencuentro de egresadas y egresados</p>
                                 </td>
@@ -213,6 +213,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Construir el mensaje MIME (Multipart/Related para adjuntar e incrustar la imagen)
         $boundary = uniqid('np');
         $qrData = base64_encode(file_get_contents($qr_path));
+        $logo_path = __DIR__ . '/../assets/images/LogoUabc.png';
+        $logoData = base64_encode(file_get_contents($logo_path));
         
         // Es importante definir el correo del remitente correctamente. Cámbialo si tu cuenta autorizada es diferente
         $correo_remitente = 'egresados@uabc.edu.mx'; 
@@ -236,6 +238,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $rawMessage .= "Content-Transfer-Encoding: base64\r\n";
         $rawMessage .= "Content-ID: <qr_img>\r\n\r\n";
         $rawMessage .= $qrData . "\r\n\r\n";
+        
+        // Parte Imagen (Logo UABC incrustado)
+        $rawMessage .= "--$boundary\r\n";
+        $rawMessage .= "Content-Type: image/png; name=\"LogoUabc.png\"\r\n";
+        $rawMessage .= "Content-Disposition: inline; filename=\"LogoUabc.png\"\r\n";
+        $rawMessage .= "Content-Transfer-Encoding: base64\r\n";
+        $rawMessage .= "Content-ID: <logo_uabc>\r\n\r\n";
+        $rawMessage .= $logoData . "\r\n\r\n";
         
         $rawMessage .= "--$boundary--";
 

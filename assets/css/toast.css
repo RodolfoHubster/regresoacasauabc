@@ -1,0 +1,62 @@
+/* toast.css — Notificaciones no bloqueantes */
+
+#toast-container {
+  position: fixed;
+  bottom: var(--space-6);
+  right: var(--space-6);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  pointer-events: none;
+  max-width: min(380px, calc(100vw - var(--space-8)));
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  line-height: 1.4;
+  pointer-events: all;
+  opacity: 0;
+  transform: translateX(16px);
+}
+
+.toast--visible  { animation: toast-in  0.28s cubic-bezier(0.16,1,0.3,1) forwards; }
+.toast--leaving  { animation: toast-out 0.22s ease-in forwards; }
+
+@keyframes toast-in  { from{opacity:0;transform:translateX(16px)} to{opacity:1;transform:translateX(0)} }
+@keyframes toast-out { from{opacity:1;transform:translateX(0)} to{opacity:0;transform:translateX(16px)} }
+
+.toast--success { background:#1b4d2b; color:#d4edda; border:1px solid #2e7d32; }
+.toast--success .toast-icon { color:#81c784; }
+.toast--error   { background:#4a1020; color:#f8d7da; border:1px solid #c62828; }
+.toast--error   .toast-icon { color:#ef9a9a; }
+.toast--warning { background:#4a2e00; color:#fff3cd; border:1px solid #856404; }
+.toast--warning .toast-icon { color:#ffe082; }
+.toast--info    { background:#0d2a3a; color:#cce5ff; border:1px solid #006494; }
+.toast--info    .toast-icon { color:#90caf9; }
+
+.toast-icon  { flex-shrink:0; display:flex; align-items:center; }
+.toast-message { flex:1; min-width:0; }
+.toast-close {
+  flex-shrink:0; display:flex; align-items:center;
+  background:none; border:none; cursor:pointer;
+  opacity:0.6; color:inherit;
+  padding:var(--space-1); border-radius:var(--radius-sm);
+  transition:opacity 0.15s;
+}
+.toast-close:hover { opacity:1; }
+
+@media (max-width:480px) {
+  #toast-container { bottom:var(--space-4); right:var(--space-4); left:var(--space-4); max-width:none; }
+  @keyframes toast-in  { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes toast-out { from{opacity:1;transform:translateY(0)} to{opacity:0;transform:translateY(12px)} }
+}
+
+@media print { #toast-container { display:none; } }

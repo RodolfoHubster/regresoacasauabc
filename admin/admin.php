@@ -132,7 +132,7 @@
             </div>
             <div class="kpi-data">
               <span class="kpi-value" data-kpi="confirmados"></span>
-              <span class="kpi-label">QR Confirmados</span>
+              <span class="kpi-label">Asistentes Confirmados</span>
             </div>
           </div>
           <div class="kpi-card">

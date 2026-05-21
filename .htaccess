@@ -3,7 +3,8 @@
     Order allow,deny
     Deny from all
 </Files>
-#Evita que listen los directorios (seguridad extra)
+
+# Evita que listen los directorios (seguridad extra)
 Options -Indexes
 
-RedirectMatch 301 ^/regresoacasauabc/(.*)$ /regresaacasa/$1
+RedirectMatch 301 ^/regresaacasa/(.*)$ /regresoacasauabc/$1
