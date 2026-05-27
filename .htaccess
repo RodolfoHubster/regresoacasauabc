@@ -7,4 +7,3 @@
 # Evita que listen los directorios (seguridad extra)
 Options -Indexes
 
-RedirectMatch 301 ^/regresaacasa/(.*)$ /regresoacasauabc/$1

@@ -467,6 +467,12 @@ function poblarFiltrosEventos() {
         selectFiltroFaq.addEventListener('change', aplicarFiltrosFAQ);
         if(selectFiltroFaqCampus) selectFiltroFaqCampus.addEventListener('change', aplicarFiltrosFAQ);
     }
+
+    // 4. Filtro de facultad de la tabla de asistentes (carga dinámica según campus)
+    const selectFacultad = document.getElementById('filtro-facultad');
+    if (selectFacultad) {
+        cargarFacultadesPorCampus('');
+    }
 }
 
 // ─── LÓGICA DE MULTI-FILTROS PARA FAQ ───
@@ -498,22 +504,60 @@ function aplicarFiltrosFAQ() {
     renderTablaFAQs(filtradas);
 }
 
-// ─── LÓGICA DE MULTI-FILTROS (EVENTO Y CAMPUS) ───
-document.addEventListener('DOMContentLoaded', () => {
-    const selectEvento = document.getElementById('filtro-evento');
-    const selectCampus = document.getElementById('filtro-campus');
+// ─── CARGA DINÁMICA DE FACULTADES POR CAMPUS ───
+function cargarFacultadesPorCampus(campusNombre) {
+    const selectFacultad = document.getElementById('filtro-facultad');
+    if (!selectFacultad) return;
 
-    // Si cambias cualquiera de los dos, se ejecuta la misma función
-    if (selectEvento) selectEvento.addEventListener('change', aplicarFiltros);
-    if (selectCampus) selectCampus.addEventListener('change', aplicarFiltros);
+    const url = campusNombre
+        ? `php/get_facultades_por_campus.php?campus=${encodeURIComponent(campusNombre)}`
+        : 'php/get_facultades_por_campus.php';
+
+    fetch(url)
+        .then(r => r.json())
+        .then(result => {
+            selectFacultad.innerHTML = '<option value="">Todas las facultades</option>';
+            if (result.status === 'success') {
+                result.data.forEach(fac => {
+                    const opt = document.createElement('option');
+                    opt.value = fac.nombre;
+                    opt.textContent = fac.nombre;
+                    selectFacultad.appendChild(opt);
+                });
+            }
+        })
+        .catch(err => console.error('Error al cargar facultades:', err));
+}
+
+// ─── LÓGICA DE MULTI-FILTROS (EVENTO, CAMPUS Y FACULTAD) ───
+document.addEventListener('DOMContentLoaded', () => {
+    const selectEvento   = document.getElementById('filtro-evento');
+    const selectCampus   = document.getElementById('filtro-campus');
+    const selectFacultad = document.getElementById('filtro-facultad');
+
+    if (selectEvento)   selectEvento.addEventListener('change', aplicarFiltros);
+    if (selectFacultad) selectFacultad.addEventListener('change', aplicarFiltros);
+
+    // Cuando cambia campus: recargamos las facultades de ese campus Y aplicamos filtros
+    if (selectCampus) {
+        selectCampus.addEventListener('change', () => {
+            const campusVal = selectCampus.value;
+            // Reset facultad al cambiar campus
+            if (selectFacultad) selectFacultad.value = '';
+            cargarFacultadesPorCampus(campusVal);
+            aplicarFiltros();
+        });
+    }
 });
 
 function aplicarFiltros() {
-    const selectEvento = document.getElementById('filtro-evento');
-    const selectCampus = document.getElementById('filtro-campus');
+    const selectEvento   = document.getElementById('filtro-evento');
+    const selectCampus   = document.getElementById('filtro-campus');
+    const selectFacultad = document.getElementById('filtro-facultad');
     
-    const eventoSeleccionado = selectEvento ? selectEvento.value : "";
-    const campusSeleccionado = selectCampus ? selectCampus.value : "";
+    const eventoSeleccionado   = selectEvento   ? selectEvento.value   : "";
+    const campusSeleccionado   = selectCampus   ? selectCampus.value   : "";
+    const facultadSeleccionada = selectFacultad ? selectFacultad.value : "";
 
     // Empezamos con todos los asistentes
     let filtrados = asistentesCargados;
@@ -528,20 +572,27 @@ function aplicarFiltros() {
         filtrados = filtrados.filter(a => a.campus === campusSeleccionado);
     }
 
+    // 3. Filtrar por facultad (si hay una seleccionada)
+    if (facultadSeleccionada !== "") {
+        filtrados = filtrados.filter(a => a.facultad_nombre === facultadSeleccionada);
+    }
+
     // Dibujamos la tabla con el resultado de los filtros
     renderTablaAsistentes(filtrados);
 }
 
-// ─── EXPORTAR A EXCEL: ASISTENTES (Con filtros) ───
+// ─── EXPORTAR A EXCEL: ASISTENTES (Con filtros: evento, campus, facultad) ───
 function exportarExcelAsistentes() {
-    const selectEvento = document.getElementById('filtro-evento');
-    const selectCampus = document.getElementById('filtro-campus');
+    const selectEvento   = document.getElementById('filtro-evento');
+    const selectCampus   = document.getElementById('filtro-campus');
+    const selectFacultad = document.getElementById('filtro-facultad');
     
-    const evento = selectEvento ? selectEvento.value : "";
-    const campus = selectCampus ? selectCampus.value : "";
+    const evento   = selectEvento   ? selectEvento.value   : "";
+    const campus   = selectCampus   ? selectCampus.value   : "";
+    const facultad = selectFacultad ? selectFacultad.value : "";
 
-    // Armamos la URL pasándole los filtros seleccionados
-    const url = `php/exportar_asistentes.php?evento=${encodeURIComponent(evento)}&campus=${encodeURIComponent(campus)}`;
+    // Armamos la URL pasándole los tres filtros seleccionados
+    const url = `php/exportar_asistentes.php?evento=${encodeURIComponent(evento)}&campus=${encodeURIComponent(campus)}&facultad=${encodeURIComponent(facultad)}`;
     
     // Redirigir inicia la descarga del archivo sin cambiar de página
     window.location.href = url;
