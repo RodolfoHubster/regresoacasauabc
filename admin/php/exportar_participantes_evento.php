@@ -8,72 +8,59 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Color;
 
-// Leemos los filtros que nos mandará Javascript por la URL
-$filtroEvento   = $_GET['evento']   ?? '';
-$filtroCampus   = $_GET['campus']   ?? '';
-$filtroFacultad = $_GET['facultad'] ?? '';
+$eventoId = isset($_GET['evento_id']) ? intval($_GET['evento_id']) : 0;
 
-// Nombramos el archivo dinámicamente según los filtros
-$nombreArchivo = "Lista_Asistentes";
-if (!empty($filtroEvento))   $nombreArchivo .= "_" . preg_replace('/[^A-Za-z0-9_\-]/', '_', $filtroEvento);
-if (!empty($filtroCampus))   $nombreArchivo .= "_" . $filtroCampus;
-if (!empty($filtroFacultad)) $nombreArchivo .= "_" . preg_replace('/[^A-Za-z0-9_\-]/', '_', $filtroFacultad);
-$nombreArchivo .= ".xlsx";
+if (!$eventoId) {
+    header('Content-Type: text/html; charset=utf-8');
+    echo "Error: ID de evento no proporcionado.";
+    exit;
+}
 
 try {
-    // Consulta base (con facultad incluida)
-    $sql = "SELECT r.*, c.nombre as campus_nombre, f.nombre as facultad_nombre, ca.nombre as carrera_nombre, e.nombre as evento_nombre
+    // Obtener nombre del evento
+    $stmtEvento = $conexion->prepare("SELECT nombre FROM evento WHERE id = :id");
+    $stmtEvento->execute([':id' => $eventoId]);
+    $evento = $stmtEvento->fetch(PDO::FETCH_ASSOC);
+    $nombreEvento = $evento ? $evento['nombre'] : 'Evento';
+
+    // Consulta de participantes del evento
+    $sql = "SELECT r.nombre, r.apellidos, r.correo,
+                   cp.nombre AS campus_nombre,
+                   f.nombre  AS facultad_nombre,
+                   cr.nombre AS carrera_nombre,
+                   r.generacion,
+                   r.tipo_asistente,
+                   r.correo_enviado,
+                   r.asistencia
             FROM registro_asistente r
-            LEFT JOIN campus    c  ON r.campus_id   = c.id
-            LEFT JOIN facultad  f  ON r.facultad_id = f.id
-            LEFT JOIN carrera   ca ON r.carrera_id  = ca.id
-            LEFT JOIN evento    e  ON r.evento_id   = e.id
-            WHERE 1=1";
-
-    $params = [];
-
-    // Aplicar filtros a la consulta SQL
-    if (!empty($filtroEvento)) {
-        $sql .= " AND e.nombre = :evento";
-        $params[':evento'] = $filtroEvento;
-    }
-    if (!empty($filtroCampus)) {
-        $sql .= " AND c.nombre = :campus";
-        $params[':campus'] = $filtroCampus;
-    }
-    if (!empty($filtroFacultad)) {
-        $sql .= " AND f.nombre = :facultad";
-        $params[':facultad'] = $filtroFacultad;
-    }
-
-    $sql .= " ORDER BY r.id DESC";
+            LEFT JOIN campus    cp ON r.campus_id   = cp.id
+            LEFT JOIN facultad   f ON r.facultad_id  = f.id
+            LEFT JOIN carrera   cr ON r.carrera_id   = cr.id
+            WHERE r.evento_id = :id
+            ORDER BY r.apellidos ASC";
 
     $stmt = $conexion->prepare($sql);
-    $stmt->execute($params);
-    $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    $totalPersonas   = count($datos);
-    $totalAsistieron = count(array_filter($datos, fn($r) => $r['asistencia'] == 1));
+    $stmt->execute([':id' => $eventoId]);
+    $participantes   = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $totalPersonas   = count($participantes);
+    $totalAsistieron = count(array_filter($participantes, fn($r) => $r['asistencia'] == 1));
+
+    // Nombre del archivo
+    $nombreArchivo = 'Participantes_' . preg_replace('/[^A-Za-z0-9_\-]/', '_', $nombreEvento) . '.xlsx';
 
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
-    $sheet->setTitle('Asistentes');
+    $sheet->setTitle('Participantes');
     $sheet->setShowGridlines(true);
 
-    // ── Fila 1: filtros aplicados | total registrados | total asistieron ──
-    $descripcionFiltros = 'Todos los asistentes';
-    $partesFiltro = [];
-    if (!empty($filtroEvento))   $partesFiltro[] = 'Evento: ' . $filtroEvento;
-    if (!empty($filtroCampus))   $partesFiltro[] = 'Campus: ' . $filtroCampus;
-    if (!empty($filtroFacultad)) $partesFiltro[] = 'Facultad: ' . $filtroFacultad;
-    if (!empty($partesFiltro))   $descripcionFiltros = implode(' | ', $partesFiltro);
-
+    // ── Fila 1: nombre del evento | Registrados: N | Asistieron: N ──
     $resumen = 'Registrados: ' . $totalPersonas . '   |   Asistieron: ' . $totalAsistieron;
 
-    $sheet->setCellValue('A1', $descripcionFiltros);
+    $sheet->setCellValue('A1', 'Evento: ' . $nombreEvento);
     $sheet->setCellValue('B1', $resumen);
 
     $tituloStyle = [
-        'font'      => ['bold' => true, 'size' => 11, 'name' => 'Arial', 'color' => ['argb' => 'FF1A6B2A']],
+        'font'      => ['bold' => true, 'size' => 12, 'name' => 'Arial', 'color' => ['argb' => 'FF1A6B2A']],
         'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_CENTER],
     ];
     $sheet->getStyle('A1')->applyFromArray($tituloStyle);
@@ -87,7 +74,7 @@ try {
     $sheet->getRowDimension(1)->setRowHeight(24);
 
     // ── Fila 2: Encabezados ──
-    $headers = ['Nombre', 'Apellidos', 'Correo', 'Campus', 'Facultad', 'Carrera', 'Generación', 'Tipo', 'Evento', 'QR Correo', 'Asistencia'];
+    $headers = ['Nombre', 'Apellidos', 'Correo', 'Campus', 'Facultad', 'Carrera', 'Generación', 'Tipo', 'QR Correo', 'Asistencia'];
     $col = 'A';
     foreach ($headers as $header) {
         $sheet->setCellValue($col . '2', $header);
@@ -111,14 +98,14 @@ try {
             'startColor' => ['argb' => 'FF1A6B2A'],
         ],
     ];
-    $sheet->getStyle('A2:K2')->applyFromArray($headerStyle);
+    $sheet->getStyle('A2:J2')->applyFromArray($headerStyle);
     $sheet->getRowDimension(2)->setRowHeight(30);
 
     // ── Filas de datos ──
     $rowNum = 3;
-    foreach ($datos as $row) {
-        $qrEstado        = ($row['correo_enviado'] == 1) ? 'Enviado'   : 'Pendiente';
-        $asistenciaEstado = ($row['asistencia']   == 1) ? 'Asistió'   : 'Registrado';
+    foreach ($participantes as $row) {
+        $qrEstado        = ($row['correo_enviado'] == 1) ? 'Enviado'    : 'Pendiente';
+        $asistenciaEstado = ($row['asistencia']    == 1) ? 'Asistió'    : 'Registrado';
 
         $sheet->setCellValue('A' . $rowNum, $row['nombre']);
         $sheet->setCellValue('B' . $rowNum, $row['apellidos']);
@@ -128,9 +115,8 @@ try {
         $sheet->setCellValue('F' . $rowNum, $row['carrera_nombre']  ?? 'N/A');
         $sheet->setCellValue('G' . $rowNum, $row['generacion']      ?? 'N/A');
         $sheet->setCellValue('H' . $rowNum, $row['tipo_asistente']  ?? 'N/A');
-        $sheet->setCellValue('I' . $rowNum, $row['evento_nombre']   ?? 'N/A');
-        $sheet->setCellValue('J' . $rowNum, $qrEstado);
-        $sheet->setCellValue('K' . $rowNum, $asistenciaEstado);
+        $sheet->setCellValue('I' . $rowNum, $qrEstado);
+        $sheet->setCellValue('J' . $rowNum, $asistenciaEstado);
 
         $rowNum++;
     }
@@ -147,32 +133,32 @@ try {
                 ],
             ],
         ];
-        $sheet->getStyle('A2:K' . $lastRow)->applyFromArray($borderStyle);
+        $sheet->getStyle('A2:J' . $lastRow)->applyFromArray($borderStyle);
 
         // Formato de filas de datos
         for ($i = 3; $i <= $lastRow; $i++) {
             $sheet->getRowDimension($i)->setRowHeight(22);
             $sheet->getStyle('D' . $i . ':H' . $i)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('J' . $i . ':K' . $i)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('I' . $i . ':J' . $i)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
             // Fila cebra
             if ($i % 2 === 0) {
-                $sheet->getStyle('A' . $i . ':K' . $i)->getFill()
+                $sheet->getStyle('A' . $i . ':J' . $i)->getFill()
                     ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()->setARGB('FFF4F9F5');
             }
         }
 
         // Auto-ajuste de columnas
-        foreach (range('A', 'K') as $columnId) {
+        foreach (range('A', 'J') as $columnId) {
             $sheet->getColumnDimension($columnId)->setAutoSize(true);
         }
 
-        // Filtros automáticos
-        $sheet->setAutoFilter('A2:K' . $lastRow);
+        // Filtros automáticos (solo en el rango de datos)
+        $sheet->setAutoFilter('A2:J' . $lastRow);
     }
 
-    // Cabeceras para forzar la descarga de .xlsx
+    // ── Cabeceras HTTP para descarga ──
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     header('Content-Disposition: attachment; filename="' . $nombreArchivo . '"');
     header('Cache-Control: max-age=0');

@@ -66,11 +66,11 @@
       </div>
 
       <div class="filter-actions">
-        <div class="filter-count"><span id="result-count">0</span> registros</div>
+        <div class="filter-count"><span id="result-count">0</span> registros visibles &nbsp;|&nbsp; <strong id="total-count">0</strong> total en el evento</div>
         <div class="filter-buttons">
-          <button class="btn-icon" id="btn-exportar-csv" title="Exportar CSV" aria-label="Exportar a CSV">
+          <button class="btn-icon" id="btn-exportar-excel" title="Exportar Excel" aria-label="Exportar a Excel">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            CSV
+            Excel
           </button>
           <button class="btn-icon" id="btn-imprimir" title="Imprimir tabla" aria-label="Imprimir">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
@@ -153,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const tbody           = document.getElementById('tabla-asistentes');
   const emptyBox        = document.getElementById('table-empty');
   const countEl         = document.getElementById('result-count');
+  const totalCountEl    = document.getElementById('total-count');
 
   const inputNombre = document.getElementById('search-nombre');
   const selTipo     = document.getElementById('filter-tipo');
@@ -174,6 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
           document.getElementById('event-title').textContent = result.evento_nombre;
           document.title = result.evento_nombre + ' – Participantes';
         }
+        // Mostrar total del evento (no cambia con filtros)
+        if (totalCountEl) totalCountEl.textContent = allData.length;
         renderTable(allData);
         showToast(`${allData.length} registro(s) cargados`, 'success');
       } else {
@@ -274,32 +277,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Exportar CSV
-  document.getElementById('btn-exportar-csv').addEventListener('click', () => {
-    const visibleRows = Array.from(tbody.querySelectorAll('tr:not([hidden])'));
-    if (visibleRows.length === 0) { showToast('No hay registros visibles para exportar', 'warning'); return; }
-
-    const headers = ['Nombre','Correo','Campus','Facultad','Carrera','Tipo','Estatus','QR'];
-    const lines   = [headers.join(',')];
-    visibleRows.forEach(tr => {
-      try {
-        const d = JSON.parse(tr.dataset.raw);
-        const row = [d.nombre,d.correo,d.campus,d.facultad,d.carrera,d.tipo,d.estatus,d.qr]
-          .map(v => '"' + String(v).replace(/"/g,'""') + '"');
-        lines.push(row.join(','));
-      } catch(e) {}
-    });
-
-    const titulo = document.getElementById('event-title').textContent.trim()
-      .replace(/[^\w\sáéíóúÁÉÍÓÚñÑ]/g,'').replace(/\s+/g,'_') || 'participantes';
-    const filename = `${titulo}_${new Date().toISOString().slice(0,10)}.csv`;
-
-    const blob = new Blob(['\uFEFF' + lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url; a.download = filename; a.click();
-    URL.revokeObjectURL(url);
-    showToast(`CSV exportado: ${visibleRows.length} registro(s)`, 'success');
+  // Exportar Excel (PhpSpreadsheet)
+  document.getElementById('btn-exportar-excel').addEventListener('click', () => {
+    window.location.href = `php/exportar_participantes_evento.php?evento_id=${eventoId}`;
   });
 
   // Imprimir

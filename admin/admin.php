@@ -206,6 +206,9 @@
                 <option value="Mexicali">Mexicali</option>
                 <option value="Ensenada">Ensenada</option>
               </select>
+              <select id="filtro-facultad" class="form-select" aria-label="Filtrar por facultad">
+                <option value="">Todas las facultades</option>
+              </select>
             </div>
             <button class="btn btn-primary btn-sm" onclick="exportarExcelAsistentes()">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
