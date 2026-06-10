@@ -121,28 +121,17 @@
         <div class="section-header">
           <h2 class="section-title">Preguntas Frecuentes</h2>
           <p class="section-desc">Resolvemos tus dudas sobre los eventos.</p>
+          
+          <div class="faq-filters" style="margin-top: 1.5rem; display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap;">
+            <button class="btn btn-primary faq-filter-btn" data-campus="Todos">Generales</button>
+            <button class="btn btn-ghost faq-filter-btn" data-campus="Tijuana">Tijuana</button>
+            <button class="btn btn-ghost faq-filter-btn" data-campus="Mexicali">Mexicali</button>
+            <button class="btn btn-ghost faq-filter-btn" data-campus="Ensenada">Ensenada</button>
+          </div>
         </div>
+
         <div class="faq-list" id="faq-list">
-          <div class="faq-item">
-            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-1"><span>¿Hay estacionamiento disponible?</span><svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="faq-answer" id="faq-1" hidden><p>Sí, contamos con estacionamiento gratuito para egresados registrados. Se habilitará una zona especial con acceso desde la entrada principal del campus.</p></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-2"><span>¿A qué hora puedo ingresar al evento?</span><svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="faq-answer" id="faq-2" hidden><p>Las puertas abren 30 minutos antes del horario oficial. Te recomendamos llegar con anticipación para agilizar el registro con tu código QR.</p></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-3"><span>¿Cuál es el código de vestimenta?</span><svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="faq-answer" id="faq-3" hidden><p>El evento es semiformal. Se recomienda vestimenta casual elegante. No se permite ropa de playa ni deportiva. Los colores institucionales UABC siempre son bienvenidos.</p></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-4"><span>¿Cómo recibo mi QR de acceso?</span><svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="faq-answer" id="faq-4" hidden><p>Al completar tu registro recibirás un correo de confirmación con tu código QR único. Puedes mostrarlo desde tu celular, tablet o impreso en papel.</p></div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-trigger" aria-expanded="false" aria-controls="faq-5"><span>¿Puedo registrar a un acompañante?</span><svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg></button>
-            <div class="faq-answer" id="faq-5" hidden><p>El registro es individual y exclusivo para egresados UABC. Cada asistente debe completar su propio formulario con sus datos académicos.</p></div>
-          </div>
+          <p class="events-loading-text" style="text-align:center; padding: 2rem;">Cargando preguntas frecuentes...</p>
         </div>
       </div>
     </section>
@@ -242,6 +231,16 @@
             <span class="form-error" id="error-generacion" aria-live="polite"></span>
           </div>
 
+          <div class="form-group">
+            <label class="form-label">¿Tiene alguna necesidad de movilidad o accesibilidad que debamos tomar en cuenta? <span class="required" aria-hidden="true">*</span></label>
+            <div style="display: flex; gap: 1rem; margin-top: 0.5rem; margin-bottom: 0.5rem;">
+              <label style="cursor: pointer;"><input type="radio" name="necesidad_movilidad" value="No" checked required> No</label>
+              <label style="cursor: pointer;"><input type="radio" name="necesidad_movilidad" value="Si"> Sí</label>
+            </div>
+            <input type="text" id="field-necesidad-especificacion" name="necesidad_especificacion" class="form-input" placeholder="Favor de especificar (Ej. Rampa para silla de ruedas, intérprete, etc.)" style="display: none;">
+            <span class="form-error" id="error-necesidad-especificacion" aria-live="polite"></span>
+          </div>
+
           <div class="modal-footer">
             <button type="button" class="btn btn-ghost" onclick="closeModal('modal-registro')">Cancelar</button>
             <button type="submit" class="btn btn-primary">Confirmar Registro</button>
@@ -278,12 +277,23 @@
           <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><div><span class="info-highlight-label">Fecha y hora</span><span class="info-highlight-value" id="info-dinamico-fecha"></span></div></div>
           <div class="info-highlight-item"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><div><span class="info-highlight-label">Ubicación</span><span class="info-highlight-value" id="info-dinamico-ubicacion"></span></div></div>
         </div>
-        <div class="info-rich-content">
+        
+        <div class="info-rich-content" id="info-dinamico-detalles-section">
           <h3>Acerca del evento</h3>
           <p id="info-dinamico-desc"></p>
         </div>
+
+        <div class="info-rich-content" id="info-dinamico-faq-section" style="display: none;">
+          <h3>Preguntas Frecuentes del Evento</h3>
+          <div class="faq-list" id="info-dinamico-faq-list">
+            </div>
+        </div>
+
         <div class="modal-footer">
           <button class="btn btn-ghost" onclick="closeModal('modal-info-dinamico')">Cerrar</button>
+          
+          <button id="info-dinamico-btn-faq" class="btn btn-secondary">Preguntas Frecuentes</button>
+          
           <button id="info-dinamico-btn-registro" class="btn btn-primary">Registrarme a este evento</button>
         </div>
       </div>

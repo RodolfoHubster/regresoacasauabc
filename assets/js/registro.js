@@ -259,3 +259,22 @@ if (selectCarrera) {
     }
   });
 }
+
+// ─── Mostrar/Ocultar input de Necesidad de Movilidad ───
+const radiosMovilidad = document.querySelectorAll('input[name="necesidad_movilidad"]');
+const inputMovilidadOtra = document.getElementById('field-necesidad-especificacion');
+
+if (radiosMovilidad.length > 0 && inputMovilidadOtra) {
+  radiosMovilidad.forEach(radio => {
+    radio.addEventListener('change', function() {
+      if (this.value === 'Si') {
+        inputMovilidadOtra.style.display = 'block';
+        inputMovilidadOtra.required = true; // Lo hacemos obligatorio si marca que Sí
+      } else {
+        inputMovilidadOtra.style.display = 'none';
+        inputMovilidadOtra.required = false;
+        inputMovilidadOtra.value = ''; // Limpiamos el texto si se arrepiente y marca No
+      }
+    });
+  });
+}

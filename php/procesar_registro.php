@@ -26,6 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $carrera_otra = $_POST['carrera_otra'] ?? null;
         $generacion = $_POST['generacion'] ?? '';
         $tipo_asistente = $_POST['tipo'] ?? 'egresado';
+        $necesidad_movilidad = $_POST['necesidad_movilidad'] ?? 'No';
+        $necesidad_especificacion = $_POST['necesidad_especificacion'] ?? null;
 
         // Validar que el evento_id no esté vacío
         if (empty($nombre) || empty($correo) || empty($campus_id) || empty($evento_id)) {
@@ -69,8 +71,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // 2. Guardar en la base de datos
         $sql = "INSERT INTO registro_asistente 
-                (evento_id, qr_codigo, nombre, apellidos, correo, telefono, campus_id, facultad_id, facultad_otra, carrera_id, carrera_otra, generacion, tipo_asistente) 
-                VALUES (:evento_id, :qr_codigo, :nombre, :apellidos, :correo, :telefono, :campus_id, :facultad_id, :facultad_otra, :carrera_id, :carrera_otra, :generacion, :tipo_asistente)";
+                (evento_id, qr_codigo, nombre, apellidos, correo, telefono, campus_id, facultad_id, facultad_otra, carrera_id, carrera_otra, generacion, tipo_asistente, necesidad_movilidad, necesidad_especificacion) 
+                VALUES (:evento_id, :qr_codigo, :nombre, :apellidos, :correo, :telefono, :campus_id, :facultad_id, :facultad_otra, :carrera_id, :carrera_otra, :generacion, :tipo_asistente, :necesidad_movilidad, :necesidad_especificacion)";
         
         $stmt = $conexion->prepare($sql);
         $stmt->execute([
@@ -86,7 +88,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':carrera_id' => $carrera_id,
             ':carrera_otra' => $carrera_otra, 
             ':generacion' => $generacion,
-            ':tipo_asistente' => $tipo_asistente
+            ':tipo_asistente' => $tipo_asistente,
+            ':necesidad_movilidad' => $necesidad_movilidad,
+            ':necesidad_especificacion' => ($necesidad_movilidad === 'Si') ? $necesidad_especificacion : null
         ]);
 
         // 3. Generar la imagen del código QR
