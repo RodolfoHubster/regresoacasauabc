@@ -70,9 +70,15 @@ document.addEventListener('DOMContentLoaded', () => {
     faqListContainer.innerHTML = '';
 
     const filtradas = allFaqsData.filter(faq => {
-      if (campus === 'Todos') return true;
-      // Si la pregunta es "general" y no tiene campus asignado, la mostramos en todos lados
+      // 1. Si estamos en la pestaña principal, mostramos SOLO las preguntas generales (sin campus)
+      if (campus === 'Todos') {
+        return !faq.campus_nombre; 
+      }
+      
+      // 2. Si estamos en un campus específico, mostramos las generales...
       if (!faq.campus_nombre) return true; 
+      
+      // ... y TAMBIÉN las específicas de ese campus
       return faq.campus_nombre === campus;
     });
 
