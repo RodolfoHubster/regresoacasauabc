@@ -206,18 +206,20 @@ function enviarRegistro() {
       btnSubmit.disabled    = false;
       btnSubmit.textContent = textoOrig;
 
-      if (res.status === 'success') {
+     if (res.status === 'success') {
         closeModal('modal-registro');
         resetFormulario(form);
         setTimeout(() => openModal('modal-confirmacion'), 200);
       } else {
-        alert('Ocurrió un error al guardar: ' + res.message);
+        // Usamos tu sistema de toast para mostrar el error de forma profesional
+        showToast(res.message, 'error'); 
       }
     })
     .catch(() => {
       btnSubmit.disabled    = false;
       btnSubmit.textContent = textoOrig;
-      alert('Error de comunicación con el servidor.');
+      // Usamos tu sistema de toast para el error de red
+      showToast('Error de comunicación con el servidor.', 'error');
     });
 }
 

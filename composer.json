@@ -16,6 +16,6 @@
         "phpmailer/phpmailer": "^7.0",
         "endroid/qr-code": "^6.0",
         "google/apiclient": "^2.19",
-        "phpoffice/phpspreadsheet": "*"
+        "phpoffice/phpspreadsheet": "^5.7"
     }
 }
