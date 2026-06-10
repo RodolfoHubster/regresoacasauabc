@@ -32,6 +32,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new Exception("Faltan campos obligatorios (incluyendo el ID del evento).");
         }
 
+        // --- 1. NUEVO: VERIFICAR SI EL CORREO YA ESTÁ REGISTRADO EN ESTE EVENTO ---
+        $sql_check = "SELECT id FROM registro_asistente WHERE correo = :correo AND evento_id = :evento_id";
+        $stmt_check = $conexion->prepare($sql_check);
+        $stmt_check->execute([':correo' => $correo, ':evento_id' => $evento_id]);
+
+        if ($stmt_check->rowCount() > 0) {
+            // El correo ya existe, detenemos el proceso y enviamos un error
+            echo json_encode(['status' => 'error', 'message' => 'Este correo electrónico ya se encuentra registrado al evento.']);
+            exit; 
+        }
+
         // --- OBTENER DATOS DEL EVENTO PARA EL CORREO ---
         $sql_evento = "SELECT e.*, c.nombre as campus_nombre 
                        FROM evento e 

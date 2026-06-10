@@ -59,7 +59,7 @@ function loadPublicEventos() {
                 </ul>
                 <p class="event-card-desc">${evento.descripcion || 'Sin descripción'}</p>
                 <div class="event-card-actions">
-                  <button class="btn btn-outline-primary" ${btnDisabled} onclick="openModalInfo(${evento.id})">Información</button>
+                  <button class="btn btn-secondary" ${btnDisabled} onclick="openModalInfo(${evento.id})">Información</button>
                   <button class="btn ${btnClass} btn-registrar" ${btnDisabled} data-id="${evento.id}" onclick="openModalRegistro(${evento.id})">${btnText}</button>
                 </div>
               </div>
