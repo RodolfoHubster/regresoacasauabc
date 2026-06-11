@@ -546,15 +546,26 @@
 .faq-list {
   display: flex;
   flex-direction: column;
-  gap: .75rem;
+  gap: var(--space-3);          /* espacio entre cada item */
+  background: transparent;      /* sin fondo ni borde en el contenedor */
+  border: none;
+  overflow: visible;
+}
+
+.faq-item {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  /* overflow: hidden; */
   background: var(--color-surface);
-  padding: 0.5rem;
+  overflow: hidden;
+  transition: box-shadow 0.18s, border-color 0.18s;
 }
-.faq-item { border-bottom: 1px solid var(--color-divider); }
-.faq-item:last-child { border-bottom: none; }
+.faq-item:last-child {
+  border-bottom: 1px solid var(--color-border); /* ya no necesita resetear nada */
+}
+.faq-item:hover {
+  border-color: var(--uabc-verde);
+  box-shadow: var(--shadow-sm);
+}
 
 .faq-trigger {
   width: 100%;
@@ -594,6 +605,11 @@
   font-size: var(--text-sm);
   color: var(--color-text-muted);
   line-height: 1.7;
+}
+
+.faq-trigger[aria-expanded="true"] {
+  background: rgba(26, 107, 42, 0.05); /* fondo muy sutil al abrir */
+  border-bottom: 1px solid var(--color-divider);
 }
 
 /* =====================================================
