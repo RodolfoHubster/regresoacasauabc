@@ -385,14 +385,22 @@
   max-width: 260px;
 }
 
+/* FAQ filter — fila en desktop, columna en móvil */
 .faq-admin-filter {
-  display: grid;
-  gap: var(--space-3);
-  margin-bottom: var(--space-4);
+  display: flex;            /* ← flex en lugar de grid */
+  flex-direction: row;      /* ← fila por defecto */
   flex-wrap: wrap;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
   align-items: flex-end;
 }
-.faq-admin-filter > div { flex: 1 1 140px; max-width: 240px; }
+.faq-admin-filter > div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1 1 160px;
+  max-width: 260px;
+}
 .form-select--sm {
   padding: var(--space-2) var(--space-3);
   font-size: var(--text-sm);
@@ -407,12 +415,17 @@
   overflow-x: auto;
   border-radius: var(--radius-md);
   -webkit-overflow-scrolling: touch;
+  /* Asegura que la tabla use todo el ancho disponible */
+  width: 100%;
 }
 .admin-table {
   width: 100%;
   border-collapse: collapse;
   font-size: var(--text-sm);
-  min-width: 580px;
+  /* min-width evita que las columnas se colapsen en pantallas pequeñas
+     pero la tabla sigue expandiéndose al 100% en pantallas grandes */
+  min-width: 520px;
+  table-layout: auto;   /* ← el navegador distribuye el ancho según contenido */
 }
 .admin-table thead tr {
   background: var(--uabc-verde);
@@ -442,7 +455,29 @@
 }
 .admin-table tbody tr:last-child td { border-bottom: none; }
 .row--muted td { color: var(--color-text-muted); }
-.td-truncate { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Columna Pregunta: ocupa el mayor espacio disponible */
+.admin-table td:first-child,
+.admin-table th:first-child { width: 1%; white-space: nowrap; } /* # */
+
+/* Para la tabla FAQ: la columna Pregunta y Respuesta se expanden */
+#tabla-faq-body td:nth-child(2),
+#section-faq .admin-table th:nth-child(2) {
+  width: 30%;
+}
+#tabla-faq-body td:nth-child(3),
+#section-faq .admin-table th:nth-child(3) {
+  width: 40%;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.td-truncate {
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
 /* Acciones */
 .table-actions { display: flex; gap: var(--space-2); align-items: center; }
@@ -514,6 +549,8 @@
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   transition: box-shadow 200ms ease, transform 200ms ease;
 }
 .event-admin-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
@@ -522,11 +559,17 @@
 .event-admin-img {
   width: 100%;
   aspect-ratio: 16 / 9;
-  height: auto;
-  background-size: contain;
+  object-fit: cover;        /* ← cubre el área sin deformarse */
+  display: block;
+  background-color: var(--uabc-verde);
+  flex-shrink: 0;
+}
+
+/* Soporte para img con background (modo antiguo) */
+.event-admin-img[style*="background-image"] {
+  background-size: cover;   /* ← cover en lugar de contain */
   background-repeat: no-repeat;
   background-position: center;
-  background-color: var(--uabc-verde);
 }
 
 .event-admin-body {
@@ -534,6 +577,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  flex: 1;                  /* ← ocupa el espacio restante de la tarjeta */
 }
 .event-admin-top {
   display: flex;
@@ -547,12 +591,21 @@
   font-weight: 700;
   color: var(--uabc-verde);
 }
-.event-admin-meta { font-size: var(--text-xs); color: var(--color-text-muted); max-width: none; }
+.event-admin-meta {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  max-width: none;
+  /* Evita que el UUID largo rompa el layout */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .event-admin-actions {
   display: flex;
   gap: var(--space-2);
   flex-wrap: wrap;
-  margin-top: var(--space-2);
+  margin-top: auto;         /* ← empuja los botones al fondo */
+  padding-top: var(--space-2);
 }
 .event-admin-actions .btn { flex: 1 1 auto; justify-content: center; min-width: 80px; }
 
@@ -670,6 +723,60 @@
 }
 
 /* ══════════════════════════════
+   MODALES EN EL PANEL ADMIN
+   Overrides específicos para los modales dentro del contexto admin.
+   La estructura flex (header / body scroll / footer sticky) viene de
+   components.css — aquí solo ajustamos tamaños y comportamientos propios
+   del panel.
+══════════════════════════════ */
+
+/* Modal de evento (crear/editar) — más ancho para acomodar form-row de 2 columnas */
+.modal--evento   { max-width: 640px; }
+.modal--faq      { max-width: 600px; }
+.modal--asistente{ max-width: 480px; }
+.modal--reminder { max-width: 440px; }
+
+/* form-row dentro de modales admin: 2 columnas en desktop */
+.modal .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+/* Hijo único en form-row ocupa todo el ancho */
+.modal .form-row > *:only-child,
+.modal .form-row > input[type="hidden"] ~ * {
+  grid-column: 1 / -1;
+}
+
+/* form-group: separación label→input consistente */
+.modal .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Textarea en modales — altura mínima cómoda */
+.modal textarea.form-input {
+  min-height: 96px;
+  resize: vertical;
+}
+
+/* Inputs y selects en el admin: previene zoom en iOS */
+.admin-body .form-input,
+.admin-body .form-select {
+  font-size: 16px;
+}
+
+/* ── Separador visual entre secciones del form ──
+   Útil cuando el modal tiene muchos campos y se agrupan por tema */
+.modal-section-divider {
+  border: none;
+  border-top: 1px solid var(--color-divider);
+  margin-block: var(--space-1);
+}
+
+/* ══════════════════════════════
    RESPONSIVE · TABLET (≤ 1100px)
 ══════════════════════════════ */
 @media (max-width: 1100px) {
@@ -703,11 +810,26 @@
   .table-filters { flex-direction: column; gap: var(--space-3); }
   .table-filters .form-select { max-width: 100%; flex: 1 1 100%; }
 
-  .faq-admin-filter { flex-direction: column; }
-  .faq-admin-filter > div { max-width: 100%; }
+  /* FAQ filter: columna en móvil */
+  .faq-admin-filter { flex-direction: column; gap: var(--space-3); }
+  .faq-admin-filter > div { max-width: 100%; flex: 1 1 100%; }
 
   .events-admin-grid { grid-template-columns: 1fr; }
   .qr-layout { grid-template-columns: 1fr; gap: var(--space-4); }
+
+  /* form-row en modales admin → columna única en móvil */
+  .modal .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  /* Modales admin: mismas restricciones flotantes que en components.css */
+  .modal--evento,
+  .modal--faq,
+  .modal--asistente,
+  .modal--reminder {
+    max-width: 480px;
+    width: calc(100% - var(--space-8));
+  }
 }
 
 /* ══════════════════════════════
@@ -728,6 +850,10 @@
   .admin-card-header { flex-direction: column; align-items: flex-start; }
   .admin-card-header .btn { width: 100%; justify-content: center; }
 
+  /* Tabla: reduce padding en celdas para ganar espacio */
+  .admin-table th,
+  .admin-table td { padding: var(--space-2) var(--space-3); }
+
   .qr-input-row { flex-direction: column; }
   .qr-input-row .btn { width: 100%; justify-content: center; }
 
@@ -736,6 +862,9 @@
 
   .event-admin-actions { flex-direction: column; }
   .event-admin-actions .btn { width: 100%; }
+
+  /* UUID en tarjetas de evento: se corta con ellipsis */
+  .event-admin-meta { max-width: 100%; }
 }
 
 /* ══════════════════════════════
