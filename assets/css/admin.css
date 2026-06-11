@@ -670,6 +670,60 @@
 }
 
 /* ══════════════════════════════
+   MODALES EN EL PANEL ADMIN
+   Overrides específicos para los modales dentro del contexto admin.
+   La estructura flex (header / body scroll / footer sticky) viene de
+   components.css — aquí solo ajustamos tamaños y comportamientos propios
+   del panel.
+══════════════════════════════ */
+
+/* Modal de evento (crear/editar) — más ancho para acomodar form-row de 2 columnas */
+.modal--evento   { max-width: 640px; }
+.modal--faq      { max-width: 600px; }
+.modal--asistente{ max-width: 480px; }
+.modal--reminder { max-width: 440px; }
+
+/* form-row dentro de modales admin: 2 columnas en desktop */
+.modal .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+/* Hijo único en form-row ocupa todo el ancho */
+.modal .form-row > *:only-child,
+.modal .form-row > input[type="hidden"] ~ * {
+  grid-column: 1 / -1;
+}
+
+/* form-group: separación label→input consistente */
+.modal .form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Textarea en modales — altura mínima cómoda */
+.modal textarea.form-input {
+  min-height: 96px;
+  resize: vertical;
+}
+
+/* Inputs y selects en el admin: previene zoom en iOS */
+.admin-body .form-input,
+.admin-body .form-select {
+  font-size: 16px;
+}
+
+/* ── Separador visual entre secciones del form ──
+   Útil cuando el modal tiene muchos campos y se agrupan por tema */
+.modal-section-divider {
+  border: none;
+  border-top: 1px solid var(--color-divider);
+  margin-block: var(--space-1);
+}
+
+/* ══════════════════════════════
    RESPONSIVE · TABLET (≤ 1100px)
 ══════════════════════════════ */
 @media (max-width: 1100px) {
@@ -708,6 +762,20 @@
 
   .events-admin-grid { grid-template-columns: 1fr; }
   .qr-layout { grid-template-columns: 1fr; gap: var(--space-4); }
+
+  /* form-row en modales admin → columna única en móvil */
+  .modal .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  /* Modales admin: mismas restricciones flotantes que en components.css */
+  .modal--evento,
+  .modal--faq,
+  .modal--asistente,
+  .modal--reminder {
+    max-width: 480px;
+    width: calc(100% - var(--space-8));
+  }
 }
 
 /* ══════════════════════════════
