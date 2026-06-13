@@ -5,8 +5,14 @@ header('Content-Type: application/json');
 if (isset($_GET['evento_id'])) {
     try {
         $id = $_GET['evento_id'];
+
+        // 1. OBTENER EL NOMBRE DEL EVENTO (NUEVO)
+        $stmtEvento = $conexion->prepare("SELECT nombre FROM evento WHERE id = :id");
+        $stmtEvento->execute([':id' => $id]);
+        $evento = $stmtEvento->fetch(PDO::FETCH_ASSOC);
+        $nombreEvento = $evento ? $evento['nombre'] : 'Participantes del Evento';
         
-        // Unimos con las tablas campus, facultad y carrera para obtener los nombres
+        // 2. OBTENER LOS ASISTENTES (Tu consulta original intacta)
         $sql = "SELECT r.*, 
                        cp.nombre as campus_nombre, 
                        f.nombre as facultad_nombre, 
@@ -22,9 +28,16 @@ if (isset($_GET['evento_id'])) {
         $stmt->execute([':id' => $id]);
         $asistentes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        echo json_encode(['status' => 'success', 'data' => $asistentes]);
+        // 3. ENVIAR TODO AL JAVASCRIPT
+        echo json_encode([
+            'status' => 'success', 
+            'evento_nombre' => $nombreEvento, // Esto actualizará el título en participantes.php
+            'data' => $asistentes
+        ]);
     } catch (Exception $e) {
         echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
     }
+} else {
+    echo json_encode(['status' => 'error', 'message' => 'Falta el ID del evento']);
 }
 ?>
