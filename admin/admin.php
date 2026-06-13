@@ -66,6 +66,12 @@
             Validar QR
           </button>
         </li>
+        <li>
+          <button class="sidebar-link" data-section="usuarios" onclick="showSection('usuarios')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Usuarios
+          </button>
+        </li>
       </ul>
     </nav>
 
@@ -309,26 +315,34 @@
           </div>
 
           <div class="admin-card qr-card">
-            <h3 class="admin-card-title">Verificar por código</h3>
+            <h3 class="admin-card-title">Verificar Acceso</h3>
+            
             <div class="form-group">
-              <label for="qr-input" class="form-label">Código QR o ID de registro</label>
+              <label for="qr-input" class="form-label">Código QR o Folio</label>
               <div class="qr-input-row">
-                <input type="text" id="qr-input" class="form-input" placeholder="Ej. UABC-TJ-2025-00142" aria-label="Ingresa el código QR">
+                <input type="text" id="qr-input" class="form-input" placeholder="Ej. UABC-A1B2C3D4">
                 <button class="btn btn-primary" onclick="validarQR()">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                   Validar
                 </button>
               </div>
             </div>
+
+            <div class="form-group" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+              <label for="search-nombre-qr" class="form-label">¿No tiene código? Buscar manualmente:</label>
+              <input type="text" id="search-nombre-qr" class="form-input" placeholder="Escribe el nombre o correo..." onkeyup="buscarManualQR()">
+              <div id="resultados-nombre-qr" style="margin-top: 10px; max-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px;"></div>
+            </div>
+
             <div class="qr-result" id="qr-result" hidden>
               <div class="qr-result-card" id="qr-result-content">
                 <div class="qr-result-icon">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 </div>
                 <div>
-                  <p class="qr-result-status">Registro válido</p>
-                  <p class="qr-result-name" id="qr-result-name">Ana Martínez López</p>
-                  <p class="qr-result-detail" id="qr-result-detail">Tijuana 2025 · Egresado · Ing. Sistemas</p>
+                  <p class="qr-result-status" id="qr-result-status">Registro válido</p>
+                  <p class="qr-result-name" id="qr-result-name">Cargando...</p>
+                  <p class="qr-result-detail" id="qr-result-detail">Cargando detalles...</p>
                 </div>
               </div>
             </div>
@@ -355,6 +369,35 @@
         </div>
       </section>
 
+      <!-- ==============================
+           SECCIÓN: USUARIO
+      ============================== -->
+      <section class="admin-section" id="section-usuarios">
+        <div class="admin-section-header">
+          <h2 class="admin-section-title">Gestión de Usuarios</h2>
+          <button class="btn btn-primary" onclick="openModalUsuario(null)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo Usuario
+          </button>
+        </div>
+
+        <div class="admin-card">
+          <div class="table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Correo (Usuario)</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-usuarios-body">
+                <tr><td colspan="3" style="text-align:center;">Cargando usuarios...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -600,6 +643,57 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="modal-usuario" role="dialog" aria-modal="true" aria-labelledby="modal-usuario-title" hidden>
+    <div class="modal modal--sm">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-usuario-title">Nuevo Usuario</h2>
+        <button class="modal-close" onclick="closeAdminModal('modal-usuario')" aria-label="Cerrar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="form-usuario" novalidate>
+          <input type="hidden" id="user-id" name="id">
+          
+          <div class="form-group">
+            <label for="user-nombre" class="form-label">Nombre completo <span class="required">*</span></label>
+            <input type="text" id="user-nombre" name="nombre" class="form-input" placeholder="Ej. Juan Pérez" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="user-correo" class="form-label">Correo electrónico <span class="required">*</span></label>
+            <input type="email" id="user-correo" name="correo" class="form-input" placeholder="juan@uabc.edu.mx" required>
+          </div>
+          
+          <div class="form-group">
+            <label id="label-user-password" for="user-password" class="form-label">Contraseña <span class="required">*</span></label>
+            <input type="password" id="user-password" name="password" class="form-input" placeholder="••••••••" required>
+            <small id="user-password-help" style="color: var(--color-text-muted); display: none;">Déjalo en blanco si no deseas cambiar la contraseña.</small>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" onclick="closeAdminModal('modal-usuario')">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar Usuario</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal-overlay" id="modal-confirmar-eliminar-usuario" role="dialog" aria-modal="true" hidden>
+    <div class="modal modal--sm" style="text-align: center; padding: 30px 20px;">
+      <div style="color: var(--color-error); margin-bottom: 15px; display: flex; justify-content: center;">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      </div>
+      <h2 class="modal-title" style="margin-bottom: 10px;">¿Eliminar usuario?</h2>
+      <p style="color: var(--color-text-muted); margin-bottom: 25px; line-height: 1.5;">Esta acción no se puede deshacer. El administrador perderá el acceso al sistema de inmediato.</p>
+      <div style="display: flex; gap: 10px;">
+        <button type="button" class="btn btn-ghost" onclick="closeAdminModal('modal-confirmar-eliminar-usuario')" style="flex: 1;">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btn-confirmar-eliminar-usuario" style="flex: 1; background-color: var(--color-error); border-color: var(--color-error);" onclick="ejecutarEliminarUsuario()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     window.AppConfig = {
       // Escribe directamente tu Cloud Name (ejemplo: "drhxxyz")
@@ -611,6 +705,7 @@
   </script>
 
   <script src="../assets/js/main.js"></script>
+  <script src="../assets/js/toast.js"></script>
   <script src="../assets/js/admin.js"></script>
   <script src="../assets/js/qr-scanner.js"></script>
 

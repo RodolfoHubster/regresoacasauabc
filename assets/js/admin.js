@@ -10,6 +10,21 @@ const sectionTitles = {
 };
 
 function showSection(name) {
+  // ─── 1. CONTROL INTELIGENTE DE CÁMARA ───
+  if (name !== 'qr') {
+      // Si salimos de la pestaña, buscamos el botón de Stop y apagamos la cámara
+      const btnStop = document.getElementById('html5-qrcode-button-camera-stop');
+      if (btnStop && window.getComputedStyle(btnStop).display !== 'none') {
+          btnStop.click();
+      }
+  } else {
+      // Si entramos a la pestaña QR, creamos el escáner (solo la primera vez)
+      if (typeof inicializarLectorQR === 'function') {
+          inicializarLectorQR();
+      }
+  }
+
+  // ─── 2. CAMBIO VISUAL DE SECCIONES ───
   document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
 
@@ -27,7 +42,7 @@ function showSection(name) {
   if (main) main.scrollTop = 0;
 
   if (name === 'registros') {
-      cargarTablaAsistentes(); // Recarga los datos reales al hacer clic en el menú
+      if (typeof cargarTablaAsistentes === 'function') cargarTablaAsistentes();
   }
 }
 
@@ -1016,3 +1031,342 @@ function loadCampusForm() {
 document.addEventListener('DOMContentLoaded', () => {
   loadCampusForm();
 });
+
+// ==========================================
+// MÓDULO: GESTIÓN DE USUARIOS
+// ==========================================
+
+function cargarUsuarios() {
+  const tbody = document.getElementById('tabla-usuarios-body');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Cargando usuarios...</td></tr>';
+
+  fetch('php/get_usuarios.php')
+    .then(r => r.json())
+    .then(res => {
+      if (res.status === 'success') {
+        tbody.innerHTML = '';
+        if (res.data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No hay usuarios registrados.</td></tr>';
+          return;
+        }
+        res.data.forEach(user => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${user.nombre}</strong></td>
+            <td>${user.correo}</td>
+            <td>
+              <button class="btn btn-ghost btn-sm" onclick='openModalUsuario(${JSON.stringify(user)})'>Editar</button>
+              <button class="btn btn-ghost btn-sm" style="color:var(--color-error);" onclick="confirmarEliminarUsuario(${user.id})">Eliminar</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    })
+    .catch(err => console.error(err));
+}
+
+function openModalUsuario(user) {
+  const form = document.getElementById('form-usuario');
+  form.reset();
+  const helpText = document.getElementById('user-password-help');
+  const inputPass = document.getElementById('user-password');
+
+  if (user) {
+    // Modo Edición
+    document.getElementById('modal-usuario-title').textContent = 'Editar Usuario';
+    document.getElementById('user-id').value = user.id;
+    document.getElementById('user-nombre').value = user.nombre;
+    document.getElementById('user-correo').value = user.correo;
+    inputPass.required = false; // No es obligatorio cambiar contraseña
+    helpText.style.display = 'block';
+  } else {
+    // Modo Creación
+    document.getElementById('modal-usuario-title').textContent = 'Nuevo Usuario';
+    document.getElementById('user-id').value = '';
+    inputPass.required = true;
+    helpText.style.display = 'none';
+  }
+  
+  const modal = document.getElementById('modal-usuario');
+  modal.hidden = false;
+}
+
+// Interceptar envío del formulario de Usuario
+const formUsuario = document.getElementById('form-usuario');
+if (formUsuario) {
+  formUsuario.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    
+    // Cambiamos el texto del botón para que se vea que está cargando
+    const btnSubmit = formUsuario.querySelector('button[type="submit"]');
+    const originalText = btnSubmit.textContent;
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = 'Guardando...';
+    
+    fetch('php/guardar_usuario.php', { method: 'POST', body: formData })
+      .then(r => r.json())
+      .then(res => {
+        if (res.status === 'success') {
+          closeAdminModal('modal-usuario');
+          if (typeof cargarUsuarios === 'function') cargarUsuarios(); // Recargamos la tabla
+          
+          // 🟢 LLAMAR AL MODAL ELEGANTE
+          const modalExito = document.getElementById('modal-exito');
+          const modalTitle = modalExito.querySelector('.modal-title');
+          const modalMsg = document.getElementById('mensaje-exito');
+          const modalIconContainer = modalExito.querySelector('div[style*="justify-content: center"]');
+          
+          if(modalTitle) {
+              modalTitle.textContent = "¡Guardado!";
+              modalTitle.style.color = "var(--uabc-verde)";
+          }
+          if(modalIconContainer) {
+              modalIconContainer.style.color = "var(--uabc-verde)";
+              modalIconContainer.innerHTML = '<svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+          }
+          if(modalMsg) modalMsg.textContent = res.message; 
+          
+          if(modalExito) {
+              modalExito.hidden = false;
+              // Se cierra solito a los 2.5 segundos
+              setTimeout(() => { modalExito.hidden = true; }, 2500); 
+          }
+          
+        } else {
+          alert('Error: ' + res.message);
+        }
+      })
+      .catch(err => alert('Error al conectar con el servidor'))
+      .finally(() => {
+         // Devolvemos el botón a la normalidad
+         btnSubmit.disabled = false;
+         btnSubmit.textContent = originalText;
+      });
+  });
+}
+
+let usuarioAEliminar = null;
+function confirmarEliminarUsuario(id) {
+  usuarioAEliminar = id;
+  document.getElementById('modal-confirmar-eliminar-usuario').hidden = false;
+}
+
+function ejecutarEliminarUsuario() {
+  if (!usuarioAEliminar) return;
+  
+  const btn = document.getElementById('btn-confirmar-eliminar-usuario');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = 'Eliminando...';
+  btn.disabled = true;
+
+  const formData = new FormData();
+  formData.append('id', usuarioAEliminar);
+
+  fetch('php/eliminar_usuario.php', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(res => {
+      closeAdminModal('modal-confirmar-eliminar-usuario');
+      if (res.status === 'success') {
+        if (typeof cargarUsuarios === 'function') cargarUsuarios();
+        
+        // 🟢 LLAMAR AL MODAL ELEGANTE (ELIMINADO)
+        const modalExito = document.getElementById('modal-exito');
+        const modalTitle = modalExito.querySelector('.modal-title');
+        const modalMsg = document.getElementById('mensaje-exito');
+        const modalIconContainer = modalExito.querySelector('div[style*="justify-content: center"]');
+        
+        if(modalTitle) {
+            modalTitle.textContent = "¡Eliminado!";
+            modalTitle.style.color = "var(--uabc-verde)";
+        }
+        if(modalIconContainer) {
+            modalIconContainer.style.color = "var(--uabc-verde)";
+            modalIconContainer.innerHTML = '<svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+        }
+        if(modalMsg) modalMsg.textContent = res.message; 
+        
+        if(modalExito) {
+            modalExito.hidden = false;
+            // Se cierra solito a los 2.5 segundos
+            setTimeout(() => { modalExito.hidden = true; }, 2500);
+        }
+        
+      } else {
+        alert('Error: ' + res.message);
+      }
+    })
+    .catch(err => alert('Error al eliminar'))
+    .finally(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        usuarioAEliminar = null;
+    });
+}
+
+// Cargar la tabla cuando se le de clic al botón de la sección
+document.addEventListener('DOMContentLoaded', () => {
+  const btnUsuarios = document.querySelector('[data-section="usuarios"]');
+  if (btnUsuarios) {
+    btnUsuarios.addEventListener('click', cargarUsuarios);
+  }
+});
+
+// ==========================================
+// MÓDULO: VALIDACIÓN DE QR Y BÚSQUEDA MANUAL
+// ==========================================
+
+function validarQR(codigoManual = null, idManual = null) {
+  const input = document.getElementById('qr-input');
+  const codigo = codigoManual || (input ? input.value.trim() : '');
+
+  // Referencias a la tarjeta rápida en línea
+  const resultDiv = document.getElementById('qr-result');
+  const resultCard = document.getElementById('qr-result-content');
+  const resultStatus = document.getElementById('qr-result-status');
+  const resultName = document.getElementById('qr-result-name');
+  const resultDetail = document.getElementById('qr-result-detail');
+  const resultIcon = document.querySelector('.qr-result-icon');
+
+  // Función interna para mostrar errores rápido en la misma tarjeta
+  function mostrarTarjetaError(mensajeError) {
+    if(resultDiv) resultDiv.hidden = false;
+    if(resultCard) resultCard.style.borderLeft = "4px solid var(--color-error)";
+    if(resultStatus) {
+        resultStatus.textContent = "Error de validación";
+        resultStatus.style.color = "var(--color-error)";
+    }
+    if(resultName) resultName.textContent = "";
+    if(resultDetail) resultDetail.textContent = mensajeError;
+    if(resultIcon) {
+        resultIcon.style.color = "var(--color-error)";
+        resultIcon.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+    }
+    setTimeout(() => { if (resultDiv) resultDiv.hidden = true; }, 3000);
+  }
+
+  // Validar que manden algo
+  if (!codigo && !idManual) {
+    mostrarTarjetaError('Por favor, ingresa un código QR o busca un nombre.');
+    return;
+  }
+
+  const formData = new FormData();
+  if (idManual) formData.append('id', idManual);
+  else formData.append('codigo', codigo);
+
+  fetch('php/validar_qr.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(res => res.json())
+  .then(result => {
+    
+    if (result.status === 'success') {
+      // 🟢 ÉXITO: Tarjeta en Verde
+      if(resultDiv) resultDiv.hidden = false;
+      if(resultCard) resultCard.style.borderLeft = "4px solid var(--uabc-verde)";
+      if(resultStatus) {
+          resultStatus.textContent = "¡Acceso Concedido!";
+          resultStatus.style.color = "var(--uabc-verde)";
+      }
+      if(resultName) resultName.textContent = `${result.data.nombre} ${result.data.apellidos}`;
+      if(resultDetail) resultDetail.textContent = `${result.data.campus} · ${result.data.carrera || 'Asistente'}`;
+      if(resultIcon) {
+          resultIcon.style.color = "var(--uabc-verde)";
+          resultIcon.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+      }
+
+      // Recargamos datos en silencio
+      if (typeof cargarTablaAsistentes === 'function') cargarTablaAsistentes();
+      if (typeof cargarDashboardStats === 'function') cargarDashboardStats();
+      
+      // Auto-ocultar a los 2.5 segundos
+      setTimeout(() => { if (resultDiv) resultDiv.hidden = true; }, 2500);
+
+    } else if (result.status === 'already_scanned') {
+      // 🟡 ADVERTENCIA: Tarjeta en Dorado
+      if(resultDiv) resultDiv.hidden = false;
+      if(resultCard) resultCard.style.borderLeft = "4px solid #F2A900"; // Dorado UABC
+      if(resultStatus) {
+          resultStatus.textContent = "Código Ya Escaneado";
+          resultStatus.style.color = "#F2A900";
+      }
+      if(resultName) resultName.textContent = `${result.data.nombre} ${result.data.apellidos}`;
+      if(resultDetail) resultDetail.textContent = "Esta persona ya registró su entrada previamente.";
+      if(resultIcon) {
+          resultIcon.style.color = "#F2A900";
+          resultIcon.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+      }
+
+      // Auto-ocultar a los 3 segundos
+      setTimeout(() => { if (resultDiv) resultDiv.hidden = true; }, 3000);
+
+    } else {
+      // 🔴 ERROR (Ej. Código Falso): Tarjeta en Rojo
+      mostrarTarjetaError(result.message || 'Código inválido o no encontrado en el sistema');
+    }
+
+    // Limpiamos los inputs
+    if (input) input.value = '';
+    const searchInput = document.getElementById('search-nombre-qr');
+    if (searchInput) searchInput.value = '';
+    const resultsDiv = document.getElementById('resultados-nombre-qr');
+    if (resultsDiv) resultsDiv.innerHTML = '';
+
+  })
+  .catch(err => {
+    console.error(err);
+    mostrarTarjetaError('Error de conexión con el servidor.');
+  });
+}
+
+function buscarManualQR() {
+  const query = document.getElementById('search-nombre-qr').value.toLowerCase();
+  const container = document.getElementById('resultados-nombre-qr');
+  container.innerHTML = '';
+
+  if (query.length < 3) return; // Esperar a que escriban al menos 3 letras
+
+  // Aprovechamos que la tabla de asistentes ya cargó todos los datos
+  if (!asistentesCargados || asistentesCargados.length === 0) {
+      cargarTablaAsistentes(); // Forzar carga si estaba vacía
+      container.innerHTML = '<small style="color:var(--color-text-muted);">Cargando base de datos...</small>';
+      return;
+  }
+
+  // NUEVO: Agregamos la condición de que la asistencia NO sea 1
+  const filtrados = asistentesCargados.filter(a => 
+      parseInt(a.asistencia) !== 1 && // <-- ESTA LÍNEA ES LA MAGIA QUE LOS OCULTA
+      (`${a.nombre} ${a.apellidos}`.toLowerCase().includes(query) || 
+      (a.correo && a.correo.toLowerCase().includes(query)))
+  ).slice(0, 5);
+
+  if (filtrados.length === 0) {
+      // Modificamos ligeramente el texto para que el usuario entienda
+      container.innerHTML = '<small style="color:var(--color-text-muted);">No se encontraron coincidencias o ya ingresaron.</small>';
+      return;
+  }
+
+  // Imprimir botones elegantes para dar acceso
+  filtrados.forEach(a => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn-ghost btn-sm';
+      btn.style.justifyContent = 'space-between';
+      btn.style.width = '100%';
+      btn.style.textAlign = 'left';
+      btn.innerHTML = `
+          <div style="line-height: 1.3;">
+              <strong>${a.nombre} ${a.apellidos}</strong><br>
+              <small style="color:var(--color-text-muted);">${a.correo || 'Sin correo'}</small>
+          </div>
+          <span class="badge badge--green">Dar Acceso</span>
+      `;
+      // Al hacer clic, ejecuta la misma función de validar pero usando el ID
+      btn.onclick = () => validarQR(null, a.id);
+      container.appendChild(btn);
+  });
+}
