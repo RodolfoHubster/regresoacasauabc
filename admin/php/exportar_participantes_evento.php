@@ -23,7 +23,7 @@ try {
     $evento = $stmtEvento->fetch(PDO::FETCH_ASSOC);
     $nombreEvento = $evento ? $evento['nombre'] : 'Evento';
 
-    // Consulta de participantes del evento
+    // Consulta de participantes del evento (AHORA TRAE NECESIDAD DE MOVILIDAD)
     $sql = "SELECT r.nombre, r.apellidos, r.correo,
                    cp.nombre AS campus_nombre,
                    f.nombre  AS facultad_nombre,
@@ -31,7 +31,9 @@ try {
                    r.generacion,
                    r.tipo_asistente,
                    r.correo_enviado,
-                   r.asistencia
+                   r.asistencia,
+                   r.necesidad_movilidad,
+                   r.necesidad_especificacion
             FROM registro_asistente r
             LEFT JOIN campus    cp ON r.campus_id   = cp.id
             LEFT JOIN facultad   f ON r.facultad_id  = f.id
@@ -73,8 +75,8 @@ try {
     $sheet->mergeCells('B1:E1');
     $sheet->getRowDimension(1)->setRowHeight(24);
 
-    // ── Fila 2: Encabezados ──
-    $headers = ['Nombre', 'Apellidos', 'Correo', 'Campus', 'Facultad', 'Carrera', 'Generación', 'Tipo', 'QR Correo', 'Asistencia'];
+    // ── Fila 2: Encabezados (NUEVA COLUMNA K) ──
+    $headers = ['Nombre', 'Apellidos', 'Correo', 'Campus', 'Facultad', 'Carrera', 'Generación', 'Tipo', 'QR Correo', 'Asistencia', '¿Tiene alguna necesidad de movilidad o accesibilidad que debamos tomar en cuenta?'];
     $col = 'A';
     foreach ($headers as $header) {
         $sheet->setCellValue($col . '2', $header);
@@ -98,7 +100,8 @@ try {
             'startColor' => ['argb' => 'FF1A6B2A'],
         ],
     ];
-    $sheet->getStyle('A2:J2')->applyFromArray($headerStyle);
+    // Se extiende el estilo hasta la columna K
+    $sheet->getStyle('A2:K2')->applyFromArray($headerStyle);
     $sheet->getRowDimension(2)->setRowHeight(30);
 
     // ── Filas de datos ──
@@ -106,6 +109,13 @@ try {
     foreach ($participantes as $row) {
         $qrEstado        = ($row['correo_enviado'] == 1) ? 'Enviado'    : 'Pendiente';
         $asistenciaEstado = ($row['asistencia']    == 1) ? 'Asistió'    : 'Registrado';
+
+        // Lógica para Necesidades Especiales
+        $textoNecesidad = 'No'; // Por defecto
+        if ($row['necesidad_movilidad'] === 'Si') {
+            $especificacion = !empty($row['necesidad_especificacion']) ? $row['necesidad_especificacion'] : 'Sí, pero no especificó';
+            $textoNecesidad = 'Sí. ' . $especificacion;
+        }
 
         $sheet->setCellValue('A' . $rowNum, $row['nombre']);
         $sheet->setCellValue('B' . $rowNum, $row['apellidos']);
@@ -117,6 +127,7 @@ try {
         $sheet->setCellValue('H' . $rowNum, $row['tipo_asistente']  ?? 'N/A');
         $sheet->setCellValue('I' . $rowNum, $qrEstado);
         $sheet->setCellValue('J' . $rowNum, $asistenciaEstado);
+        $sheet->setCellValue('K' . $rowNum, $textoNecesidad);
 
         $rowNum++;
     }
@@ -124,7 +135,7 @@ try {
     $lastRow = $rowNum - 1;
 
     if ($lastRow >= 2) {
-        // Bordes para todos los datos
+        // Bordes para todos los datos (Hasta la columna K)
         $borderStyle = [
             'borders' => [
                 'allBorders' => [
@@ -133,29 +144,29 @@ try {
                 ],
             ],
         ];
-        $sheet->getStyle('A2:J' . $lastRow)->applyFromArray($borderStyle);
+        $sheet->getStyle('A2:K' . $lastRow)->applyFromArray($borderStyle);
 
         // Formato de filas de datos
         for ($i = 3; $i <= $lastRow; $i++) {
             $sheet->getRowDimension($i)->setRowHeight(22);
             $sheet->getStyle('D' . $i . ':H' . $i)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle('I' . $i . ':J' . $i)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('I' . $i . ':K' . $i)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
             // Fila cebra
             if ($i % 2 === 0) {
-                $sheet->getStyle('A' . $i . ':J' . $i)->getFill()
+                $sheet->getStyle('A' . $i . ':K' . $i)->getFill()
                     ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()->setARGB('FFF4F9F5');
             }
         }
 
-        // Auto-ajuste de columnas
-        foreach (range('A', 'J') as $columnId) {
+        // Auto-ajuste de columnas de la A a la K
+        foreach (range('A', 'K') as $columnId) {
             $sheet->getColumnDimension($columnId)->setAutoSize(true);
         }
 
-        // Filtros automáticos (solo en el rango de datos)
-        $sheet->setAutoFilter('A2:J' . $lastRow);
+        // Filtros automáticos (solo en el rango de datos, hasta la K)
+        $sheet->setAutoFilter('A2:K' . $lastRow);
     }
 
     // ── Cabeceras HTTP para descarga ──
