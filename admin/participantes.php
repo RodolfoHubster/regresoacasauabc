@@ -46,16 +46,24 @@
 
   <main class="p-container">
 
-    <div class="tabs-nav">
-      <button class="tab-btn active" id="tab-lista" onclick="switchTab('lista')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-        Lista de Asistentes
-      </button>
-      <button class="tab-btn" id="tab-stats" onclick="switchTab('stats')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-        Estadísticas y Gráficas
-      </button>
-    </div>
+  <nav class="tabs-nav" role="tablist" aria-label="Secciones">
+  <button class="tab-btn active" id="tab-lista" role="tab" aria-selected="true" aria-controls="content-lista" onclick="switchTab('lista')">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+      <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
+      <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+    </svg>
+    Lista de Asistentes
+  </button>
+  <button class="tab-btn" id="tab-stats" role="tab" aria-selected="false" aria-controls="content-stats" onclick="switchTab('stats')">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <line x1="18" y1="20" x2="18" y2="10"/>
+      <line x1="12" y1="20" x2="12" y2="4"/>
+      <line x1="6" y1="20" x2="6" y2="14"/>
+    </svg>
+    Estadísticas y Gráficas
+  </button>
+</nav>
 
     <div id="content-lista">
       <div class="filters-bar card">
@@ -109,6 +117,11 @@
             </button>
           </div>
         </div>
+        <div class="table-empty" id="table-empty" hidden>
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <p>No se encontraron registros con los filtros aplicados.</p>
+      <button class="btn-ghost" id="btn-clear-filters">Limpiar filtros</button>
+    </div>
       </div>
 
       <div class="admin-table-wrapper card" id="skeleton-wrapper">
@@ -191,11 +204,7 @@
       </div>
     </div>
 
-    <div class="table-empty" id="table-empty" hidden>
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      <p>No se encontraron registros con los filtros aplicados.</p>
-      <button class="btn-ghost" id="btn-clear-filters">Limpiar filtros</button>
-    </div>
+
 
   </main>
 
