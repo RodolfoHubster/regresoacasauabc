@@ -64,23 +64,48 @@ main.p-container {
 }
 
 /* ================================================
-   FILTROS
+   FILTROS — Grid responsivo
    ================================================ */
 
+/*
+  Desktop (>900px): 4 filtros en fila + actions pegado a la derecha
+  ┌──────────┬──────┬─────────┬────┬─────────────────┐
+  │ Buscar   │ Tipo │ Estatus │ QR │ count + botones  │
+  └──────────┴──────┴─────────┴────┴─────────────────┘
+
+  Tablet (641-900px): 2×2 + actions fila completa abajo
+  ┌──────────┬──────┐
+  │ Buscar   │ Tipo │
+  ├──────────┴──────┤  <- reparte 2 cols
+  │ Estatus  │  QR  │
+  ├─────────────────┤
+  │ count + botones │
+  └─────────────────┘
+
+  Móvil (≤640px): 1 columna
+*/
+
 .filters-bar {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr auto;
+  grid-template-areas: "search tipo estatus qr actions";
+  align-items: end;
   gap: var(--space-4);
   padding: var(--space-5);
 }
+
+/* Asignar cada grupo a su área */
+.filter-group:nth-child(1) { grid-area: search;   }
+.filter-group:nth-child(2) { grid-area: tipo;     }
+.filter-group:nth-child(3) { grid-area: estatus;  }
+.filter-group:nth-child(4) { grid-area: qr;       }
+.filter-actions            { grid-area: actions;  }
 
 .filter-group {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  min-width: 160px;
-  flex: 1;
+  min-width: 0; /* evita overflow en flex/grid */
 }
 
 .filter-label {
@@ -92,6 +117,7 @@ main.p-container {
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  white-space: nowrap;
 }
 
 .filter-input,
@@ -112,12 +138,13 @@ main.p-container {
   box-shadow: 0 0 0 3px rgba(26,107,42,.12);
 }
 
+/* Actions: contador arriba, botones abajo */
 .filter-actions {
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
   gap: var(--space-2);
-  align-self: flex-end;
-  padding-top: var(--space-4);
+  white-space: nowrap;
 }
 
 .filter-count {
@@ -305,11 +332,11 @@ th.sort-desc .sort-svg { transform: rotate(180deg); }
 [hidden] { display: none !important; }
 
 /* ================================================
-   TABLET (<=900px)
+   TABLET (641px – 900px) — 2 columnas de filtros
    ================================================ */
 
 @media (max-width: 900px) {
-  .filter-group { min-width: 140px; }
+  /* Sombra de scroll en la tabla */
   .admin-table-wrapper {
     background:
       linear-gradient(to right, var(--color-surface) 30%, rgba(255,255,255,0)),
@@ -323,27 +350,54 @@ th.sort-desc .sort-svg { transform: rotate(180deg); }
   }
 }
 
+@media (min-width: 641px) and (max-width: 900px) {
+  .filters-bar {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "search  search"
+      "tipo    estatus"
+      "qr      qr"
+      "actions actions";
+    gap: var(--space-3);
+  }
+
+  .filter-actions {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+}
+
 /* ================================================
-   MÓVIL (<=640px) — cards por fila
+   MÓVIL (≤640px) — 1 columna, tabla como tarjetas
    ================================================ */
 
 @media (max-width: 640px) {
   .p-container { padding-inline: var(--space-4); }
 
+  /* Filtros: 1 columna */
   .filters-bar {
-    flex-direction: column;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "search"
+      "tipo"
+      "estatus"
+      "qr"
+      "actions";
     gap: var(--space-3);
     padding: var(--space-4);
   }
-  .filter-group { min-width: 100%; flex: unset; }
+
   .filter-actions {
-    padding-top: 0;
-    align-self: flex-start;
     flex-direction: row;
     align-items: center;
-    gap: var(--space-4);
+    justify-content: space-between;
+    width: 100%;
+    padding-top: var(--space-1);
   }
 
+  /* Tabla → cards */
   .admin-table { min-width: unset; }
   .admin-table,
   .admin-table thead,
@@ -428,7 +482,7 @@ th.sort-desc .sort-svg { transform: rotate(180deg); }
 }
 
 /* ================================================
-   MÓVIL PEQUEÑO (<=345px)
+   MÓVIL PEQUEÑO (≤345px)
    ================================================ */
 
 @media (max-width: 345px) {
@@ -476,7 +530,13 @@ th.sort-desc .sort-svg { transform: rotate(180deg); }
   .admin-body { background: white; min-height: unset; }
   main.p-container { padding-block: var(--space-4); gap: var(--space-3); }
 
-  .filters-bar { padding: var(--space-3) var(--space-4); box-shadow: none; border: 1px solid #ddd; }
+  .filters-bar {
+    display: flex;
+    flex-wrap: wrap;
+    padding: var(--space-3) var(--space-4);
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
 
   .admin-table-wrapper { overflow: visible; box-shadow: none; border: 1px solid #ddd; }
 
