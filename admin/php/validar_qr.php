@@ -22,6 +22,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Dependiendo de qué nos enviaron, adaptamos la búsqueda
         if (!empty($codigo)) {
+            // Normalizamos el código: mayúsculas y reinsertar guion si falta
+            $codigo = strtoupper(trim($codigo));
+            // Si empieza con UABC seguido de alfanumérico sin guion, lo reinsertamos
+            if (preg_match('/^UABC[A-Z0-9]/', $codigo) && substr($codigo, 4, 1) !== '-') {
+                $codigo = 'UABC-' . substr($codigo, 4);
+            }
             $sql .= "WHERE r.qr_codigo = :param LIMIT 1";
             $param = $codigo;
         } else {

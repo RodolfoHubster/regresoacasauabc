@@ -107,10 +107,30 @@ function openModalEvento(id) {
   openAdminModal('modal-evento');
 }
 
-function openModalRecordatorio(evento) {
-  const label = document.getElementById('modal-rec-evento');
-  if (label) label.textContent = ' ' + evento;
-  openAdminModal('modal-recordatorio');
+function openModalRecordatorio(id, nombre) {
+    const label = document.getElementById('modal-rec-evento');
+    const idInput = document.getElementById('rec-evento-id');
+    if (label) label.textContent = ' ' + nombre;
+    if (idInput) idInput.value = id;
+    openAdminModal('modal-recordatorio');
+}
+
+function abrirRecordatorioDesdeFiltro() {
+    const selectEvento = document.getElementById('filtro-evento');
+    const nombreEvento = selectEvento ? selectEvento.value : "";
+    
+    if (!nombreEvento) {
+        alert("Por favor, primero selecciona un evento específico en el filtro de la izquierda.");
+        return;
+    }
+    
+    // Buscamos el evento en la memoria para sacar su ID
+    const evento = eventosCargados.find(e => e.nombre === nombreEvento);
+    if (evento) {
+        openModalRecordatorio(evento.id, evento.nombre);
+    } else {
+        alert("Error al encontrar el evento.");
+    }
 }
 
 function openModalAsistente(nombre) {
@@ -232,7 +252,7 @@ function loadEventos() {
                   <button class="btn btn-secondary btn-sm" onclick="openModalEvento(${evento.id})">Editar</button>
                   <button class="btn btn-secondary btn-sm" onclick="verQR(${evento.id}, '${evento.nombre}')">Ver QR</button>
                   <a href="participantes.php?id=${evento.id}" class="btn btn-secondary btn-sm">Participantes</a>
-                  <button class="btn btn-secondary btn-sm" onclick="openModalRecordatorio('${evento.nombre}')">Recordatorio</button>
+                  <button class="btn btn-secondary btn-sm" onclick="openModalRecordatorio(${evento.id}, '${evento.nombre}')">Recordatorio</button>
                   <button class="btn btn-secondary btn-sm btn-delete-hover" onclick="confirmarEliminar(${evento.id}, '${evento.nombre}')">Eliminar</button>
                 </div>
               </div>
@@ -702,6 +722,7 @@ async function ejecutarEliminarEvento() {
 function enviarCorreosRecordatorio() {
     const tipoEnvio = document.querySelector('input[name="rec-tipo"]:checked').value;
     const mensaje = document.getElementById('rec-mensaje').value;
+    const eventoId = document.getElementById('rec-evento-id').value;
     const btn = document.getElementById('btn-enviar-rec');
     
     // Cambiar el botón a estado de carga para que el usuario no le pique dos veces
@@ -713,6 +734,7 @@ function enviarCorreosRecordatorio() {
     const formData = new FormData();
     formData.append('tipo', tipoEnvio);
     formData.append('mensaje', mensaje);
+    formData.append('evento_id', eventoId);
 
     fetch('php/enviar_recordatorio.php', {
         method: 'POST',
@@ -1220,7 +1242,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function validarQR(codigoManual = null, idManual = null) {
   const input = document.getElementById('qr-input');
-  const codigo = codigoManual || (input ? input.value.trim() : '');
+  let codigo = (codigoManual || (input ? input.value : '')).trim();
+
+  // LIMPIEZA ROBUSTA: elimina comillas, caracteres de control e invisibles
+  if (codigo) {
+      codigo = codigo
+          .replace(/[\x00-\x1F\x7F]/g, '') // Caracteres de control e invisibles
+          .replace(/['"]/g, '')             // Comillas simples y dobles
+          .replace(/[^a-zA-Z0-9-]/g, '')   // Todo lo que no sea alfanumérico o guion
+          .trim()
+          .toUpperCase();                   // Normalizar a mayúsculas
+  }
+
+  // Algunos scanners eliminan el guion: UABC6A... → restaurar a UABC-6A...
+  if (/^UABC[A-Z0-9]/i.test(codigo) && codigo.charAt(4) !== '-') {
+      codigo = 'UABC-' + codigo.slice(4);
+  }
 
   // Referencias a la tarjeta rápida en línea
   const resultDiv = document.getElementById('qr-result');
