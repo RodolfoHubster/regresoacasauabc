@@ -1,4 +1,15 @@
-<?php include 'php/auth_check.php'; ?>
+<?php 
+include 'php/auth_check.php'; 
+require_once 'php/conexion.php';
+
+try {
+    $stmtEventos = $conexion->query("SELECT id, nombre FROM evento ORDER BY fecha DESC, id DESC");
+    $todosEventos = $stmtEventos->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $todosEventos = [];
+}
+$currentEventoId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+?>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -7,6 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Participantes del Evento - UABC</title>
   <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/components.css">
   <link rel="stylesheet" href="../assets/css/admin.css">
   <link rel="stylesheet" href="../assets/css/participantes.css">
@@ -15,13 +27,27 @@
 </head>
 <body class="admin-body">
 
+  <?php include 'sidebar.php'; ?>
+
+  <div class="admin-layout">
+
   <header class="p-header">
-    <div class="p-container p-header-inner">
+    <div class="p-container p-header-inner" style="display:flex;align-items:center;">
+      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="admin-sidebar" style="background:none;border:none;color:white;cursor:pointer;margin-right:1rem;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
       <a href="admin.php" class="back-link" aria-label="Volver al Panel">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         Volver al Panel
       </a>
-      <h1 id="event-title" class="p-header-title">Cargando evento…</h1>
+      <select id="event-title" class="p-header-title event-selector" onchange="if(this.value) window.location.href='participantes.php?id='+this.value" style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.3); padding: 0.5rem 1rem; font-size: 1.5rem; font-weight: bold; border-radius: var(--radius-md); outline: none; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=\'2\'><polyline points=\'6 9 12 15 18 9\'/></svg>'); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 3rem;">
+        <option value="" style="background: var(--uabc-verde); color: white;">-- Cambiar de Evento --</option>
+        <?php foreach($todosEventos as $ev): ?>
+          <option value="<?= $ev['id'] ?>" style="background: var(--uabc-verde); color: white;" <?= $ev['id'] == $currentEventoId ? 'selected' : '' ?>>
+            <?= htmlspecialchars($ev['nombre']) ?>
+          </option>
+        <?php endforeach; ?>
+      </select>
     </div>
   </header>
 
@@ -355,7 +381,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (result.status === 'success') {
         allData = result.data;
         if (result.evento_nombre) {
-          document.getElementById('event-title').textContent = result.evento_nombre;
+          // document.getElementById('event-title').textContent = result.evento_nombre;
+          document.title = result.evento_nombre + ' - Participantes';
           document.title = result.evento_nombre + ' – Participantes';
         }
         if (totalCountEl) totalCountEl.textContent = allData.length;
@@ -558,5 +585,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 </script>
+  </div> <!-- fin admin-layout -->
+  <script src="../assets/js/admin.js"></script>
+  <script src="../assets/js/sidebar.js"></script>
 </body>
 </html>

@@ -25,11 +25,18 @@ function showSection(name) {
   }
 
   // ─── 2. CAMBIO VISUAL DE SECCIONES ───
+  const sec = document.getElementById('section-' + name);
+  if (!sec) {
+      // Si la sección no existe en el DOM, probablemente estamos en participantes.php
+      // Redirigimos al panel principal con la sección en la URL
+      window.location.href = 'admin.php?section=' + name;
+      return;
+  }
+
   document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
 
-  const sec = document.getElementById('section-' + name);
-  if (sec) sec.classList.add('active');
+  sec.classList.add('active');
 
   const link = document.querySelector('[data-section="' + name + '"]');
   if (link) link.classList.add('active');

@@ -18,12 +18,12 @@ try {
     $conexion = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
     $conexion->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    try {
-        $conexion->exec("ALTER TABLE faq ADD COLUMN orden INT DEFAULT 0");
-        $conexion->exec("ALTER TABLE faq ADD COLUMN oculto TINYINT(1) DEFAULT 0");
-        $conexion->exec("ALTER TABLE registro_asistente ADD COLUMN facultad_otra VARCHAR(255) NULL");
-        $conexion->exec("ALTER TABLE registro_asistente ADD COLUMN carrera_otra VARCHAR(255) NULL");
-    } catch(Exception $e) {}
+    try { $conexion->exec("ALTER TABLE faq ADD COLUMN orden INT DEFAULT 0"); } catch(Exception $e) {}
+    try { $conexion->exec("ALTER TABLE faq ADD COLUMN oculto TINYINT(1) DEFAULT 0"); } catch(Exception $e) {}
+    try { $conexion->exec("ALTER TABLE registro_asistente ADD COLUMN facultad_otra VARCHAR(255) NULL"); } catch(Exception $e) {}
+    try { $conexion->exec("ALTER TABLE registro_asistente ADD COLUMN carrera_otra VARCHAR(255) NULL"); } catch(Exception $e) {}
+    try { $conexion->exec("ALTER TABLE registro_asistente ADD COLUMN necesidad_movilidad TINYINT(1) DEFAULT 0"); } catch(Exception $e) {}
+    try { $conexion->exec("ALTER TABLE registro_asistente ADD COLUMN necesidad_especificacion VARCHAR(255) NULL"); } catch(Exception $e) {}
 
 } catch (Exception $e) {
     // Si hay error en el .env o en la base de datos, lo capturamos

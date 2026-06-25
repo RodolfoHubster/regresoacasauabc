@@ -23,7 +23,7 @@ try {
     $evento = $stmtEvento->fetch(PDO::FETCH_ASSOC);
     $nombreEvento = $evento ? $evento['nombre'] : 'Evento';
 
-    // Consulta de participantes del evento (AHORA TRAE NECESIDAD DE MOVILIDAD)
+    // Consulta de participantes del evento
     $sql = "SELECT r.nombre, r.apellidos, r.correo,
                    cp.nombre AS campus_nombre,
                    f.nombre  AS facultad_nombre,
@@ -60,25 +60,24 @@ try {
     // ── Fila 1: nombre del evento | Registrados: N | Asistieron: N ──
     $resumen = 'Registrados: ' . $totalPersonas . '   |   Asistieron: ' . $totalAsistieron;
 
-    $sheet->setCellValue('A1', 'Evento: ' . $nombreEvento);
-    $sheet->setCellValue('B1', $resumen);
-
     $tituloStyle = [
         'font'      => ['bold' => true, 'size' => 12, 'name' => 'Arial', 'color' => ['argb' => 'FF1A6B2A']],
         'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_CENTER],
     ];
+    $sheet->setCellValue('A1', 'Evento: ' . $nombreEvento);
     $sheet->getStyle('A1')->applyFromArray($tituloStyle);
 
     $resumenStyle = [
         'font'      => ['bold' => true, 'size' => 11, 'name' => 'Arial', 'color' => ['argb' => 'FF1A6B2A']],
         'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_CENTER],
     ];
+    $sheet->setCellValue('B1', $resumen);
     $sheet->getStyle('B1:E1')->applyFromArray($resumenStyle);
     $sheet->mergeCells('B1:E1');
     $sheet->getRowDimension(1)->setRowHeight(24);
 
     // ── Fila 2: Encabezados (NUEVA COLUMNA K) ──
-    $headers = ['Nombre', 'Apellidos', 'Correo', 'Campus', 'Facultad', 'Carrera', 'Generación', 'Tipo', 'QR Correo', 'Asistencia', '¿Tiene alguna necesidad de movilidad o accesibilidad que debamos tomar en cuenta?'];
+    $headers = ['Nombre', 'Apellidos', 'Correo', 'Campus', 'Facultad', 'Carrera', 'Generación', 'Tipo', 'QR Correo', 'Asistencia', '¿Necesidad Movilidad?'];
     $col = 'A';
     foreach ($headers as $header) {
         $sheet->setCellValue($col . '2', $header);
@@ -102,7 +101,6 @@ try {
             'startColor' => ['argb' => 'FF1A6B2A'],
         ],
     ];
-    // Se extiende el estilo hasta la columna K
     $sheet->getStyle('A2:K2')->applyFromArray($headerStyle);
     $sheet->getRowDimension(2)->setRowHeight(30);
 
@@ -112,10 +110,9 @@ try {
         $qrEstado        = ($row['correo_enviado'] == 1) ? 'Enviado'    : 'Pendiente';
         $asistenciaEstado = ($row['asistencia']    == 1) ? 'Asistió'    : 'Registrado';
 
-        // Lógica para Necesidades Especiales
-        $textoNecesidad = 'No'; // Por defecto
-        if ($row['necesidad_movilidad'] === 'Si') {
-            $especificacion = !empty($row['necesidad_especificacion']) ? $row['necesidad_especificacion'] : 'Sí, pero no especificó';
+        $textoNecesidad = 'No';
+        if ($row['necesidad_movilidad'] == 1 || $row['necesidad_movilidad'] === 'Si' || $row['necesidad_movilidad'] === 'Sí') {
+            $especificacion = !empty($row['necesidad_especificacion']) ? $row['necesidad_especificacion'] : 'Sí';
             $textoNecesidad = 'Sí. ' . $especificacion;
         }
 
@@ -140,7 +137,6 @@ try {
     $lastRow = $rowNum - 1;
 
     if ($lastRow >= 2) {
-        // Bordes para todos los datos (Hasta la columna K)
         $borderStyle = [
             'borders' => [
                 'allBorders' => [
@@ -151,13 +147,11 @@ try {
         ];
         $sheet->getStyle('A2:K' . $lastRow)->applyFromArray($borderStyle);
 
-        // Formato de filas de datos
         for ($i = 3; $i <= $lastRow; $i++) {
             $sheet->getRowDimension($i)->setRowHeight(22);
             $sheet->getStyle('D' . $i . ':H' . $i)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
             $sheet->getStyle('I' . $i . ':K' . $i)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
 
-            // Fila cebra
             if ($i % 2 === 0) {
                 $sheet->getStyle('A' . $i . ':K' . $i)->getFill()
                     ->setFillType(Fill::FILL_SOLID)
@@ -165,16 +159,13 @@ try {
             }
         }
 
-        // Auto-ajuste de columnas de la A a la K
         foreach (range('A', 'K') as $columnId) {
             $sheet->getColumnDimension($columnId)->setAutoSize(true);
         }
 
-        // Filtros automáticos (solo en el rango de datos, hasta la K)
         $sheet->setAutoFilter('A2:K' . $lastRow);
     }
 
-    // ── Cabeceras HTTP para descarga ──
     header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     header('Content-Disposition: attachment; filename="' . $nombreArchivo . '"');
     header('Cache-Control: max-age=0');
