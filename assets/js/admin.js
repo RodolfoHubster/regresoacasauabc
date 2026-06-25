@@ -363,8 +363,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });   
 // ─── CARGAR ESTADÍSTICAS DEL DASHBOARD ───
-function cargarDashboardStats() {
-  fetch('php/get_dashboard_stats.php')
+function cargarDashboardStats(campus = '') {
+  let url = 'php/get_dashboard_stats.php';
+  if (campus) {
+      url += '?campus=' + encodeURIComponent(campus);
+  }
+  fetch(url)
     .then(response => response.json())
     .then(result => {
       if (result.status === 'success') {
@@ -384,6 +388,15 @@ function cargarDashboardStats() {
     })
     .catch(error => console.error('Error al cargar stats:', error));
 }
+
+// ─── LÓGICA DE FILTRO DE DASHBOARD ───
+function aplicarFiltroDashboard() {
+    const selectCampus = document.getElementById('filtro-campus-dashboard');
+    const campus = selectCampus ? selectCampus.value : '';
+    cargarDashboardStats(campus);
+    cargarDashboardEventos(campus);
+}
+
 
 // ─── CARGAR TABLA DE ASISTENTES (QR ESCANEADO) ───
 // Variable global para guardar a los asistentes sin tener que consultar la BD a cada rato
@@ -964,8 +977,12 @@ function ejecutarEliminarFaq() {
 }
 
 // ─── CARGAR TABLA RESUMEN EN EL DASHBOARD ───
-function cargarDashboardEventos() {
-    fetch('php/get_dashboard_eventos.php')
+function cargarDashboardEventos(campus = '') {
+    let url = 'php/get_dashboard_eventos.php';
+    if (campus) {
+        url += '?campus=' + encodeURIComponent(campus);
+    }
+    fetch(url)
         .then(response => response.json())
         .then(result => {
             if (result.status === 'success') {

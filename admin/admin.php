@@ -108,8 +108,18 @@
       ============================== -->
       <section class="admin-section active" id="section-dashboard">
         <div class="admin-section-header">
-          <h2 class="admin-section-title">Dashboard</h2>
-          <p class="admin-section-desc">Resumen general de todos los eventos</p>
+          <div>
+            <h2 class="admin-section-title">Dashboard</h2>
+            <p class="admin-section-desc">Resumen general de los eventos</p>
+          </div>
+          <div class="admin-section-actions">
+            <select id="filtro-campus-dashboard" class="form-select form-select--sm" onchange="aplicarFiltroDashboard()">
+              <option value="">Todos los campus</option>
+              <option value="Tijuana">Tijuana</option>
+              <option value="Mexicali">Mexicali</option>
+              <option value="Ensenada">Ensenada</option>
+            </select>
+          </div>
         </div>
 
         <!-- KPI Cards -->
