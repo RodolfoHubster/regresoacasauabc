@@ -14,12 +14,12 @@ try {
 
     if ($evento_id) {
         // 3a. Si HAY un evento_id, filtramos la consulta con WHERE
-        $sql .= " WHERE f.evento_id = :evento_id ORDER BY f.id DESC";
+        $sql .= " WHERE f.evento_id = :evento_id ORDER BY f.orden ASC, f.id DESC";
         $stmt = $conexion->prepare($sql);
         $stmt->execute([':evento_id' => $evento_id]);
     } else {
         // 3b. Si NO hay evento_id, traemos todas (tu comportamiento original)
-        $sql .= " ORDER BY f.id DESC";
+        $sql .= " ORDER BY f.orden ASC, f.id DESC";
         $stmt = $conexion->query($sql);
     }
             

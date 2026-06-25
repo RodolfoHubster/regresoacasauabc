@@ -91,6 +91,10 @@
             <strong id="total-count">0</strong> total en el evento
           </div>
           <div class="filter-buttons">
+            <button class="btn-icon" onclick="abrirModalParticipante()" style="color: var(--uabc-verde); border-color: var(--uabc-verde); font-weight: bold;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+              Nuevo
+            </button>
             <button class="btn-icon" id="btn-exportar-excel" title="Exportar Excel" aria-label="Exportar a Excel">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               Excel
@@ -146,6 +150,7 @@
               <th class="sortable" data-col="5">Tipo <span class="sort-icon" aria-hidden="true"><svg class="sort-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l4-4 4 4M16 15l-4 4-4-4"/></svg></span></th>
               <th class="sortable" data-col="6">Estatus <span class="sort-icon" aria-hidden="true"><svg class="sort-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l4-4 4 4M16 15l-4 4-4-4"/></svg></span></th>
               <th class="sortable" data-col="7">QR <span class="sort-icon" aria-hidden="true"><svg class="sort-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l4-4 4 4M16 15l-4 4-4-4"/></svg></span></th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody id="tabla-asistentes"></tbody>
@@ -193,7 +198,101 @@
 
   </main>
 
+    <!-- Modal Participante -->
+    <div class="modal" id="modal-participante" aria-hidden="true">
+      <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+          <h3 class="modal-title" id="titulo-modal-participante">Nuevo Participante</h3>
+          <button class="btn-icon close-modal" aria-label="Cerrar modal" onclick="closeModal('modal-participante')">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="form-participante" class="admin-form">
+            <input type="hidden" id="part-id" name="id" value="">
+            
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label for="part-nombre" class="form-label">Nombre *</label>
+                <input type="text" id="part-nombre" name="nombre" class="form-input" required>
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label for="part-apellidos" class="form-label">Apellidos *</label>
+                <input type="text" id="part-apellidos" name="apellidos" class="form-input" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="part-correo" class="form-label">Correo Electrónico *</label>
+              <input type="email" id="part-correo" name="correo" class="form-input" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label for="part-tipo" class="form-label">Tipo Asistente *</label>
+                <select id="part-tipo" name="tipo_asistente" class="form-select" required>
+                  <option value="egresado">Egresado</option>
+                  <option value="estudiante">Estudiante</option>
+                  <option value="docente">Docente</option>
+                  <option value="invitado">Invitado</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label for="part-evento" class="form-label">Evento *</label>
+                <select id="part-evento" name="evento_id" class="form-select" required>
+                  <option value="">Selecciona un evento</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label for="part-campus" class="form-label">Campus</label>
+                <select id="part-campus" name="campus_id" class="form-select">
+                  <option value="">Selecciona campus</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label for="part-facultad" class="form-label">Facultad</label>
+                <select id="part-facultad" name="facultad_id" class="form-select">
+                  <option value="">Selecciona facultad</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label for="part-carrera" class="form-label">Carrera</label>
+                <select id="part-carrera" name="carrera_id" class="form-select">
+                  <option value="">Selecciona carrera</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label for="part-generacion" class="form-label">Generación</label>
+                <input type="text" id="part-generacion" name="generacion" class="form-input" placeholder="Ej. 2015-2019">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="part-asistencia" class="form-label">Estatus de Asistencia</label>
+              <select id="part-asistencia" name="asistencia" class="form-select">
+                <option value="0">Pendiente</option>
+                <option value="1">Confirmado (Asistió)</option>
+                <option value="2">Cancelado</option>
+              </select>
+            </div>
+
+            <div class="form-actions" style="margin-top: 20px;">
+              <button type="button" class="btn btn-ghost" onclick="closeModal('modal-participante')">Cancelar</button>
+              <button type="submit" class="btn btn-primary" id="btn-submit-participante">Guardar Participante</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
 <script src="../assets/js/toast.js"></script>
+<script src="../assets/js/admin_participante_crud.js"></script>
 <script>
 function switchTab(tab) {
   const tabLista    = document.getElementById('tab-lista');
@@ -282,7 +381,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const facultad = a.facultad_nombre || a.facultad_otra || 'N/A';
       const carrera  = a.carrera_nombre  || a.carrera_otra  || 'N/A';
       const nombre   = `${a.apellidos || ''}, ${a.nombre || ''}`;
-      const estatus  = a.estatus || 'pendiente';
+      
+      let estatus = 'pendiente';
+      if (a.asistencia == 1) estatus = 'confirmado';
+      if (a.asistencia == 2) estatus = 'cancelado';
+      
       const qr       = a.correo_enviado == 1 ? 'enviado' : 'no_enviado';
       const tipo     = a.tipo_asistente || 'N/A';
 
@@ -302,6 +405,14 @@ document.addEventListener('DOMContentLoaded', () => {
         <td data-label="Tipo">${badgeTipo}</td>
         <td data-label="Estatus">${badgeEstatus}</td>
         <td data-label="QR">${badgeQr}</td>
+        <td data-label="Acciones" class="table-actions">
+           <button class="btn-icon" title="Editar" onclick="abrirModalParticipante(${a.id})">
+             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+           </button>
+           <button class="btn-icon" style="color:#d9534f;" title="Eliminar" onclick="eliminarParticipante(${a.id})">
+             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+           </button>
+        </td>
       `;
       tr.dataset.nombre  = nombre.toLowerCase();
       tr.dataset.correo  = (a.correo || '').toLowerCase();
@@ -319,7 +430,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     data.forEach(a => {
       const facultad = a.facultad_nombre || a.facultad_otra || 'No especificada';
-      const estatus  = cap(a.estatus) || 'Pendiente';
+      
+      let estatus = 'Pendiente';
+      if (a.asistencia == 1) estatus = 'Confirmado';
+      if (a.asistencia == 2) estatus = 'Cancelado';
+
       const qr       = a.correo_enviado == 1 ? 'Enviados' : 'No Enviados';
       conteoFacultad[facultad] = (conteoFacultad[facultad] || 0) + 1;
       conteoEstatus[estatus]   = (conteoEstatus[estatus]   || 0) + 1;

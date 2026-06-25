@@ -15,10 +15,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         // Usamos LEFT JOIN para evitar que la validación falle si alguien se registró con "Otra carrera"
-        $sql = "SELECT r.*, c.nombre as campus_nombre, ca.nombre as carrera_nombre 
+        $sql = "SELECT r.*, c.nombre as campus_nombre, ca.nombre as carrera_nombre, e.nombre as evento_nombre 
                 FROM registro_asistente r
                 LEFT JOIN campus c ON r.campus_id = c.id
-                LEFT JOIN carrera ca ON r.carrera_id = ca.id ";
+                LEFT JOIN carrera ca ON r.carrera_id = ca.id 
+                LEFT JOIN evento e ON r.evento_id = e.id ";
         
         // Dependiendo de qué nos enviaron, adaptamos la búsqueda
         if (!empty($codigo)) {
@@ -52,11 +53,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'nombre' => $asistente['nombre'],
                     'apellidos' => $asistente['apellidos'],
                     'campus' => $asistente['campus_nombre'],
-                    'carrera' => $asistente['carrera_nombre']
+                    'carrera' => $asistente['carrera_nombre'],
+                    'evento_nombre' => $asistente['evento_nombre']
                 ]]);
             }
         } else {
-            echo json_encode(['status' => 'error', 'message' => 'Registro no encontrado en el sistema.']);
+            echo json_encode(['status' => 'error', 'message' => 'No se encontrar coincidencia']);
         }
     } catch (Exception $e) {
         echo json_encode(['status' => 'error', 'message' => 'Error de conexión con la base de datos.']);

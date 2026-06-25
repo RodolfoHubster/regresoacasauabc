@@ -210,30 +210,36 @@
       ============================== -->
       <section class="admin-section" id="section-registros">
         <div class="admin-section-header">
-          <h2 class="admin-section-title">Asistentes Registrados</h2>
+          <div>
+            <h2 class="admin-section-title">Asistentes Registrados</h2>
+            <p class="admin-section-desc">Gestiona todos los participantes del sistema</p>
+          </div>
           <div class="admin-section-actions">
-            <div class="table-filters">
-              <select id="filtro-evento" class="form-select" aria-label="Filtrar por evento">
+            <div class="table-filters" style="display:flex; gap:10px; align-items:center;">
+              <select id="filtro-evento" class="form-select form-select--sm" aria-label="Filtrar por evento">
                 <option value="">Todos los eventos</option>
               </select>
-              <select id="filtro-campus" class="form-select" aria-label="Filtrar por campus">
+              <select id="filtro-campus" class="form-select form-select--sm" aria-label="Filtrar por campus">
                 <option value="">Todos los campus</option>
                 <option value="Tijuana">Tijuana</option>
                 <option value="Mexicali">Mexicali</option>
                 <option value="Ensenada">Ensenada</option>
               </select>
-              <select id="filtro-facultad" class="form-select" aria-label="Filtrar por facultad">
+              <select id="filtro-facultad" class="form-select form-select--sm" aria-label="Filtrar por facultad">
                 <option value="">Todas las facultades</option>
               </select>
             </div>
-            <button class="btn btn-primary btn-sm" onclick="exportarExcelAsistentes()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Exportar Excel
-            </button>
-            <button class="btn btn-ghost btn-sm" onclick="abrirRecordatorioDesdeFiltro()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-              Enviar Recordatorio
-            </button>
+            
+            <div style="display:flex; gap:10px;">
+              <button class="btn btn-primary btn-sm" onclick="abrirModalParticipante()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>
+                Nuevo
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="exportarExcelAsistentes()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Excel
+              </button>
+            </div>
           </div>
         </div>
 
@@ -251,10 +257,11 @@
                   <th>Evento</th>
                   <th>QR Correo</th>
                   <th>Estatus</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody id="tabla-asistentes-body">
-                <tr><td colspan="9" style="text-align:center;">Cargando asistentes...</td></tr>
+                <tr><td colspan="10" style="text-align:center;">Cargando asistentes...</td></tr>
               </tbody>
             </table>
           </div>
@@ -717,7 +724,101 @@
   </script>
 
   <script src="../assets/js/main.js"></script>
+    <!-- Modal Participante -->
+    <div class="modal" id="modal-participante" aria-hidden="true">
+      <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header">
+          <h3 class="modal-title" id="titulo-modal-participante">Nuevo Participante</h3>
+          <button class="btn-icon close-modal" aria-label="Cerrar modal" onclick="closeModal('modal-participante')">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="form-participante" class="admin-form">
+            <input type="hidden" id="part-id" name="id" value="">
+            
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label for="part-nombre" class="form-label">Nombre *</label>
+                <input type="text" id="part-nombre" name="nombre" class="form-input" required>
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label for="part-apellidos" class="form-label">Apellidos *</label>
+                <input type="text" id="part-apellidos" name="apellidos" class="form-input" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="part-correo" class="form-label">Correo Electrónico *</label>
+              <input type="email" id="part-correo" name="correo" class="form-input" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label for="part-tipo" class="form-label">Tipo Asistente *</label>
+                <select id="part-tipo" name="tipo_asistente" class="form-select" required>
+                  <option value="egresado">Egresado</option>
+                  <option value="estudiante">Estudiante</option>
+                  <option value="docente">Docente</option>
+                  <option value="invitado">Invitado</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label for="part-evento" class="form-label">Evento *</label>
+                <select id="part-evento" name="evento_id" class="form-select" required>
+                  <option value="">Selecciona un evento</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label for="part-campus" class="form-label">Campus</label>
+                <select id="part-campus" name="campus_id" class="form-select">
+                  <option value="">Selecciona campus</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label for="part-facultad" class="form-label">Facultad</label>
+                <select id="part-facultad" name="facultad_id" class="form-select">
+                  <option value="">Selecciona facultad</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label for="part-carrera" class="form-label">Carrera</label>
+                <select id="part-carrera" name="carrera_id" class="form-select">
+                  <option value="">Selecciona carrera</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label for="part-generacion" class="form-label">Generación</label>
+                <input type="text" id="part-generacion" name="generacion" class="form-input" placeholder="Ej. 2015-2019">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="part-asistencia" class="form-label">Estatus de Asistencia</label>
+              <select id="part-asistencia" name="asistencia" class="form-select">
+                <option value="0">Pendiente</option>
+                <option value="1">Confirmado (Asistió)</option>
+                <option value="2">Cancelado</option>
+              </select>
+            </div>
+
+            <div class="form-actions" style="margin-top: 20px;">
+              <button type="button" class="btn btn-ghost" onclick="closeModal('modal-participante')">Cancelar</button>
+              <button type="submit" class="btn btn-primary" id="btn-submit-participante">Guardar Participante</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
   <script src="../assets/js/toast.js"></script>
+  <script src="../assets/js/admin_participante_crud.js"></script>
   <script src="../assets/js/admin.js"></script>
   <script src="../assets/js/qr-scanner.js"></script>
 
