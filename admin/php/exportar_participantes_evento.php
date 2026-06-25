@@ -13,7 +13,7 @@ $eventoId = isset($_GET['evento_id']) ? intval($_GET['evento_id']) : 0;
 if (!$eventoId) {
     header('Content-Type: text/html; charset=utf-8');
     echo "Error: ID de evento no proporcionado.";
-    exit;
+    return;
 }
 
 try {
@@ -172,11 +172,11 @@ try {
 
     $writer = new Xlsx($spreadsheet);
     $writer->save('php://output');
-    exit;
+    return;
 
 } catch (Exception $e) {
     header('Content-Type: text/html; charset=utf-8');
     echo "Error al generar el reporte Excel: " . htmlspecialchars($e->getMessage());
-    exit;
+    return;
 }
 ?>

@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$id) {
         echo json_encode(['status' => 'error', 'message' => 'ID no proporcionado.']);
-        exit;
+        return;
     }
 
     try {

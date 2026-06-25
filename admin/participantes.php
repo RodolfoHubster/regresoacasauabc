@@ -25,22 +25,22 @@ $currentEventoId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
   <link rel="stylesheet" href="../assets/css/toast.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="admin-body">
+<body class="admin-body body-participantes">
 
   <?php include 'sidebar.php'; ?>
 
   <div class="admin-layout">
 
   <header class="p-header">
-    <div class="p-container p-header-inner" style="display:flex;align-items:center;">
-      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="admin-sidebar" style="background:none;border:none;color:white;cursor:pointer;margin-right:1rem;">
+    <div class="p-container p-header-inner">
+      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="admin-sidebar" style="background:none;border:none;color:white;cursor:pointer;flex-shrink:0;">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <a href="admin.php" class="back-link" aria-label="Volver al Panel">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         Volver al Panel
       </a>
-      <select id="event-title" class="p-header-title event-selector" onchange="if(this.value) window.location.href='participantes.php?id='+this.value" style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.3); padding: 0.5rem 1rem; font-size: 1.5rem; font-weight: bold; border-radius: var(--radius-md); outline: none; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=\'2\'><polyline points=\'6 9 12 15 18 9\'/></svg>'); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 3rem;">
+      <select id="event-title" class="p-header-title event-selector" onchange="if(this.value) window.location.href='participantes.php?id='+this.value" style="flex:1;min-width:0;background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.3); padding: 0.5rem 1rem; font-size: 1.5rem; font-weight: bold; border-radius: var(--radius-md); outline: none; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=\'2\'><polyline points=\'6 9 12 15 18 9\'/></svg>'); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 3rem;">
         <option value="" style="background: var(--uabc-verde); color: white;">-- Cambiar de Evento --</option>
         <?php foreach($todosEventos as $ev): ?>
           <option value="<?= $ev['id'] ?>" style="background: var(--uabc-verde); color: white;" <?= $ev['id'] == $currentEventoId ? 'selected' : '' ?>>
@@ -187,39 +187,41 @@ $currentEventoId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
     <!-- ── ESTADÍSTICAS ── -->
     <div id="content-stats" hidden>
-      <div class="stats-container">
+      <div class="card">
+        <div class="stats-container">
 
-        <div class="card stats-card">
-          <div class="stats-card-header">
-            <label class="filter-label" for="search-facultad-input">Filtrar por Facultad</label>
-            <input type="text" id="search-facultad-input" class="filter-input" placeholder="Escribe el nombre de la facultad…" autocomplete="off">
-          </div>
-          <div class="table-scroll-y">
-            <table class="mini-table">
-              <thead>
-                <tr>
-                  <th>Facultad / Unidad Académica</th>
-                  <th class="col-center col-narrow">Registros</th>
-                </tr>
-              </thead>
-              <tbody id="tabla-resumen-facultades"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div class="mini-charts-grid">
-          <div class="card mini-chart"><canvas id="chart-estatus"></canvas></div>
-          <div class="card mini-chart"><canvas id="chart-qr"></canvas></div>
-        </div>
-
-        <div class="card chart-wrapper">
-          <div class="chart-scroll-area">
-            <div id="chart-container-inner" style="position:relative;width:100%;">
-              <canvas id="chart-facultades"></canvas>
+          <div class="stats-card-inner">
+            <div class="stats-card-header">
+              <label class="filter-label" for="search-facultad-input">Filtrar por Facultad</label>
+              <input type="text" id="search-facultad-input" class="filter-input" placeholder="Escribe el nombre de la facultad…" autocomplete="off">
+            </div>
+            <div class="table-scroll-y">
+              <table class="mini-table">
+                <thead>
+                  <tr>
+                    <th>Facultad / Unidad Académica</th>
+                    <th class="col-center col-narrow">Registros</th>
+                  </tr>
+                </thead>
+                <tbody id="tabla-resumen-facultades"></tbody>
+              </table>
             </div>
           </div>
-        </div>
 
+          <div class="mini-charts-grid">
+            <div class="card mini-chart"><canvas id="chart-estatus"></canvas></div>
+            <div class="card mini-chart"><canvas id="chart-qr"></canvas></div>
+          </div>
+
+          <div class="chart-wrapper">
+            <div class="chart-scroll-area">
+              <div id="chart-container-inner" style="position:relative;width:100%;">
+                <canvas id="chart-facultades"></canvas>
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
     </div>
 
@@ -452,6 +454,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function renderEstadisticasYGrafica(data) {
+    const statsContainer = document.getElementById('content-stats');
+
+    // Estado vacío: sin participantes
+    if (!data || data.length === 0) {
+      statsContainer.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4rem 2rem;text-align:center;gap:1rem;">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#c0c0c0" stroke-width="1.5">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+            <circle cx="18" cy="7" r="3" stroke="#c0c0c0" fill="none"/>
+          </svg>
+          <h3 style="margin:0;color:#999;font-size:1.1rem;font-weight:600;">Sin datos para este evento</h3>
+          <p style="margin:0;color:#bbb;font-size:0.875rem;">Aún no hay participantes registrados.<br>Las estadísticas aparecerán aquí cuando haya registros.</p>
+        </div>`;
+      return;
+    }
+
     const conteoFacultad = {};
     const conteoEstatus  = {};
     const conteoQR       = { 'Enviados': 0, 'No Enviados': 0 };

@@ -12,13 +12,11 @@ const sectionTitles = {
 function showSection(name) {
   // ─── 1. CONTROL INTELIGENTE DE CÁMARA ───
   if (name !== 'qr') {
-      // Si salimos de la pestaña, buscamos el botón de Stop y apagamos la cámara
       const btnStop = document.getElementById('html5-qrcode-button-camera-stop');
       if (btnStop && window.getComputedStyle(btnStop).display !== 'none') {
           btnStop.click();
       }
   } else {
-      // Si entramos a la pestaña QR, creamos el escáner (solo la primera vez)
       if (typeof inicializarLectorQR === 'function') {
           inicializarLectorQR();
       }
@@ -27,9 +25,8 @@ function showSection(name) {
   // ─── 2. CAMBIO VISUAL DE SECCIONES ───
   const sec = document.getElementById('section-' + name);
   if (!sec) {
-      // Si la sección no existe en el DOM, probablemente estamos en participantes.php
-      // Redirigimos al panel principal con la sección en la URL
-      window.location.href = 'admin.php?section=' + name;
+      // Estamos en otra página (ej. participantes.php) — ir al panel sin parámetro de sección
+      window.location.href = 'admin.php';
       return;
   }
 

@@ -1,38 +1,51 @@
 /* participantes.css — admin/participantes.php
+   Mobile-First · CSS Grid + Flexbox
    ================================================ */
 
 /* ================================================
-   LAYOUT
-   ================================================ */
-
-.admin-body {
-  background: var(--color-bg);
-  min-height: 100dvh;
+   1. LAYOUT MAESTRO (Scroll)
+   ================================================
+   admin.css ya establece en .admin-body:
+     display: flex; height: 100dvh;
+   Por eso .admin-layout toma flex:1 y .p-main
+   es la única zona que debe scrollear.
+*/
+.p-main {
+  flex: 1;
+  min-height: 0;        /* Sin esto flexbox no activa el scroll interno */
+  overflow-y: auto;
+  padding-block: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  scroll-padding-top: var(--space-4);
 }
 
 /* ================================================
-   HEADER
+   2. HEADER
    ================================================ */
 
 .p-header {
   background: var(--uabc-verde);
   color: var(--uabc-blanco);
-  padding-block: var(--space-4) var(--space-5);
+  padding-block: var(--space-3);
   box-shadow: var(--shadow-md);
   border-bottom: 3px solid var(--uabc-dorado);
+  flex-shrink: 0;   /* Evita que el header se comprima en flexbox */
 }
 
 .p-container {
   max-width: var(--content-wide);
   margin-inline: auto;
-  padding-inline: var(--space-6);
+  padding-inline: var(--space-4);
 }
 
-/* Flex layout dentro del header: back-link arriba, título abajo */
+/* Fila: [Sidebar Toggle] [← Volver] [Nombre Evento ▾] */
 .p-header-inner {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-3);
 }
 
 .back-link {
@@ -41,40 +54,35 @@
   gap: var(--space-2);
   font-size: var(--text-xs);
   font-weight: 500;
-  color: rgba(255,255,255,0.70);
+  color: rgba(255,255,255,0.85);
   text-decoration: none;
-  width: fit-content;
-  padding: var(--space-1) var(--space-2);
-  border: 1px solid rgba(255,255,255,0.20);
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid rgba(255,255,255,0.30);
   border-radius: var(--radius-md);
   transition: color .18s, border-color .18s, background .18s;
 }
 .back-link:hover {
   color: var(--uabc-blanco);
-  border-color: rgba(255,255,255,0.45);
-  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.60);
+  background: rgba(255,255,255,0.12);
 }
 
+/* El select del evento crece para llenar el espacio restante */
 .p-header-title {
-  font-size: var(--text-xl);
+  flex: 1;
+  min-width: 0;         /* Permite que el texto se trunque en lugar de desbordar */
+  font-size: clamp(1rem, 2.5vw, 1.4rem);  /* Tamaño fluido */
   font-weight: 700;
   margin: 0;
   color: var(--uabc-blanco);
   line-height: 1.2;
-  /* Evita que muestre "Cargando evento…" con un parpadeo brusco */
   min-height: 1.4em;
 }
 
-/* Main content */
-.p-main {
-  padding-block: var(--space-6);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
 /* ================================================
-   CARD
+   3. CARD
    ================================================ */
 
 .card {
@@ -85,12 +93,11 @@
 }
 
 /* ================================================
-   TABS
+   4. TABS
    ================================================ */
 
 .tabs-nav {
   display: flex;
-  gap: 0;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
@@ -115,51 +122,37 @@
   transition: background .18s, color .18s, box-shadow .18s;
   white-space: nowrap;
 }
-
 .tab-btn:hover:not(.active) {
-  background: var(--color-surface-offset, #f0f0f0);
+  background: #f0f0f0;
   color: var(--color-text);
 }
-
 .tab-btn.active {
   background: var(--uabc-verde);
   color: #fff;
   box-shadow: 0 2px 8px rgba(0,114,63,0.25);
 }
-
 .tab-btn svg { flex-shrink: 0; opacity: .7; }
 .tab-btn.active svg { opacity: 1; }
 
-@media (max-width: 480px) {
-  .tabs-nav { gap: var(--space-1); }
-  .tab-btn {
-    font-size: var(--text-xs);
-    padding: var(--space-2) var(--space-3);
-    flex-direction: column;
-    gap: var(--space-1);
-    text-align: center;
-    line-height: 1.3;
-  }
-}
-
 /* ================================================
-   FILTROS
-   ================================================ */
-
-/*
-  Desktop (>900px): una sola fila
-  ┌──────────┬──────┬─────────┬────┬─────────────────┐
-  │ Buscar   │ Tipo │ Estatus │ QR │ count + botones  │
-  └──────────┴──────┴─────────┴────┴─────────────────┘
+   5. FILTROS — Mobile-First Grid
+   ================================================
+   Base (móvil): 1 columna apilada
+   Tablet (≥600px): 2 columnas
+   Desktop (≥960px): una fila completa
 */
 
 .filters-bar {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr auto;
-  grid-template-areas: "search tipo estatus qr actions";
-  align-items: end;
-  gap: var(--space-4);
-  padding: var(--space-4) var(--space-5);
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "search"
+    "tipo"
+    "estatus"
+    "qr"
+    "actions";
+  gap: var(--space-3);
+  padding: var(--space-4);
 }
 
 .filter-group:nth-child(1) { grid-area: search;  }
@@ -207,10 +200,13 @@
 
 .filter-actions {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   gap: var(--space-2);
-  white-space: nowrap;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border);
+  flex-wrap: wrap;
 }
 
 .filter-count {
@@ -243,12 +239,13 @@
   cursor: pointer;
   transition: border-color .18s, color .18s, background .18s;
   white-space: nowrap;
+  min-height: 36px;       /* Área táctil mínima recomendada */
 }
 .btn-icon:hover  { border-color: var(--uabc-verde); color: var(--uabc-verde); background: rgba(0,114,63,.06); }
 .btn-icon:active { background: rgba(0,114,63,.12); }
 
 /* ================================================
-   SKELETON
+   6. SKELETON LOADER
    ================================================ */
 
 @keyframes shimmer {
@@ -273,14 +270,15 @@
 }
 
 /* ================================================
-   TABLA
+   7. TABLA DE ASISTENTES
    ================================================ */
 
 .admin-table-wrapper {
-  overflow-x: auto;
+  overflow-x: auto;                   /* Scroll horizontal en tablet/desktop */
   -webkit-overflow-scrolling: touch;
   background: var(--color-surface);
   border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
 }
 
 .admin-table {
@@ -288,16 +286,18 @@
   border-collapse: collapse;
   font-size: var(--text-sm);
   background: var(--color-surface);
-  min-width: 700px;
+  min-width: 680px;                   /* Fuerza scroll horizontal antes de romperse */
 }
 
-.admin-table thead {
-  background: #f0f0f0;
-  border-bottom: 2px solid rgba(0,0,0,.10);
-}
+.admin-table thead { background: #f0f0f0; }
 
 .admin-table th {
   padding: var(--space-3) var(--space-4);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: #f0f0f0;
+  box-shadow: 0 2px 0 rgba(0,0,0,.10);
   text-align: left;
   font-size: var(--text-xs);
   font-weight: 700;
@@ -305,7 +305,6 @@
   text-transform: uppercase;
   letter-spacing: .05em;
   white-space: nowrap;
-  background: #f0f0f0;
 }
 
 .admin-table td {
@@ -314,7 +313,7 @@
   color: var(--color-text);
   vertical-align: middle;
   background: var(--color-surface);
-  max-width: 260px;
+  max-width: 220px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -323,7 +322,8 @@
 .admin-table tbody tr:last-child td { border-bottom: none; }
 .admin-table tbody tr:hover td      { background: #f9f9f9; }
 
-th.sortable       { cursor: pointer; user-select: none; white-space: nowrap; }
+/* Columnas ordenables */
+th.sortable       { cursor: pointer; user-select: none; }
 th.sortable:hover { color: var(--uabc-verde); background: #e8e8e8; }
 
 .sort-icon {
@@ -336,15 +336,14 @@ th.sortable:hover { color: var(--uabc-verde); background: #e8e8e8; }
   width: 12px; height: 12px;
   flex-shrink: 0;
 }
-.sort-svg { width: 12px; height: 12px; display: block; flex-shrink: 0; }
-th.sortable:hover .sort-icon          { opacity: .6; }
+.sort-svg { width: 12px; height: 12px; display: block; }
+th.sortable:hover .sort-icon         { opacity: .6; }
 th.sort-asc  .sort-icon,
-th.sort-desc .sort-icon               { opacity: 1; color: var(--uabc-verde); }
-th.sort-asc  .sort-svg                { transform: rotate(0deg); }
-th.sort-desc .sort-svg                { transform: rotate(180deg); }
+th.sort-desc .sort-icon              { opacity: 1; color: var(--uabc-verde); }
+th.sort-desc .sort-svg               { transform: rotate(180deg); }
 
 /* ================================================
-   BADGES
+   8. BADGES
    ================================================ */
 
 .badge {
@@ -364,7 +363,7 @@ th.sort-desc .sort-svg                { transform: rotate(180deg); }
 .badge--cancelado  { background:#f8d7da; color:#c62828; }
 
 /* ================================================
-   EMPTY STATE
+   9. EMPTY STATE
    ================================================ */
 
 .table-empty {
@@ -398,42 +397,53 @@ th.sort-desc .sort-svg                { transform: rotate(180deg); }
 [hidden] { display: none !important; }
 
 /* ================================================
-   ESTADÍSTICAS
-   ================================================ */
+   10. ESTADÍSTICAS
+   ================================================
+   Grid de dos columnas para gráficas donut.
+   Una sola columna en móvil (auto-fit lo maneja).
+*/
 
 .stats-container {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+  padding: var(--space-5);
 }
 
-.stats-card {
-  padding: var(--space-5);
+.stats-card-inner {
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-2);
 }
 
 .stats-card-header {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  margin-bottom: var(--space-4);
-  max-width: 360px;
+  margin-bottom: var(--space-3);
 }
 
 .table-scroll-y {
-  max-height: 300px;
+  max-height: 280px;
   overflow-y: auto;
+  overflow-x: hidden;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
+  overscroll-behavior: contain;
 }
 
+/* Grid de las dos donut charts
+   auto-fit + minmax(220px, 1fr):
+   - Si el contenedor mide ≥440px → dos columnas de 1fr cada una
+   - Si mide <440px → una sola columna que ocupa el 100%            */
 .mini-charts-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--space-5);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4);
 }
 
 .mini-chart {
-  height: 300px;
+  height: 280px;
   padding: var(--space-4);
   display: flex;
   align-items: center;
@@ -481,9 +491,11 @@ th.sort-desc .sort-svg                { transform: rotate(180deg); }
   min-width: 32px;
 }
 
+/* Gráfica de barras horizontal (crece con el número de facultades) */
 .chart-wrapper {
   padding: var(--space-4);
   height: 450px;
+  max-height: 55vh;
   display: flex;
   flex-direction: column;
 }
@@ -497,10 +509,22 @@ th.sort-desc .sort-svg                { transform: rotate(180deg); }
 }
 
 /* ================================================
-   RESPONSIVE — TABLET (641px – 900px)
+   11. MODAL
    ================================================ */
 
-@media (min-width: 641px) and (max-width: 900px) {
+.table-actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+/* ================================================
+   12. RESPONSIVE — Tablet (≥600px)
+   ================================================ */
+
+@media (min-width: 600px) {
+  .p-container { padding-inline: var(--space-6); }
+
   .filters-bar {
     grid-template-columns: 1fr 1fr;
     grid-template-areas:
@@ -509,23 +533,46 @@ th.sort-desc .sort-svg                { transform: rotate(180deg); }
       "qr      qr"
       "actions actions";
     gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
   }
-  .filter-actions {
+
+  .tab-btn {
     flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    border-top: 1px solid var(--color-border);
-    padding-top: var(--space-3);
-    margin-top: var(--space-1);
+    font-size: var(--text-sm);
   }
-  /* Sombra de scroll en tabla */
+}
+
+/* ================================================
+   13. RESPONSIVE — Desktop (≥960px)
+   ================================================ */
+
+@media (min-width: 960px) {
+  .p-container { padding-inline: var(--space-8); }
+
+  /* Una sola fila de filtros */
+  .filters-bar {
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    grid-template-areas: "search tipo estatus qr actions";
+    gap: var(--space-4);
+    padding: var(--space-4) var(--space-5);
+    align-items: end;
+  }
+
+  .filter-actions {
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-start;
+    border-top: none;
+    padding-top: 0;
+  }
+
+  /* Sombra de scroll lateral en tabla (scroll indicator) */
   .admin-table-wrapper {
     background:
       linear-gradient(to right, var(--color-surface) 30%, rgba(255,255,255,0)),
       linear-gradient(to right, rgba(255,255,255,0), var(--color-surface) 70%) 100% 0,
-      radial-gradient(farthest-side at 0 50%, rgba(0,0,0,.08), transparent),
-      radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,.08), transparent) 100% 0;
+      radial-gradient(farthest-side at 0 50%, rgba(0,0,0,.07), transparent),
+      radial-gradient(farthest-side at 100% 50%, rgba(0,0,0,.07), transparent) 100% 0;
     background-repeat: no-repeat;
     background-color: var(--color-surface);
     background-size: 40px 100%, 40px 100%, 12px 100%, 12px 100%;
@@ -534,38 +581,30 @@ th.sort-desc .sort-svg                { transform: rotate(180deg); }
 }
 
 /* ================================================
-   RESPONSIVE — MÓVIL (≤640px)
+   14. RESPONSIVE — Móvil (≤599px): Tabla → Tarjetas
    ================================================ */
 
-@media (max-width: 640px) {
-  .p-container { padding-inline: var(--space-4); }
+@media (max-width: 599px) {
+  .p-header { padding-block: var(--space-3); }
 
-  .filters-bar {
-    grid-template-columns: 1fr;
-    grid-template-areas:
-      "search"
-      "tipo"
-      "estatus"
-      "qr"
-      "actions";
-    gap: var(--space-3);
-    padding: var(--space-4);
-  }
-
-  .filter-actions {
+  /* Tabs apilados */
+  .tab-btn {
     flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-2);
-    width: 100%;
-    padding-top: var(--space-2);
-    border-top: 1px solid var(--color-border);
-    margin-top: var(--space-1);
+    gap: var(--space-1);
+    font-size: var(--text-xs);
+    padding: var(--space-2);
+    text-align: center;
+    line-height: 1.3;
   }
-  .filter-count  { white-space: normal; }
-  .filter-buttons { width: 100%; }
-  .btn-icon { flex: 1; justify-content: center; }
 
-  /* Tabla → tarjetas */
+  /* La tabla SIN scroll horizontal — se convierte en tarjetas */
+  .admin-table-wrapper {
+    overflow-x: visible;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+  }
+
   .admin-table { min-width: unset; }
   .admin-table,
   .admin-table thead,
@@ -573,13 +612,13 @@ th.sort-desc .sort-svg                { transform: rotate(180deg); }
   .admin-table th,
   .admin-table td,
   .admin-table tr  { display: block; }
-  .admin-table thead tr { display: none; }
+  .admin-table thead tr { display: none; } /* Oculta encabezados, los ponemos con ::before */
 
   .admin-table tbody tr {
     background: var(--color-surface);
     border: 1px solid rgba(0,0,0,.10);
     border-radius: var(--radius-lg);
-    margin: var(--space-3) 0;
+    margin-bottom: var(--space-3);
     padding: var(--space-4);
     box-shadow: var(--shadow-sm);
   }
@@ -588,9 +627,9 @@ th.sort-desc .sort-svg                { transform: rotate(180deg); }
   .admin-table td {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: center;
     padding: var(--space-2) 0;
-    border-bottom: 1px solid rgba(0,0,0,.07);
+    border-bottom: 1px solid rgba(0,0,0,.06);
     font-size: var(--text-sm);
     background: transparent;
     max-width: none;
@@ -600,6 +639,7 @@ th.sort-desc .sort-svg                { transform: rotate(180deg); }
   }
   .admin-table td:last-child { border-bottom: none; }
 
+  /* Etiqueta generada por data-label */
   .admin-table td::before {
     content: attr(data-label);
     font-weight: 700;
@@ -607,33 +647,42 @@ th.sort-desc .sort-svg                { transform: rotate(180deg); }
     font-size: var(--text-xs);
     text-transform: uppercase;
     letter-spacing: .05em;
-    flex: 0 0 auto;
-    min-width: 90px;
+    flex: 0 0 90px;
     margin-right: var(--space-3);
-    padding-top: 2px;
   }
 
-  .admin-table td,
   .admin-table td > span,
   .admin-table td > a,
-  .admin-table td > .badge { min-width: 0; word-break: break-all; overflow-wrap: anywhere; text-align: right; }
-  .admin-table td > .badge  { word-break: normal; overflow-wrap: normal; white-space: nowrap; }
+  .admin-table td > .badge,
+  .admin-table td > strong { text-align: right; word-break: break-word; overflow-wrap: anywhere; min-width: 0; }
+  .admin-table td > .badge  { word-break: normal; white-space: nowrap; overflow-wrap: normal; }
 
+  /* Primera fila = nombre — destacado */
   .admin-table td:first-child {
     font-size: var(--text-base);
+    font-weight: 700;
     border-bottom: 2px solid rgba(0,0,0,.10);
     margin-bottom: var(--space-1);
     padding-bottom: var(--space-3);
-    word-break: break-word;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
   }
   .admin-table td:first-child::before { color: var(--uabc-verde); }
-  .admin-table-wrapper { overflow-x: visible; }
 
+  /* Fila de acciones: botón centrado sin etiqueta */
+  .admin-table td[data-label="Acciones"] {
+    justify-content: flex-end;
+    padding-top: var(--space-3);
+  }
+  .admin-table td[data-label="Acciones"]::before { display: none; }
+
+  /* Skeleton en móvil */
   .skeleton-table tbody tr {
     display: block;
     border: 1px solid rgba(0,0,0,.08);
     border-radius: var(--radius-lg);
-    margin: var(--space-3) 0;
+    margin-bottom: var(--space-3);
     padding: var(--space-4);
   }
   .skeleton-table td {
@@ -644,21 +693,24 @@ th.sort-desc .sort-svg                { transform: rotate(180deg); }
     max-width: none;
     white-space: normal;
     overflow: visible;
-    text-overflow: clip;
   }
+
+  /* Estadísticas en móvil */
+  .stats-container { padding: var(--space-4); gap: var(--space-4); }
+  .chart-wrapper { height: 300px; max-height: 45vh; }
+  .mini-chart { height: 200px; padding: var(--space-3); }
 }
 
 /* ================================================
-   MÓVIL PEQUEÑO (≤345px)
+   15. RESPONSIVE — Teléfono pequeño (≤360px)
    ================================================ */
 
-@media (max-width: 345px) {
+@media (max-width: 360px) {
   .p-container { padding-inline: var(--space-3); }
-  .p-header { padding-block: var(--space-4); }
-  .p-header-title { font-size: var(--text-lg); }
+  .p-header-title { font-size: 1rem; }
   .filters-bar { padding: var(--space-3); gap: var(--space-2); }
   .filter-input, .filter-select { font-size: var(--text-xs); padding: var(--space-2); }
-  .admin-table tbody tr { margin: var(--space-3) 0; padding: var(--space-3); }
+
   .admin-table td {
     font-size: var(--text-xs);
     padding: var(--space-1) 0 var(--space-2);
@@ -666,7 +718,7 @@ th.sort-desc .sort-svg                { transform: rotate(180deg); }
     align-items: flex-start;
     gap: var(--space-1);
   }
-  .admin-table td::before { min-width: unset; margin-right: 0; }
+  .admin-table td::before { flex: unset; margin-right: 0; }
   .admin-table td,
   .admin-table td > span,
   .admin-table td > a,
@@ -675,7 +727,7 @@ th.sort-desc .sort-svg                { transform: rotate(180deg); }
 }
 
 /* ================================================
-   IMPRESIÓN
+   16. IMPRESIÓN
    ================================================ */
 
 @media print {
@@ -695,7 +747,7 @@ th.sort-desc .sort-svg                { transform: rotate(180deg); }
   }
 
   .admin-body { background: white; min-height: unset; }
-  .p-main { padding-block: var(--space-4); gap: var(--space-3); }
+  .p-main { padding-block: var(--space-4); gap: var(--space-3); overflow: visible; }
 
   .filters-bar {
     display: flex;
@@ -711,31 +763,17 @@ th.sort-desc .sort-svg                { transform: rotate(180deg); }
     border: 1px solid #ddd;
   }
 
-  .admin-table { min-width: unset; width: 100%; font-size: 10pt; }
-  .admin-table thead {
-    background: #f0f0f0 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
+  .admin-table { min-width: unset; width: 100%; }
+  .admin-table thead { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .admin-table th,
-  .admin-table td {
-    padding: 5pt 7pt;
-    font-size: 9pt;
-    white-space: normal;
-    word-break: break-word;
-    max-width: none;
-  }
-  .badge {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-    border: 1px solid rgba(0,0,0,.2);
-  }
+  .admin-table td { padding: 5pt 7pt; font-size: 9pt; white-space: normal; word-break: break-word; max-width: none; }
+  .badge { -webkit-print-color-adjust: exact; print-color-adjust: exact; border: 1px solid rgba(0,0,0,.2); }
   .admin-table tr { break-inside: avoid; }
   .card { box-shadow: none; border: 1px solid #ddd; }
 }
 
 /* ================================================
-   ANIMACIÓN TAB SWITCH
+   17. ANIMACIÓN TAB SWITCH
    ================================================ */
 
 #content-lista,

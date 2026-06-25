@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($pregunta) || empty($respuesta)) {
         echo json_encode(['status' => 'error', 'message' => 'Pregunta y respuesta son obligatorias.']);
-        exit;
+        return;
     }
 
     try {

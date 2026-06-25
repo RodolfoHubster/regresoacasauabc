@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!$id || empty($pregunta) || empty($respuesta)) {
         echo json_encode(['status' => 'error', 'message' => 'Faltan datos obligatorios.']);
-        exit;
+        return;
     }
 
     try {
