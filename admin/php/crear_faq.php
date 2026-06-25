@@ -13,12 +13,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        $sql = "INSERT INTO faq (evento_id, pregunta, respuesta) VALUES (:evento_id, :pregunta, :respuesta)";
+        // Obtener el orden máximo actual para este evento
+        $evento_cond = $evento_id ? "evento_id = " . intval($evento_id) : "evento_id IS NULL";
+        $stmtMax = $conexion->prepare("SELECT MAX(orden) as max_o FROM faq WHERE $evento_cond");
+        $stmtMax->execute();
+        $resMax = $stmtMax->fetch(PDO::FETCH_ASSOC);
+        $nuevoOrden = ($resMax && $resMax['max_o'] !== null) ? $resMax['max_o'] + 1 : 1;
+
+        $sql = "INSERT INTO faq (evento_id, pregunta, respuesta, orden) VALUES (:evento_id, :pregunta, :respuesta, :orden)";
         $stmt = $conexion->prepare($sql);
         $stmt->execute([
             ':evento_id' => $evento_id,
             ':pregunta' => $pregunta,
-            ':respuesta' => $respuesta
+            ':respuesta' => $respuesta,
+            ':orden' => $nuevoOrden
         ]);
 
         echo json_encode(['status' => 'success']);

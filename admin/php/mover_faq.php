@@ -16,39 +16,44 @@ try {
 
     if (!$actual) throw new Exception("FAQ no encontrada.");
 
-    // Ojo: En MySQL si evento_id es nulo se usa "IS NULL", pero en la app usan = o IS NULL
+    // Obtener todas las FAQs del mismo evento (o generales) ordenadas actualmente
     $evento_cond = $actual['evento_id'] ? "evento_id = " . intval($actual['evento_id']) : "evento_id IS NULL";
-
-    if ($direccion === 'subir') {
-        // Encontrar el inmediatamente anterior
-        $stmt2 = $conexion->prepare("SELECT id, orden FROM faq WHERE $evento_cond AND (orden < :orden OR (orden = :orden AND id > :id)) ORDER BY orden DESC, id ASC LIMIT 1");
-        $stmt2->execute([':orden' => $actual['orden'], ':id' => $id]);
-    } else {
-        // Encontrar el inmediatamente siguiente
-        $stmt2 = $conexion->prepare("SELECT id, orden FROM faq WHERE $evento_cond AND (orden > :orden OR (orden = :orden AND id < :id)) ORDER BY orden ASC, id DESC LIMIT 1");
-        $stmt2->execute([':orden' => $actual['orden'], ':id' => $id]);
-    }
-
-    $adyacente = $stmt2->fetch(PDO::FETCH_ASSOC);
-
-    if ($adyacente) {
-        $orden_actual = $actual['orden'];
-        $orden_adyacente = $adyacente['orden'];
-
-        // Si por casualidad tienen el mismo orden (ej. por default 0), forzamos un desfase
-        if ($orden_actual == $orden_adyacente) {
-            if ($direccion === 'subir') {
-                $orden_actual = $orden_adyacente - 1;
-            } else {
-                $orden_actual = $orden_adyacente + 1;
-            }
+    
+    $stmtAll = $conexion->prepare("SELECT id FROM faq WHERE $evento_cond ORDER BY orden ASC, id ASC");
+    $stmtAll->execute();
+    $faqs = $stmtAll->fetchAll(PDO::FETCH_ASSOC);
+    
+    $currentIndex = -1;
+    for ($i = 0; $i < count($faqs); $i++) {
+        if ($faqs[$i]['id'] == $id) {
+            $currentIndex = $i;
+            break;
         }
-
-        $conexion->beginTransaction();
-        $conexion->prepare("UPDATE faq SET orden = :o WHERE id = :i")->execute([':o' => $orden_adyacente, ':i' => $actual['id']]);
-        $conexion->prepare("UPDATE faq SET orden = :o WHERE id = :i")->execute([':o' => $orden_actual, ':i' => $adyacente['id']]);
-        $conexion->commit();
     }
+    
+    if ($currentIndex !== -1) {
+        $targetIndex = $currentIndex;
+        if ($direccion === 'subir' && $currentIndex > 0) {
+            $targetIndex = $currentIndex - 1;
+        } else if ($direccion === 'bajar' && $currentIndex < count($faqs) - 1) {
+            $targetIndex = $currentIndex + 1;
+        }
+        
+        // Intercambiar posiciones en el array
+        if ($targetIndex !== $currentIndex) {
+            $temp = $faqs[$currentIndex];
+            $faqs[$currentIndex] = $faqs[$targetIndex];
+            $faqs[$targetIndex] = $temp;
+        }
+    }
+    
+    // Normalizar todos los órdenes para que siempre sean 1, 2, 3... (sin negativos ni saltos)
+    $conexion->beginTransaction();
+    foreach ($faqs as $index => $f) {
+        $nuevoOrden = $index + 1;
+        $conexion->prepare("UPDATE faq SET orden = :o WHERE id = :i")->execute([':o' => $nuevoOrden, ':i' => $f['id']]);
+    }
+    $conexion->commit();
 
     echo json_encode(['status' => 'success']);
 } catch (Exception $e) {

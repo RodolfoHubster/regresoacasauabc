@@ -54,8 +54,7 @@ function abrirModalParticipante(id = null) {
       document.getElementById('part-evento').value = EVENTO_ID;
     }
 
-    modal.classList.add('active');
-    modal.setAttribute('aria-hidden', 'false');
+    openAdminModal('modal-participante');
   });
 }
 
@@ -146,7 +145,7 @@ document.getElementById('form-participante')?.addEventListener('submit', functio
     
     if (res.status === 'success') {
       showToast(res.message, 'success');
-      closeModal('modal-participante');
+      closeAdminModal('modal-participante');
       
       // Refresh table depending on which page we are
       if (typeof cargarAsistentes === 'function') {

@@ -7,7 +7,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Participantes del Evento - UABC</title>
   <link rel="stylesheet" href="../assets/css/base.css">
-  <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
   <link rel="stylesheet" href="../assets/css/participantes.css">
   <link rel="stylesheet" href="../assets/css/toast.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -199,11 +200,11 @@
   </main>
 
     <!-- Modal Participante -->
-    <div class="modal" id="modal-participante" aria-hidden="true">
-      <div class="modal-content" style="max-width: 600px;">
+    <div class="modal-overlay" id="modal-participante" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-participante" hidden>
+      <div class="modal modal--lg" style="max-width: 600px;">
         <div class="modal-header">
           <h3 class="modal-title" id="titulo-modal-participante">Nuevo Participante</h3>
-          <button class="btn-icon close-modal" aria-label="Cerrar modal" onclick="closeModal('modal-participante')">
+          <button class="modal-close" aria-label="Cerrar modal" onclick="closeAdminModal('modal-participante')">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>
@@ -283,7 +284,7 @@
             </div>
 
             <div class="form-actions" style="margin-top: 20px;">
-              <button type="button" class="btn btn-ghost" onclick="closeModal('modal-participante')">Cancelar</button>
+              <button type="button" class="btn btn-ghost" onclick="closeAdminModal('modal-participante')">Cancelar</button>
               <button type="submit" class="btn btn-primary" id="btn-submit-participante">Guardar Participante</button>
             </div>
           </form>
