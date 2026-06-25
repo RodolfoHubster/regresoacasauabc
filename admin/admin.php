@@ -245,6 +245,7 @@
                   <th>Nombre completo</th>
                   <th>Correo</th>
                   <th>Campus</th>
+                  <th>Facultad</th>
                   <th>Carrera / Gen.</th>
                   <th>Tipo</th>
                   <th>Evento</th>
@@ -253,7 +254,7 @@
                 </tr>
               </thead>
               <tbody id="tabla-asistentes-body">
-                <tr><td colspan="8" style="text-align:center;">Cargando asistentes...</td></tr>
+                <tr><td colspan="9" style="text-align:center;">Cargando asistentes...</td></tr>
               </tbody>
             </table>
           </div>
