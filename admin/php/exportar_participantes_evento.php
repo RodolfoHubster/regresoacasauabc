@@ -28,6 +28,8 @@ try {
                    cp.nombre AS campus_nombre,
                    f.nombre  AS facultad_nombre,
                    cr.nombre AS carrera_nombre,
+                   r.facultad_otra,
+                   r.carrera_otra,
                    r.generacion,
                    r.tipo_asistente,
                    r.correo_enviado,
@@ -117,12 +119,15 @@ try {
             $textoNecesidad = 'Sí. ' . $especificacion;
         }
 
+        $facultad = !empty($row['facultad_nombre']) ? $row['facultad_nombre'] : (!empty($row['facultad_otra']) ? $row['facultad_otra'] : 'N/A');
+        $carrera = !empty($row['carrera_nombre']) ? $row['carrera_nombre'] : (!empty($row['carrera_otra']) ? $row['carrera_otra'] : 'N/A');
+
         $sheet->setCellValue('A' . $rowNum, $row['nombre']);
         $sheet->setCellValue('B' . $rowNum, $row['apellidos']);
         $sheet->setCellValue('C' . $rowNum, $row['correo']);
         $sheet->setCellValue('D' . $rowNum, $row['campus_nombre']   ?? 'N/A');
-        $sheet->setCellValue('E' . $rowNum, $row['facultad_nombre'] ?? 'N/A');
-        $sheet->setCellValue('F' . $rowNum, $row['carrera_nombre']  ?? 'N/A');
+        $sheet->setCellValue('E' . $rowNum, $facultad);
+        $sheet->setCellValue('F' . $rowNum, $carrera);
         $sheet->setCellValue('G' . $rowNum, $row['generacion']      ?? 'N/A');
         $sheet->setCellValue('H' . $rowNum, $row['tipo_asistente']  ?? 'N/A');
         $sheet->setCellValue('I' . $rowNum, $qrEstado);

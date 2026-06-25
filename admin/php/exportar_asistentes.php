@@ -120,12 +120,15 @@ try {
         $qrEstado        = ($row['correo_enviado'] == 1) ? 'Enviado'   : 'Pendiente';
         $asistenciaEstado = ($row['asistencia']   == 1) ? 'Asistió'   : 'Registrado';
 
+        $facultad = !empty($row['facultad_nombre']) ? $row['facultad_nombre'] : (!empty($row['facultad_otra']) ? $row['facultad_otra'] : 'N/A');
+        $carrera = !empty($row['carrera_nombre']) ? $row['carrera_nombre'] : (!empty($row['carrera_otra']) ? $row['carrera_otra'] : 'N/A');
+
         $sheet->setCellValue('A' . $rowNum, $row['nombre']);
         $sheet->setCellValue('B' . $rowNum, $row['apellidos']);
         $sheet->setCellValue('C' . $rowNum, $row['correo']);
         $sheet->setCellValue('D' . $rowNum, $row['campus_nombre']   ?? 'N/A');
-        $sheet->setCellValue('E' . $rowNum, $row['facultad_nombre'] ?? 'N/A');
-        $sheet->setCellValue('F' . $rowNum, $row['carrera_nombre']  ?? 'N/A');
+        $sheet->setCellValue('E' . $rowNum, $facultad);
+        $sheet->setCellValue('F' . $rowNum, $carrera);
         $sheet->setCellValue('G' . $rowNum, $row['generacion']      ?? 'N/A');
         $sheet->setCellValue('H' . $rowNum, $row['tipo_asistente']  ?? 'N/A');
         $sheet->setCellValue('I' . $rowNum, $row['evento_nombre']   ?? 'N/A');
