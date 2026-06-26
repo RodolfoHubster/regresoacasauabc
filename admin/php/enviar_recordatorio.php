@@ -1,6 +1,9 @@
 <?php
 // Dar 30 minutos a PHP, enviar correos masivos con adjuntos toma tiempo
-set_time_limit(1800); 
+set_time_limit(1800);
+
+// BUG #4 CORREGIDO: Verificar sesión activa antes de cualquier acción
+require_once __DIR__ . '/auth_check.php';
 
 require_once __DIR__ . '/../../vendor/autoload.php';
 require_once __DIR__ . '/conexion.php';
@@ -43,11 +46,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $fecha_formateada = ltrim($fecha_parts[2], '0') . ' de ' . $meses[$fecha_parts[1]] . ' de ' . $fecha_parts[0];
         $hora_formateada = date("g:i A", strtotime($evento_data['hora']));
 
-        // --- 2. FILTRAR ASISTENTES SOLO DE ESTE EVENTO ---
+        // BUG #2 CORREGIDO: 'todos' ahora filtra por correo_enviado=0 (no recibieron QR)
+        // 'sin-qr' es un alias equivalente; ambos casos envían solo a quienes no tienen QR
         if ($tipo === 'sin-qr') {
             $sql = "SELECT * FROM registro_asistente WHERE evento_id = :evento_id AND correo_enviado = 0";
         } else {
-            $sql = "SELECT * FROM registro_asistente WHERE evento_id = :evento_id AND asistencia = 0";
+            // tipo='todos': enviar a TODOS los que no han recibido su QR en este evento
+            $sql = "SELECT * FROM registro_asistente WHERE evento_id = :evento_id AND correo_enviado = 0";
         }
 
         $stmt = $conexion->prepare($sql);
@@ -85,11 +90,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // --- 4. BUCLE DE ENVÍO DE CORREOS ---
         foreach ($asistentes as $persona) {
             try {
-                // Validación de QR
-                $qr_codigo = $persona['qr_codigo'];
+                // BUG #1 CORREGIDO: Usar prepared statement en vez de string interpolación
                 if (empty($qr_codigo)) {
                     $qr_codigo = 'UABC-' . strtoupper(uniqid());
-                    $conexion->query("UPDATE registro_asistente SET qr_codigo = '$qr_codigo' WHERE id = " . $persona['id']);
+                    $stmtQr = $conexion->prepare("UPDATE registro_asistente SET qr_codigo = :qr WHERE id = :id");
+                    $stmtQr->execute([':qr' => $qr_codigo, ':id' => $persona['id']]);
                 }
 
                 $qr = new QrCode($qr_codigo);

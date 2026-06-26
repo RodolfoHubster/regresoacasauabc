@@ -12,11 +12,13 @@
 */
 .p-main {
   flex: 1;
-  min-height: 0;        /* Sin esto flexbox no activa el scroll interno */
+  min-width: 0;         /* Sin esto flexbox no activa el shrink horizontal */
+  min-height: 0;        /* Sin esto flexbox no activa el scroll interno vertical */
   overflow-y: auto;
   padding-block: var(--space-5);
   display: flex;
   flex-direction: column;
+  align-self: center;   /* Centra todo el bloque main dentro del layout, no a sus hijos */
   gap: var(--space-4);
   scroll-padding-top: var(--space-4);
 }
@@ -32,11 +34,12 @@
   box-shadow: var(--shadow-md);
   border-bottom: 3px solid var(--uabc-dorado);
   flex-shrink: 0;   /* Evita que el header se comprima en flexbox */
+  width: 100%;
 }
 
 .p-container {
+  width: 100%;      /* Clave vital: Forza a que NUNCA sea más grande que la pantalla */
   max-width: var(--content-wide);
-  margin-inline: auto;
   padding-inline: var(--space-4);
 }
 
@@ -79,6 +82,34 @@
   color: var(--uabc-blanco);
   line-height: 1.2;
   min-height: 1.4em;
+}
+
+.p-header-select {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-lg);
+  font-weight: bold;
+  border-radius: var(--radius-md);
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 3rem;
+  transition: background 0.2s, border-color 0.2s;
+}
+.p-header-select:hover, .p-header-select:focus {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+.p-header-select option {
+  background: var(--uabc-verde);
+  color: white;
 }
 
 /* ================================================
@@ -225,6 +256,13 @@
   gap: var(--space-2);
 }
 
+/* Solo modificamos estos 3 botones para que el texto quepa, sin romper los botones cuadrados (editar/eliminar) de admin.css */
+.filter-buttons .btn-icon {
+  width: auto;
+  height: auto;
+  min-width: 0;
+}
+
 .btn-icon {
   display: inline-flex;
   align-items: center;
@@ -313,10 +351,17 @@
   color: var(--color-text);
   vertical-align: middle;
   background: var(--color-surface);
-  max-width: 220px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.4;
+  /* Permitir que el texto largo (carreras, facultades) baje de línea */
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Evitar que las columnas cortas o botones se rompan */
+.admin-table td:last-child,
+.admin-table th:last-child { 
+  white-space: nowrap; 
+  width: 1%; /* Forza a que ocupe lo mínimo posible */
 }
 
 .admin-table tbody tr:last-child td { border-bottom: none; }
@@ -530,7 +575,7 @@ th.sort-desc .sort-svg               { transform: rotate(180deg); }
     grid-template-areas:
       "search  search"
       "tipo    estatus"
-      "qr      qr"
+      "qr      ."
       "actions actions";
     gap: var(--space-3);
     padding: var(--space-4) var(--space-5);
@@ -549,24 +594,25 @@ th.sort-desc .sort-svg               { transform: rotate(180deg); }
 @media (min-width: 960px) {
   .p-container { padding-inline: var(--space-8); }
 
-  /* Una sola fila de filtros */
+  /* Filtros arriba, acciones abajo para evitar que desborde la pantalla */
   .filters-bar {
-    grid-template-columns: 2fr 1fr 1fr 1fr auto;
-    grid-template-areas: "search tipo estatus qr actions";
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    grid-template-areas: 
+      "search tipo estatus qr"
+      "actions actions actions actions";
     gap: var(--space-4);
     padding: var(--space-4) var(--space-5);
     align-items: end;
   }
 
   .filter-actions {
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: flex-start;
-    border-top: none;
-    padding-top: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-3);
   }
 
-  /* Sombra de scroll lateral en tabla (scroll indicator) */
   .admin-table-wrapper {
     background:
       linear-gradient(to right, var(--color-surface) 30%, rgba(255,255,255,0)),
@@ -581,10 +627,67 @@ th.sort-desc .sort-svg               { transform: rotate(180deg); }
 }
 
 /* ================================================
-   14. RESPONSIVE — Móvil (≤599px): Tabla → Tarjetas
+   13.5 UTILIDADES EXTRACTADAS (Sin inline styles)
    ================================================ */
 
-@media (max-width: 599px) {
+.form-row {
+  display: flex;
+  flex-direction: row;
+  gap: var(--space-4);
+  width: 100%;
+}
+.form-row > .form-group {
+  flex: 1;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+  text-align: center;
+  gap: var(--space-3);
+}
+.empty-state h3 {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+.empty-state p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: var(--text-sm);
+  opacity: 0.8;
+}
+
+.chart-container-inner {
+  position: relative;
+  width: 100%;
+}
+
+/* ================================================
+   Ajustes intermedios para Laptops (960px - 1300px)
+   Para evitar que la tabla de 9 columnas haga overflow
+   ================================================ */
+@media (min-width: 960px) and (max-width: 1300px) {
+  .admin-table th,
+  .admin-table td {
+    padding: var(--space-2) var(--space-2) !important;
+    font-size: 12px;
+  }
+  .btn-icon {
+    min-height: 30px;
+    padding: 0 var(--space-4); /* Extendido a petición tuya para que no sobresalga el texto */
+  }
+}
+
+/* ================================================
+   14. RESPONSIVE — Tablet/Móvil (≤960px): Tabla → Tarjetas
+   ================================================ */
+
+@media (max-width: 959px) {
   .p-header { padding-block: var(--space-3); }
 
   /* Tabs apilados */
@@ -784,4 +887,21 @@ th.sort-desc .sort-svg               { transform: rotate(180deg); }
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ================================================
+   18. RESPONSIVE — Mobile Extra Chico (≤390px)
+   ================================================ */
+@media (max-width: 390px) {
+  .back-link-text { display: none; }
+  .back-link svg { width: 22px; height: 22px; }
+  .back-link { padding: var(--space-2); }
+  
+  /* Dar más prioridad al título del evento y reducir su texto */
+  .p-header-select {
+    font-size: var(--text-sm);
+    padding: var(--space-2) var(--space-3);
+    padding-right: 2.2rem;
+    background-position: right 0.7rem center;
+  }
 }

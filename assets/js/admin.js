@@ -26,7 +26,7 @@ function showSection(name) {
   const sec = document.getElementById('section-' + name);
   if (!sec) {
       // Estamos en otra página (ej. participantes.php) — ir al panel sin parámetro de sección
-      window.location.href = 'admin.php';
+      window.location.href = 'admin.php?section=' + name;
       return;
   }
 

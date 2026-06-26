@@ -560,7 +560,7 @@
 /* ══════════════════════════════
    RESPONSIVE ≤ 768px (tablet/móvil)
 ══════════════════════════════ */
-@media (max-width: 768px) {
+@media (max-width: 959px) {
   /* Header: reduce padding */
   .header-inner {
     padding: var(--space-3) var(--space-4);

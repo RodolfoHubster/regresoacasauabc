@@ -5,7 +5,7 @@
   <aside class="admin-sidebar" id="admin-sidebar" aria-label="Menú de administración">
     <div class="sidebar-header">
       <!-- Solo logo, sin texto "Regresa a Casa / Panel Admin" -->
-      <a href="php/logout.php" class="sidebar-logo" aria-label="Ir al sitio público">
+      <a href="admin.php" class="sidebar-logo" aria-label="Ir al sitio público">
         <img src="../assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="128" height="128" loading="lazy">
       </a>
       <!-- Botón X para cerrar sidebar en móvil -->

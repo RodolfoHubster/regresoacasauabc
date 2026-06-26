@@ -50,7 +50,7 @@
 }
 
 /* En móvil el sidebar es fixed fuera de pantalla */
-@media (max-width: 900px) {
+@media (max-width: 959px) {
   .admin-sidebar {
     position: fixed;
     left: 0; top: 0; bottom: 0;
@@ -758,6 +758,64 @@
 }
 
 /* ══════════════════════════════
+   ACCESOS RÁPIDOS
+══════════════════════════════ */
+.quick-access-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.quick-access-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  cursor: pointer;
+  width: 100%;
+}
+
+.quick-access-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: rgba(0,114,63,0.3);
+}
+
+.qa-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.qa-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.qa-title {
+  font-weight: 700;
+  font-size: var(--text-sm);
+}
+
+.qa-desc {
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+}
+
+/* ══════════════════════════════
    RESPONSIVE · TABLET (≤ 1100px)
 ══════════════════════════════ */
 @media (max-width: 1100px) {
@@ -768,7 +826,7 @@
 /* ══════════════════════════════
    RESPONSIVE · MÓVIL (≤ 900px)
 ══════════════════════════════ */
-@media (max-width: 900px) {
+@media (max-width: 959px) {
   .admin-main {
     padding: var(--space-4) var(--space-4);
     padding-bottom: max(var(--space-4), env(safe-area-inset-bottom, var(--space-4)));

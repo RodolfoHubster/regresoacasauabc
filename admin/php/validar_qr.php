@@ -1,4 +1,6 @@
 <?php
+// BUG #4 CORREGIDO: Verificar sesión activa antes de cualquier acción
+require_once __DIR__ . '/auth_check.php';
 require_once __DIR__ . '/conexion.php';
 
 header('Content-Type: application/json');
@@ -58,7 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ]]);
             }
         } else {
-            echo json_encode(['status' => 'error', 'message' => 'No se encontrar coincidencia']);
+            // BUG #3 CORREGIDO: Error tipográfico
+            echo json_encode(['status' => 'error', 'message' => 'No se encontró coincidencia']);
         }
     } catch (Exception $e) {
         echo json_encode(['status' => 'error', 'message' => 'Error de conexión con la base de datos.']);
