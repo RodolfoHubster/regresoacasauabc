@@ -12,12 +12,18 @@ use PhpOffice\PhpSpreadsheet\Style\Color;
 $filtroEvento   = $_GET['evento']   ?? '';
 $filtroCampus   = $_GET['campus']   ?? '';
 $filtroFacultad = $_GET['facultad'] ?? '';
+$filtroEstatus  = $_GET['estatus']  ?? ''; // <-- NUEVO FILTRO AGREGADO
 
 // Nombramos el archivo dinámicamente según los filtros
 $nombreArchivo = "Lista_Asistentes";
 if (!empty($filtroEvento))   $nombreArchivo .= "_" . preg_replace('/[^A-Za-z0-9_\-]/', '_', $filtroEvento);
 if (!empty($filtroCampus))   $nombreArchivo .= "_" . $filtroCampus;
 if (!empty($filtroFacultad)) $nombreArchivo .= "_" . preg_replace('/[^A-Za-z0-9_\-]/', '_', $filtroFacultad);
+if ($filtroEstatus !== '') {
+    if ($filtroEstatus === '0') $nombreArchivo .= "_Pendientes";
+    if ($filtroEstatus === '1') $nombreArchivo .= "_Asistieron";
+    if ($filtroEstatus === '2') $nombreArchivo .= "_Cancelados";
+}
 $nombreArchivo .= ".xlsx";
 
 try {
@@ -42,8 +48,15 @@ try {
         $params[':campus'] = $filtroCampus;
     }
     if (!empty($filtroFacultad)) {
-        $sql .= " AND f.nombre = :facultad";
+        // <-- SE MODIFICÓ AQUÍ PARA DETECTAR LA "OTRA FACULTAD" A MANO
+        $sql .= " AND (f.nombre = :facultad OR r.facultad_otra = :facultad_otra)";
         $params[':facultad'] = $filtroFacultad;
+        $params[':facultad_otra'] = $filtroFacultad;
+    }
+    if ($filtroEstatus !== '') {
+        // <-- SE AGREGÓ EL FILTRO DE ESTATUS A LA BASE DE DATOS
+        $sql .= " AND r.asistencia = :estatus";
+        $params[':estatus'] = $filtroEstatus;
     }
 
     $sql .= " ORDER BY r.id DESC";
@@ -65,6 +78,14 @@ try {
     if (!empty($filtroEvento))   $partesFiltro[] = 'Evento: ' . $filtroEvento;
     if (!empty($filtroCampus))   $partesFiltro[] = 'Campus: ' . $filtroCampus;
     if (!empty($filtroFacultad)) $partesFiltro[] = 'Facultad: ' . $filtroFacultad;
+    
+    // <-- SE AGREGA EL TEXTO DEL ESTATUS A LA CELDA SUPERIOR DEL EXCEL
+    if ($filtroEstatus !== '') {
+        if ($filtroEstatus === '0') $partesFiltro[] = 'Estatus: Pendientes';
+        if ($filtroEstatus === '1') $partesFiltro[] = 'Estatus: Asistieron';
+        if ($filtroEstatus === '2') $partesFiltro[] = 'Estatus: Cancelados';
+    }
+
     if (!empty($partesFiltro))   $descripcionFiltros = implode(' | ', $partesFiltro);
 
     $resumen = 'Registrados: ' . $totalPersonas . '   |   Asistieron: ' . $totalAsistieron;
@@ -117,21 +138,26 @@ try {
     // ── Filas de datos ──
     $rowNum = 3;
     foreach ($datos as $row) {
-        $qrEstado        = ($row['correo_enviado'] == 1) ? 'Enviado'   : 'Pendiente';
-        $asistenciaEstado = ($row['asistencia']   == 1) ? 'Asistió'   : 'Registrado';
+        $qrEstado = ($row['correo_enviado'] == 1) ? 'Enviado'   : 'Pendiente';
+        
+        // <-- SE AJUSTÓ LA LÓGICA PARA LEER EL ESTATUS CANCELADO
+        $asistenciaEstado = 'Pendiente';
+        if ($row['asistencia'] == 1) $asistenciaEstado = 'Asistió';
+        if ($row['asistencia'] == 2) $asistenciaEstado = 'Cancelado';
 
-        $facultad = !empty($row['facultad_nombre']) ? $row['facultad_nombre'] : (!empty($row['facultad_otra']) ? $row['facultad_otra'] : 'N/A');
-        $carrera = !empty($row['carrera_nombre']) ? $row['carrera_nombre'] : (!empty($row['carrera_otra']) ? $row['carrera_otra'] : 'N/A');
+        // <-- AQUÍ QUITAMOS LOS N/A EN CASO DE QUE SEA CAMPO VACÍO O "OTRA"
+        $facultad = !empty($row['facultad_nombre']) ? $row['facultad_nombre'] : (!empty($row['facultad_otra']) ? $row['facultad_otra'] : '');
+        $carrera = !empty($row['carrera_nombre']) ? $row['carrera_nombre'] : (!empty($row['carrera_otra']) ? $row['carrera_otra'] : '');
 
-        $sheet->setCellValue('A' . $rowNum, $row['nombre']);
-        $sheet->setCellValue('B' . $rowNum, $row['apellidos']);
-        $sheet->setCellValue('C' . $rowNum, $row['correo']);
-        $sheet->setCellValue('D' . $rowNum, $row['campus_nombre']   ?? 'N/A');
+        $sheet->setCellValue('A' . $rowNum, $row['nombre'] ?? '');
+        $sheet->setCellValue('B' . $rowNum, $row['apellidos'] ?? '');
+        $sheet->setCellValue('C' . $rowNum, $row['correo'] ?? '');
+        $sheet->setCellValue('D' . $rowNum, $row['campus_nombre']   ?? '');
         $sheet->setCellValue('E' . $rowNum, $facultad);
         $sheet->setCellValue('F' . $rowNum, $carrera);
-        $sheet->setCellValue('G' . $rowNum, $row['generacion']      ?? 'N/A');
-        $sheet->setCellValue('H' . $rowNum, $row['tipo_asistente']  ?? 'N/A');
-        $sheet->setCellValue('I' . $rowNum, $row['evento_nombre']   ?? 'N/A');
+        $sheet->setCellValue('G' . $rowNum, $row['generacion']      ?? '');
+        $sheet->setCellValue('H' . $rowNum, $row['tipo_asistente']  ?? '');
+        $sheet->setCellValue('I' . $rowNum, $row['evento_nombre']   ?? '');
         $sheet->setCellValue('J' . $rowNum, $qrEstado);
         $sheet->setCellValue('K' . $rowNum, $asistenciaEstado);
 
