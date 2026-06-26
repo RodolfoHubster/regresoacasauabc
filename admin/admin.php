@@ -13,69 +13,14 @@
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/components.css">
   <link rel="stylesheet" href="../assets/css/admin.css">
+  <link rel="stylesheet" href="../assets/css/toast.css">
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="admin-body">
 
-  <!-- Overlay: clic fuera del sidebar lo cierra -->
-  <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-  <!-- ===== SIDEBAR ===== -->
-  <aside class="admin-sidebar" id="admin-sidebar" aria-label="Menú de administración">
-    <div class="sidebar-header">
-      <!-- Solo logo, sin texto "Regresa a Casa / Panel Admin" -->
-      <a href="php/logout.php" class="sidebar-logo" aria-label="Ir al sitio público">
-        <img src="../assets/images/AlumniTransparente.png" alt="Logo UABC Alumni" width="128" height="128" loading="lazy">
-      </a>
-      <!-- Botón X para cerrar sidebar en móvil -->
-      <button class="sidebar-close" id="sidebar-close-btn" aria-label="Cerrar menú">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-
-    <nav class="sidebar-nav" aria-label="Navegación admin">
-      <ul role="list">
-        <li>
-          <button class="sidebar-link active" data-section="dashboard" onclick="showSection('dashboard')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            Dashboard
-          </button>
-        </li>
-        <li>
-          <button class="sidebar-link" data-section="eventos" onclick="showSection('eventos')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            Eventos
-          </button>
-        </li>
-        <li>
-          <button class="sidebar-link" data-section="registros" onclick="showSection('registros')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            Asistentes
-          </button>
-        </li>
-        <li>
-          <button class="sidebar-link" data-section="faq" onclick="showSection('faq')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-            FAQ
-          </button>
-        </li>
-        <li>
-          <button class="sidebar-link" data-section="qr" onclick="showSection('qr')">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="5" height="5"/><rect x="16" y="3" width="5" height="5"/><rect x="3" y="16" width="5" height="5"/><path d="M21 16h-3v3"/><path d="M18 21h3"/><path d="M11 3v3"/><path d="M3 11h3"/><path d="M11 11h3v3"/><path d="M14 14v3"/><path d="M11 17h3"/><path d="M11 21v-3"/></svg>
-            Validar QR
-          </button>
-        </li>
-      </ul>
-    </nav>
-
-    <div class="sidebar-footer">
-      <a href="php/logout.php" class="sidebar-link" style="color: #d32f2f;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-        Cerrar Sesión
-      </a>
-    </div>
-  </aside>
+  <?php include 'sidebar.php'; ?>
 
   <!-- ===== LAYOUT PRINCIPAL ===== -->
   <div class="admin-layout">
@@ -102,8 +47,18 @@
       ============================== -->
       <section class="admin-section active" id="section-dashboard">
         <div class="admin-section-header">
-          <h2 class="admin-section-title">Dashboard</h2>
-          <p class="admin-section-desc">Resumen general de todos los eventos</p>
+          <div>
+            <h2 class="admin-section-title">Dashboard</h2>
+            <p class="admin-section-desc">Resumen general de los eventos</p>
+          </div>
+          <div class="admin-section-actions">
+            <select id="filtro-campus-dashboard" class="form-select form-select--sm" onchange="aplicarFiltroDashboard()">
+              <option value="">Todos los campus</option>
+              <option value="Tijuana">Tijuana</option>
+              <option value="Mexicali">Mexicali</option>
+              <option value="Ensenada">Ensenada</option>
+            </select>
+          </div>
         </div>
 
         <!-- KPI Cards -->
@@ -132,7 +87,7 @@
             </div>
             <div class="kpi-data">
               <span class="kpi-value" data-kpi="confirmados"></span>
-              <span class="kpi-label">QR Confirmados</span>
+              <span class="kpi-label">Asistentes Confirmados</span>
             </div>
           </div>
           <div class="kpi-card">
@@ -194,27 +149,42 @@
       ============================== -->
       <section class="admin-section" id="section-registros">
         <div class="admin-section-header">
-          <h2 class="admin-section-title">Asistentes Registrados</h2>
+          <div>
+            <h2 class="admin-section-title">Asistentes Registrados</h2>
+            <p class="admin-section-desc">Gestiona todos los participantes del sistema</p>
+          </div>
           <div class="admin-section-actions">
-            <div class="table-filters">
-              <select id="filtro-evento" class="form-select" aria-label="Filtrar por evento">
+            <div class="table-filters" style="display:flex; gap:10px; align-items:center;">
+              <select id="filtro-evento" class="form-select form-select--sm" aria-label="Filtrar por evento">
                 <option value="">Todos los eventos</option>
               </select>
-              <select id="filtro-campus" class="form-select" aria-label="Filtrar por campus">
+              <select id="filtro-campus" class="form-select form-select--sm" aria-label="Filtrar por campus">
                 <option value="">Todos los campus</option>
                 <option value="Tijuana">Tijuana</option>
                 <option value="Mexicali">Mexicali</option>
                 <option value="Ensenada">Ensenada</option>
               </select>
+              <select id="filtro-facultad" class="form-select form-select--sm" aria-label="Filtrar por facultad">
+                <option value="">Todas las facultades</option>
+              </select>
+              <select id="filtro-estatus" class="form-select form-select--sm" aria-label="Filtrar por estatus">
+                <option value="">Cualquier Estatus</option>
+                <option value="0">Pendiente</option>
+                <option value="1">Asistió</option>
+                <option value="2">Cancelado</option>
+              </select>
             </div>
-            <button class="btn btn-primary btn-sm" onclick="exportarExcelAsistentes()">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              Exportar Excel
-            </button>
-            <button class="btn btn-ghost btn-sm" onclick="openModalRecordatorio('evento seleccionado')">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-              Enviar Recordatorio
-            </button>
+            
+            <div style="display:flex; gap:10px;">
+              <button class="btn btn-primary" onclick="openAdminModal('modal-nuevo-asistente')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Nuevo Asistente
+              </button>
+              <button class="btn btn-secondary btn-sm" onclick="exportarExcelAsistentes()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Excel
+              </button>
+            </div>
           </div>
         </div>
 
@@ -226,15 +196,17 @@
                   <th>Nombre completo</th>
                   <th>Correo</th>
                   <th>Campus</th>
+                  <th>Facultad</th>
                   <th>Carrera / Gen.</th>
                   <th>Tipo</th>
                   <th>Evento</th>
                   <th>QR Correo</th>
                   <th>Estatus</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody id="tabla-asistentes-body">
-                <tr><td colspan="8" style="text-align:center;">Cargando asistentes...</td></tr>
+                <tr><td colspan="10" style="text-align:center;">Cargando asistentes...</td></tr>
               </tbody>
             </table>
           </div>
@@ -306,26 +278,34 @@
           </div>
 
           <div class="admin-card qr-card">
-            <h3 class="admin-card-title">Verificar por código</h3>
+            <h3 class="admin-card-title">Verificar Acceso</h3>
+            
             <div class="form-group">
-              <label for="qr-input" class="form-label">Código QR o ID de registro</label>
+              <label for="qr-input" class="form-label">Código QR o Folio</label>
               <div class="qr-input-row">
-                <input type="text" id="qr-input" class="form-input" placeholder="Ej. UABC-TJ-2025-00142" aria-label="Ingresa el código QR">
+                <input type="text" id="qr-input" class="form-input" placeholder="Ej. UABC-A1B2C3D4">
                 <button class="btn btn-primary" onclick="validarQR()">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                   Validar
                 </button>
               </div>
             </div>
+
+            <div class="form-group" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
+              <label for="search-nombre-qr" class="form-label">¿No tiene código? Buscar manualmente:</label>
+              <input type="text" id="search-nombre-qr" class="form-input" placeholder="Escribe el nombre o correo..." onkeyup="buscarManualQR()">
+              <div id="resultados-nombre-qr" style="margin-top: 10px; max-height: 160px; overflow-y: auto; display: flex; flex-direction: column; gap: 5px;"></div>
+            </div>
+
             <div class="qr-result" id="qr-result" hidden>
               <div class="qr-result-card" id="qr-result-content">
                 <div class="qr-result-icon">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 </div>
                 <div>
-                  <p class="qr-result-status">Registro válido</p>
-                  <p class="qr-result-name" id="qr-result-name">Ana Martínez López</p>
-                  <p class="qr-result-detail" id="qr-result-detail">Tijuana 2025 · Egresado · Ing. Sistemas</p>
+                  <p class="qr-result-status" id="qr-result-status">Registro válido</p>
+                  <p class="qr-result-name" id="qr-result-name">Cargando...</p>
+                  <p class="qr-result-detail" id="qr-result-detail">Cargando detalles...</p>
                 </div>
               </div>
             </div>
@@ -352,6 +332,35 @@
         </div>
       </section>
 
+      <!-- ==============================
+           SECCIÓN: USUARIO
+      ============================== -->
+      <section class="admin-section" id="section-usuarios">
+        <div class="admin-section-header">
+          <h2 class="admin-section-title">Gestión de Usuarios</h2>
+          <button class="btn btn-primary" onclick="openModalUsuario(null)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo Usuario
+          </button>
+        </div>
+
+        <div class="admin-card">
+          <div class="table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Correo (Usuario)</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-usuarios-body">
+                <tr><td colspan="3" style="text-align:center;">Cargando usuarios...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 
@@ -431,6 +440,7 @@
         </button>
       </div>
       <div class="modal-body">
+        <input type="hidden" id="rec-evento-id">
         <p class="modal-event-name" id="modal-rec-evento"></p>
         <div class="form-group">
           <label class="form-label">Tipo de envío</label>
@@ -597,6 +607,57 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="modal-usuario" role="dialog" aria-modal="true" aria-labelledby="modal-usuario-title" hidden>
+    <div class="modal modal--sm">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-usuario-title">Nuevo Usuario</h2>
+        <button class="modal-close" onclick="closeAdminModal('modal-usuario')" aria-label="Cerrar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form id="form-usuario" novalidate>
+          <input type="hidden" id="user-id" name="id">
+          
+          <div class="form-group">
+            <label for="user-nombre" class="form-label">Nombre completo <span class="required">*</span></label>
+            <input type="text" id="user-nombre" name="nombre" class="form-input" placeholder="Ej. Juan Pérez" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="user-correo" class="form-label">Correo electrónico <span class="required">*</span></label>
+            <input type="email" id="user-correo" name="correo" class="form-input" placeholder="juan@uabc.edu.mx" required>
+          </div>
+          
+          <div class="form-group">
+            <label id="label-user-password" for="user-password" class="form-label">Contraseña <span class="required">*</span></label>
+            <input type="password" id="user-password" name="password" class="form-input" placeholder="••••••••" required>
+            <small id="user-password-help" style="color: var(--color-text-muted); display: none;">Déjalo en blanco si no deseas cambiar la contraseña.</small>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" onclick="closeAdminModal('modal-usuario')">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar Usuario</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal-overlay" id="modal-confirmar-eliminar-usuario" role="dialog" aria-modal="true" hidden>
+    <div class="modal modal--sm" style="text-align: center; padding: 30px 20px;">
+      <div style="color: var(--color-error); margin-bottom: 15px; display: flex; justify-content: center;">
+        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+      </div>
+      <h2 class="modal-title" style="margin-bottom: 10px;">¿Eliminar usuario?</h2>
+      <p style="color: var(--color-text-muted); margin-bottom: 25px; line-height: 1.5;">Esta acción no se puede deshacer. El administrador perderá el acceso al sistema de inmediato.</p>
+      <div style="display: flex; gap: 10px;">
+        <button type="button" class="btn btn-ghost" onclick="closeAdminModal('modal-confirmar-eliminar-usuario')" style="flex: 1;">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btn-confirmar-eliminar-usuario" style="flex: 1; background-color: var(--color-error); border-color: var(--color-error);" onclick="ejecutarEliminarUsuario()">Eliminar</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     window.AppConfig = {
       // Escribe directamente tu Cloud Name (ejemplo: "drhxxyz")
@@ -608,46 +669,128 @@
   </script>
 
   <script src="../assets/js/main.js"></script>
+    <!-- Modal Participante -->
+    <div class="modal-overlay" id="modal-participante" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-participante" hidden>
+      <div class="modal modal--lg" style="max-width: 600px;">
+        <div class="modal-header">
+          <h3 class="modal-title" id="titulo-modal-participante">Editar Participante</h3>
+          <button class="modal-close" aria-label="Cerrar modal" onclick="closeAdminModal('modal-participante')">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="form-participante" class="admin-form">
+            <input type="hidden" id="part-id" name="id" value="">
+            
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label for="part-nombre" class="form-label">Nombre *</label>
+                <input type="text" id="part-nombre" name="nombre" class="form-input" required>
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label for="part-apellidos" class="form-label">Apellidos *</label>
+                <input type="text" id="part-apellidos" name="apellidos" class="form-input" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="part-correo" class="form-label">Correo Electrónico *</label>
+              <input type="email" id="part-correo" name="correo" class="form-input" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label for="part-tipo" class="form-label">Tipo Asistente *</label>
+                <select id="part-tipo" name="tipo_asistente" class="form-select" required>
+                  <option value="egresado">Egresado</option>
+                  <option value="estudiante">Estudiante</option>
+                  <option value="docente">Docente</option>
+                  <option value="invitado">Invitado</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label for="part-evento" class="form-label">Evento *</label>
+                <select id="part-evento" name="evento_id" class="form-select" required>
+                  <option value="">Selecciona un evento</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label for="part-campus" class="form-label">Campus</label>
+                <select id="part-campus" name="campus_id" class="form-select">
+                  <option value="">Selecciona campus</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label for="part-facultad" class="form-label">Facultad</label>
+                <select id="part-facultad" name="facultad_id" class="form-select">
+                  <option value="">Selecciona facultad</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label for="part-carrera" class="form-label">Carrera</label>
+                <select id="part-carrera" name="carrera_id" class="form-select">
+                  <option value="">Selecciona carrera</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label for="part-generacion" class="form-label">Generación</label>
+                <input type="text" id="part-generacion" name="generacion" class="form-input" placeholder="Ej. 2015-2019">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="part-asistencia" class="form-label">Estatus de Asistencia</label>
+              <select id="part-asistencia" name="asistencia" class="form-select">
+                <option value="0">Pendiente</option>
+                <option value="1">Confirmado (Asistió)</option>
+                <option value="2">Cancelado</option>
+              </select>
+            </div>
+
+            <div class="form-actions" style="margin-top: 20px;">
+              <button type="button" class="btn btn-ghost" onclick="closeAdminModal('modal-participante')">Cancelar</button>
+              <button type="submit" class="btn btn-primary" id="btn-submit-participante">Guardar Participante</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-nuevo-asistente" role="dialog" aria-modal="true" hidden>
+    <div class="modal" style="width: 95%; max-width: 900px; height: 90vh; display: flex; flex-direction: column; padding: 0;">
+      <div class="modal-header" style="padding: 15px 20px; border-bottom: 1px solid #eee;">
+        <h2 class="modal-title">Registrar Nuevo Asistente</h2>
+        <button class="modal-close" onclick="closeAdminModal('modal-nuevo-asistente'); cargarTablaAsistentes();">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="flex: 1; padding: 0; overflow: hidden;">
+        <iframe src="../index.html" style="width: 100%; height: 100%; border: none;"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/toast.js"></script>
+  <script src="../assets/js/admin_participante_crud.js"></script>
   <script src="../assets/js/admin.js"></script>
   <script src="../assets/js/qr-scanner.js"></script>
 
   <script>
     (function () {
-      var sidebar  = document.getElementById('admin-sidebar');
-      var overlay  = document.getElementById('sidebar-overlay');
-      var toggle   = document.getElementById('sidebar-toggle');
-      var closeBtn = document.getElementById('sidebar-close-btn');
-
-      function openSidebar() {
-        sidebar.classList.add('open');
-        overlay.classList.add('active');
-        toggle.setAttribute('aria-expanded', 'true');
+      // Abrir sección desde la URL (viene de participantes.php)
+      const urlParams = new URLSearchParams(window.location.search);
+      const sectionParam = urlParams.get('section');
+      if (sectionParam && typeof showSection === 'function') {
+          showSection(sectionParam);
       }
-
-      function closeSidebar() {
-        sidebar.classList.remove('open');
-        overlay.classList.remove('active');
-        toggle.setAttribute('aria-expanded', 'false');
-      }
-
-      // Botón hamburguesa abre/cierra
-      toggle.addEventListener('click', function () {
-        sidebar.classList.contains('open') ? closeSidebar() : openSidebar();
-      });
-
-      // Botón X dentro del sidebar cierra
-      closeBtn.addEventListener('click', closeSidebar);
-
-      // Clic en el overlay (zona de contenido) cierra sidebar
-      overlay.addEventListener('click', closeSidebar);
-
-      // Cierra sidebar al hacer clic en un ítem de nav (solo en móvil)
-      document.querySelectorAll('.sidebar-link[data-section]').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          if (window.innerWidth <= 900) closeSidebar();
-        });
-      });
     })();
   </script>
+  <script src="../assets/js/sidebar.js"></script>
 </body>
 </html>

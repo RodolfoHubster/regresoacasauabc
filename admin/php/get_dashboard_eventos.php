@@ -3,19 +3,30 @@ require_once __DIR__ . '/conexion.php';
 header('Content-Type: application/json');
 
 try {
-    // Esta consulta cuenta cuántos registros hay para cada campus asociado a un evento
+    $campus = isset($_GET['campus']) ? $_GET['campus'] : '';
+    
     $sql = "SELECT 
                 e.id, 
                 e.nombre, 
                 c.nombre as campus, 
                 e.fecha, 
                 e.estado,
-                (SELECT COUNT(*) FROM registro_asistente r WHERE r.campus_id = e.campus_id) as total_registros
+                (SELECT COUNT(*) FROM registro_asistente r WHERE r.evento_id = e.id) as total_registros
             FROM evento e
-            JOIN campus c ON e.campus_id = c.id
-            ORDER BY e.fecha ASC";
+            JOIN campus c ON e.campus_id = c.id";
             
-    $stmt = $conexion->query($sql);
+    if ($campus !== '') {
+        $sql .= " WHERE c.nombre = :campus";
+    }
+    
+    $sql .= " ORDER BY e.fecha ASC";
+            
+    $stmt = $conexion->prepare($sql);
+    if ($campus !== '') {
+        $stmt->execute([':campus' => $campus]);
+    } else {
+        $stmt->execute();
+    }
     $eventos = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     echo json_encode(['status' => 'success', 'data' => $eventos]);

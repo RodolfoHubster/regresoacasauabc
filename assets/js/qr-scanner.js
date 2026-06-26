@@ -1,33 +1,66 @@
-let html5QrcodeScanner;
+let html5QrcodeScanner = null;
+let escanerRenderizado = false;
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Inicializar el escáner
+// Esta función SOLO se ejecutará cuando entremos a la pestaña "Validar QR"
+window.inicializarLectorQR = function() {
+    if (escanerRenderizado) return; // Si ya se dibujó la cámara en la pantalla, no lo vuelve a hacer
+
     html5QrcodeScanner = new Html5QrcodeScanner(
       "lector-camara", 
       { fps: 10, qrbox: {width: 250, height: 250} }, 
       false
     );
   
-    // Esta función se ejecuta mágicamente cuando la cámara detecta un QR
     function onScanSuccess(decodedText, decodedResult) {
-      // 1. Pausar el escáner para que no lea el mismo QR 10 veces por segundo
       html5QrcodeScanner.pause();
-  
-      // 2. Opcional: Hacer un sonido de "Beep"
       tocarBeep();
-  
-      // 3. Poner el código en el input manual para que el usuario lo vea
-      document.getElementById('qr-input').value = decodedText;
-  
-      // 4. Enviar al servidor para registrar la asistencia
-      validarQRBD(decodedText);
+      
+      // LIMPIEZA: Solo permite letras, números y el guion (-)
+      // También limpia comillas, espacios, saltos de línea y caracteres de control
+      let codigoLimpio = limpiarCodigo(decodedText);
+
+      // Ponemos el código ya limpio en la cajita visual
+      document.getElementById('qr-input').value = codigoLimpio;
+      
+      // Llamamos a la validación con el código limpio
+      if (typeof validarQR === 'function') {
+          validarQR(codigoLimpio);
+      }
+
+      setTimeout(() => {
+          if (html5QrcodeScanner) html5QrcodeScanner.resume(); 
+      }, 3000);
     }
   
-    // Renderizar la cámara en el div que creamos
     html5QrcodeScanner.render(onScanSuccess);
-});
-  
-// Función para hacer un ruidito cuando escanea (tipo cajero de súper)
+    escanerRenderizado = true;
+};
+
+/**
+ * Limpia un código QR de cualquier carácter no deseado.
+ * Elimina: comillas simples/dobles, espacios, saltos de línea,
+ * retornos de carro, caracteres de control (0x00-0x1F, 0x7F) y
+ * cualquier símbolo que no sea letra, número o guion.
+ * También normaliza a mayúsculas y reinserta el guion de UABC si el
+ * scanner lo eliminó (UABC6A... → UABC-6A...).
+ */
+function limpiarCodigo(str) {
+    if (!str) return '';
+    let limpio = str
+        .replace(/[\x00-\x1F\x7F]/g, '') // Caracteres de control e invisibles
+        .replace(/['"]/g, '')             // Comillas simples y dobles
+        .replace(/[^a-zA-Z0-9-]/g, '')   // Todo lo que no sea alfanumérico o guion
+        .trim()
+        .toUpperCase();                   // Normalizar a mayúsculas
+
+    // Algunos scanners eliminan el guion: UABC6A... → restaurar a UABC-6A...
+    if (/^UABC[A-Z0-9]/.test(limpio) && limpio.charAt(4) !== '-') {
+        limpio = 'UABC-' + limpio.slice(4);
+    }
+
+    return limpio;
+}
+
 function tocarBeep() {
     const context = new (window.AudioContext || window.webkitAudioContext)();
     const oscillator = context.createOscillator();
@@ -38,88 +71,46 @@ function tocarBeep() {
     setTimeout(() => { oscillator.stop(); }, 150);
 }
 
-// Función que manda el código a PHP
-function validarQRBD(codigoQR) {
-    const resultDiv = document.getElementById('qr-result');
-    const resultName = document.getElementById('qr-result-name');
-    const resultDetail = document.getElementById('qr-result-detail');
-    const resultStatus = document.querySelector('.qr-result-status');
-
-    fetch('../admin/php/validar_qr.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'codigo=' + encodeURIComponent(codigoQR)
-    })
-    .then(response => response.json())
-    .then(res => {
-        resultDiv.hidden = false;
-        
-        if (res.status === 'success') {
-            resultStatus.textContent = "¡Acceso Permitido!";
-            resultStatus.style.color = "green";
-            resultName.textContent = res.data.nombre + ' ' + res.data.apellidos;
-            resultDetail.textContent = res.data.campus + ' · ' + res.data.carrera;
-            
-            // ACTUALIZACIÓN EN TIEMPO REAL:
-            // Llamamos a las funciones que ya tienes definidas en admin.js
-            if (typeof cargarTablaAsistentes === 'function') {
-                cargarTablaAsistentes(); 
-            }
-            if (typeof cargarDashboardStats === 'function') {
-                cargarDashboardStats();
-            }
-
-        } else if (res.status === 'already_scanned') {
-            resultStatus.textContent = "⚠️ QR Ya fue utilizado";
-            resultStatus.style.color = "orange";
-            resultName.textContent = res.data.nombre + ' ' + res.data.apellidos;
-            resultDetail.textContent = "Este asistente ya había registrado su entrada.";
-        } else {
-            resultStatus.textContent = "❌ QR Inválido";
-            resultStatus.style.color = "red";
-            resultName.textContent = "Código no encontrado";
-            resultDetail.textContent = "Verifica que pertenezca a este evento.";
-        }
-
-        // Reactivar la cámara después de 3 segundos para el siguiente asistente
-        // Busca esta parte al final de la función validarQRBD
-      setTimeout(() => {
-          // 1. Limpiamos el campo de texto
-          document.getElementById('qr-input').value = '';
-          
-          // 2. Ocultamos el cuadro con el resultado del escaneo anterior
-          resultDiv.hidden = true;
-          
-          // 3. ¡LA CLAVE! Reactivamos el escáner sin recargar la página
-          // Esto permite que la cámara siga encendida y lista para el siguiente
-          if (html5QrcodeScanner) {
-              html5QrcodeScanner.resume(); 
-          }
-          
-          // Quitamos el location.reload(); <-- BORRA ESA LÍNEA
-      }, 3000); // 3 segundos es ideal para que alcances a leer el nombre y pase el siguiente
-    })
-    .catch(err => console.error("Error validando:", err));
-}
-
-// Para el botón manual que ya tenías
-function validarQR() {
-    const input = document.getElementById('qr-input').value;
-    if(input.trim() !== '') {
-        validarQRBD(input);
-    }
-}
-
-// Escuchar la tecla "Enter" en el campo de texto (Ideal para pistolas USB)
+// ─── MANEJO DE PISTOLA LECTORA USB ───
+// Las pistolas USB simulan un teclado y terminan con Enter.
+// Usamos un buffer con pequeño delay para capturar el código completo
+// antes de procesarlo, evitando procesar caracteres parciales.
 document.addEventListener('DOMContentLoaded', () => {
     const inputQR = document.getElementById('qr-input');
-    if (inputQR) {
-        inputQR.addEventListener('keypress', function(event) {
-            // Si la tecla presionada es "Enter"
-            if (event.key === 'Enter') {
-                event.preventDefault(); // Evita que la página se recargue
-                validarQR(); // Ejecuta la misma función que el botón
-            }
-        });
-    }
+    if (!inputQR) return;
+
+    let debounceTimer = null;
+
+    // Usamos 'keydown' (más confiable que el deprecado 'keypress')
+    inputQR.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+
+            // Cancelamos cualquier timer previo para evitar doble disparo
+            if (debounceTimer) clearTimeout(debounceTimer);
+
+            // Pequeño delay para asegurar que la pistola terminó de escribir
+            debounceTimer = setTimeout(() => {
+                const codigoLimpio = limpiarCodigo(inputQR.value);
+                inputQR.value = codigoLimpio;
+
+                if (codigoLimpio && typeof validarQR === 'function') {
+                    validarQR(codigoLimpio);
+                }
+                debounceTimer = null;
+            }, 50); // 50ms es suficiente para que la pistola termine de enviar
+        }
+    });
+
+    // También limpiamos el valor en tiempo real mientras se escribe,
+    // para que el usuario no vea caracteres raros en el input
+    inputQR.addEventListener('input', function() {
+        const pos = inputQR.selectionStart;
+        const cleaned = inputQR.value.replace(/['"]/g, '').replace(/[\x00-\x1F\x7F]/g, '');
+        if (cleaned !== inputQR.value) {
+            inputQR.value = cleaned;
+            // Restaurar posición del cursor
+            inputQR.setSelectionRange(pos, pos);
+        }
+    });
 });

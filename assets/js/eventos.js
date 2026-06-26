@@ -59,7 +59,7 @@ function loadPublicEventos() {
                 </ul>
                 <p class="event-card-desc">${evento.descripcion || 'Sin descripción'}</p>
                 <div class="event-card-actions">
-                  <button class="btn btn-outline-primary" ${btnDisabled} onclick="openModalInfo(${evento.id})">Información</button>
+                  <button class="btn btn-secondary" ${btnDisabled} onclick="openModalInfo(${evento.id})">Información</button>
                   <button class="btn ${btnClass} btn-registrar" ${btnDisabled} data-id="${evento.id}" onclick="openModalRegistro(${evento.id})">${btnText}</button>
                 </div>
               </div>
@@ -157,26 +157,109 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// Nueva función para abrir el modal dinámico de información
+// Nueva función para abrir el modal dinámico de información con soporte de FAQs filtradas
 function openModalInfo(id) {
-  // Buscamos el evento en la lista cargada de la BD
-  const evento = publicEventos.find(e => e.id == id);
+  const evento = publicEventEventos = publicEventos.find(e => e.id == id);
   if (!evento) return;
 
-  // Llenamos los datos dinámicamente en el HTML
+  // Llenamos los datos principales de forma dinámica
   document.getElementById('info-dinamico-title').textContent = evento.nombre;
   document.getElementById('info-dinamico-img').src = evento.imagen || 'assets/images/download.jpg';
   document.getElementById('info-dinamico-fecha').textContent = `${evento.fecha} · ${evento.hora}`;
   document.getElementById('info-dinamico-ubicacion').textContent = evento.ubicacion;
   document.getElementById('info-dinamico-desc').textContent = evento.descripcion || 'Sin descripción detallada disponible.';
 
-  // Configuramos el botón verde para que abra el registro de ESTE evento en particular
+  // Referencias a las secciones y botones
+  const detallesSection = document.getElementById('info-dinamico-detalles-section');
+  const faqSection = document.getElementById('info-dinamico-faq-section');
+  const btnFaq = document.getElementById('info-dinamico-btn-faq');
+  const faqList = document.getElementById('info-dinamico-faq-list');
+
+  // Forzar estado inicial: mostrar detalles del evento y ocultar FAQs
+  if (detallesSection) detallesSection.style.display = 'block';
+  if (faqSection) faqSection.style.display = 'none';
+  if (btnFaq) btnFaq.textContent = 'Preguntas Frecuentes';
+
+  // Configuración del comportamiento del botón de preguntas frecuentes
+  if (btnFaq) {
+    btnFaq.onclick = () => {
+      if (faqSection.style.display === 'none') {
+        // Mostrar cargando mientras se realiza el fetch
+        faqList.innerHTML = '<p class="events-loading-text">Cargando preguntas frecuentes del evento...</p>';
+        
+        const path = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+        const faqApiRuta = path + 'admin/php/get_faqs.php?evento_id=' + evento.id;
+
+        fetch(faqApiRuta)
+          .then(res => res.json())
+          .then(result => {
+            const activas = result.data ? result.data.filter(f => f.oculto == 0) : [];
+            if (result.status === 'success' && activas.length > 0) {
+              faqList.innerHTML = '';
+              activas.forEach((faq, index) => {
+                const faqHtml = `
+                  <div class="faq-item">
+                    <button class="faq-trigger" aria-expanded="false" onclick="toggleModalFaq('modal-faq-${index}')">
+                      <span>${faq.pregunta}</span>
+                      <svg class="faq-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+                    <div class="faq-answer" id="modal-faq-${index}" hidden>
+                      <p>${faq.respuesta}</p>
+                    </div>
+                  </div>
+                `;
+                faqList.innerHTML += faqHtml;
+              });
+            } else {
+              faqList.innerHTML = '<p class="events-loading-text">No hay preguntas frecuentes específicas para este evento.</p>';
+            }
+          })
+          .catch(err => {
+            console.error("Error cargando FAQs:", err);
+            faqList.innerHTML = '<p style="color:var(--color-error); text-align:center; font-size:var(--text-sm);">Error al conectar con el servidor.</p>';
+          });
+
+        if (detallesSection) detallesSection.style.display = 'none';
+        faqSection.style.display = 'block';
+        btnFaq.textContent = 'Ver Acerca del Evento';
+      } else {
+        if (detallesSection) detallesSection.style.display = 'block';
+        faqSection.style.display = 'none';
+        btnFaq.textContent = 'Preguntas Frecuentes';
+      }
+    };
+  }
+
+  // Configuración del botón de inscripción
   const btnRegistro = document.getElementById('info-dinamico-btn-registro');
   btnRegistro.onclick = () => {
     closeModal('modal-info-dinamico');
     openModalRegistro(evento.id);
   };
 
-  // Finalmente, abrimos el modal
   openModal('modal-info-dinamico');
+}
+
+// Función global auxiliar para manejar los colapsables dentro del modal
+function toggleModalFaq(id) {
+  const answer = document.getElementById(id);
+  if (!answer) return;
+  const trigger = answer.previousElementSibling;
+  const isHidden = answer.hasAttribute('hidden');
+  
+  if (isHidden) {
+    answer.removeAttribute('hidden');
+    if (trigger) {
+      trigger.setAttribute('aria-expanded', 'true');
+      const icon = trigger.querySelector('.faq-icon');
+      if (icon) icon.style.transform = 'rotate(180deg)';
+    }
+  } else {
+    answer.setAttribute('hidden', '');
+    if (trigger) {
+      trigger.setAttribute('aria-expanded', 'false');
+      const icon = trigger.querySelector('.faq-icon');
+      if (icon) icon.style.transform = 'none';
+    }
+  }
 }

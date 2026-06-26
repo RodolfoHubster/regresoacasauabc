@@ -1,34 +1,41 @@
 <?php
 require_once __DIR__ . '/conexion.php';
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Color;
+
 // Leemos los filtros que nos mandará Javascript por la URL
-$filtroEvento = $_GET['evento'] ?? '';
-$filtroCampus = $_GET['campus'] ?? '';
+$filtroEvento   = $_GET['evento']   ?? '';
+$filtroCampus   = $_GET['campus']   ?? '';
+$filtroFacultad = $_GET['facultad'] ?? '';
+$filtroEstatus  = $_GET['estatus']  ?? ''; // <-- NUEVO FILTRO AGREGADO
 
 // Nombramos el archivo dinámicamente según los filtros
 $nombreArchivo = "Lista_Asistentes";
-if (!empty($filtroEvento)) $nombreArchivo .= "_" . str_replace(' ', '', $filtroEvento);
-if (!empty($filtroCampus)) $nombreArchivo .= "_" . $filtroCampus;
-$nombreArchivo .= ".csv";
-
-header('Content-Type: text/csv; charset=utf-8');
-header('Content-Disposition: attachment; filename="' . $nombreArchivo . '"');
-
-$output = fopen('php://output', 'w');
-fputs($output, "\xEF\xBB\xBF"); // BOM para acentos
-
-// Encabezados
-fputcsv($output, ['Nombre', 'Apellidos', 'Correo', 'Campus', 'Carrera', 'Generacion', 'Tipo', 'Evento', 'QR Correo', 'Asistencia']);
+if (!empty($filtroEvento))   $nombreArchivo .= "_" . preg_replace('/[^A-Za-z0-9_\-]/', '_', $filtroEvento);
+if (!empty($filtroCampus))   $nombreArchivo .= "_" . $filtroCampus;
+if (!empty($filtroFacultad)) $nombreArchivo .= "_" . preg_replace('/[^A-Za-z0-9_\-]/', '_', $filtroFacultad);
+if ($filtroEstatus !== '') {
+    if ($filtroEstatus === '0') $nombreArchivo .= "_Pendientes";
+    if ($filtroEstatus === '1') $nombreArchivo .= "_Asistieron";
+    if ($filtroEstatus === '2') $nombreArchivo .= "_Cancelados";
+}
+$nombreArchivo .= ".xlsx";
 
 try {
-    // Consulta base
-    $sql = "SELECT r.*, c.nombre as campus_nombre, ca.nombre as carrera_nombre, e.nombre as evento_nombre
+    // Consulta base (con facultad incluida)
+    $sql = "SELECT r.*, c.nombre as campus_nombre, f.nombre as facultad_nombre, ca.nombre as carrera_nombre, e.nombre as evento_nombre
             FROM registro_asistente r
-            LEFT JOIN campus c ON r.campus_id = c.id
-            LEFT JOIN carrera ca ON r.carrera_id = ca.id
-            LEFT JOIN evento e ON r.campus_id = e.campus_id
+            LEFT JOIN campus    c  ON r.campus_id   = c.id
+            LEFT JOIN facultad  f  ON r.facultad_id = f.id
+            LEFT JOIN carrera   ca ON r.carrera_id  = ca.id
+            LEFT JOIN evento    e  ON r.evento_id   = e.id
             WHERE 1=1";
-    
+
     $params = [];
 
     // Aplicar filtros a la consulta SQL
@@ -40,33 +47,172 @@ try {
         $sql .= " AND c.nombre = :campus";
         $params[':campus'] = $filtroCampus;
     }
-    
+    if (!empty($filtroFacultad)) {
+        // <-- SE MODIFICÓ AQUÍ PARA DETECTAR LA "OTRA FACULTAD" A MANO
+        $sql .= " AND (f.nombre = :facultad OR r.facultad_otra = :facultad_otra)";
+        $params[':facultad'] = $filtroFacultad;
+        $params[':facultad_otra'] = $filtroFacultad;
+    }
+    if ($filtroEstatus !== '') {
+        // <-- SE AGREGÓ EL FILTRO DE ESTATUS A LA BASE DE DATOS
+        $sql .= " AND r.asistencia = :estatus";
+        $params[':estatus'] = $filtroEstatus;
+    }
+
     $sql .= " ORDER BY r.id DESC";
 
     $stmt = $conexion->prepare($sql);
     $stmt->execute($params);
+    $datos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $totalPersonas   = count($datos);
+    $totalAsistieron = count(array_filter($datos, fn($r) => $r['asistencia'] == 1));
 
-    while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-        $qrEstado = ($row['correo_enviado'] == 1) ? 'Enviado' : 'Pendiente';
-        $asistenciaEstado = ($row['asistencia'] == 1) ? 'Asistio' : 'Registrado';
+    $spreadsheet = new Spreadsheet();
+    $sheet = $spreadsheet->getActiveSheet();
+    $sheet->setTitle('Asistentes');
+    $sheet->setShowGridlines(true);
 
-        fputcsv($output, [
-            $row['nombre'],
-            $row['apellidos'],
-            $row['correo'],
-            $row['campus_nombre'] ?? 'N/A',
-            $row['carrera_nombre'] ?? 'N/A',
-            $row['generacion'] ?? 'N/A',
-            $row['tipo_asistente'] ?? 'N/A',
-            $row['evento_nombre'] ?? 'N/A',
-            $qrEstado,
-            $asistenciaEstado
-        ]);
+    // ── Fila 1: filtros aplicados | total registrados | total asistieron ──
+    $descripcionFiltros = 'Todos los asistentes';
+    $partesFiltro = [];
+    if (!empty($filtroEvento))   $partesFiltro[] = 'Evento: ' . $filtroEvento;
+    if (!empty($filtroCampus))   $partesFiltro[] = 'Campus: ' . $filtroCampus;
+    if (!empty($filtroFacultad)) $partesFiltro[] = 'Facultad: ' . $filtroFacultad;
+    
+    // <-- SE AGREGA EL TEXTO DEL ESTATUS A LA CELDA SUPERIOR DEL EXCEL
+    if ($filtroEstatus !== '') {
+        if ($filtroEstatus === '0') $partesFiltro[] = 'Estatus: Pendientes';
+        if ($filtroEstatus === '1') $partesFiltro[] = 'Estatus: Asistieron';
+        if ($filtroEstatus === '2') $partesFiltro[] = 'Estatus: Cancelados';
     }
-} catch (Exception $e) {
-    fputcsv($output, ['Error al generar el reporte', $e->getMessage()]);
-}
 
-fclose($output);
-exit;
+    if (!empty($partesFiltro))   $descripcionFiltros = implode(' | ', $partesFiltro);
+
+    $resumen = 'Registrados: ' . $totalPersonas . '   |   Asistieron: ' . $totalAsistieron;
+
+    $sheet->setCellValue('A1', $descripcionFiltros);
+    $sheet->setCellValue('B1', $resumen);
+
+    $tituloStyle = [
+        'font'      => ['bold' => true, 'size' => 11, 'name' => 'Arial', 'color' => ['argb' => 'FF1A6B2A']],
+        'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_CENTER],
+    ];
+    $sheet->getStyle('A1')->applyFromArray($tituloStyle);
+
+    $resumenStyle = [
+        'font'      => ['bold' => true, 'size' => 11, 'name' => 'Arial', 'color' => ['argb' => 'FF1A6B2A']],
+        'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT, 'vertical' => Alignment::VERTICAL_CENTER],
+    ];
+    $sheet->getStyle('B1:E1')->applyFromArray($resumenStyle);
+    $sheet->mergeCells('B1:E1');
+    $sheet->getRowDimension(1)->setRowHeight(24);
+
+    // ── Fila 2: Encabezados ──
+    $headers = ['Nombre', 'Apellidos', 'Correo', 'Campus', 'Facultad', 'Carrera', 'Generación', 'Tipo', 'Evento', 'QR Correo', 'Asistencia'];
+    $col = 'A';
+    foreach ($headers as $header) {
+        $sheet->setCellValue($col . '2', $header);
+        $col++;
+    }
+
+    $headerStyle = [
+        'font' => [
+            'bold'  => true,
+            'color' => ['argb' => Color::COLOR_WHITE],
+            'size'  => 11,
+            'name'  => 'Arial',
+        ],
+        'alignment' => [
+            'horizontal' => Alignment::HORIZONTAL_CENTER,
+            'vertical'   => Alignment::VERTICAL_CENTER,
+            'wrapText'   => true,
+        ],
+        'fill' => [
+            'fillType'   => Fill::FILL_SOLID,
+            'startColor' => ['argb' => 'FF1A6B2A'],
+        ],
+    ];
+    $sheet->getStyle('A2:K2')->applyFromArray($headerStyle);
+    $sheet->getRowDimension(2)->setRowHeight(30);
+
+    // ── Filas de datos ──
+    $rowNum = 3;
+    foreach ($datos as $row) {
+        $qrEstado = ($row['correo_enviado'] == 1) ? 'Enviado'   : 'Pendiente';
+        
+        // <-- SE AJUSTÓ LA LÓGICA PARA LEER EL ESTATUS CANCELADO
+        $asistenciaEstado = 'Pendiente';
+        if ($row['asistencia'] == 1) $asistenciaEstado = 'Asistió';
+        if ($row['asistencia'] == 2) $asistenciaEstado = 'Cancelado';
+
+        // <-- AQUÍ QUITAMOS LOS N/A EN CASO DE QUE SEA CAMPO VACÍO O "OTRA"
+        $facultad = !empty($row['facultad_nombre']) ? $row['facultad_nombre'] : (!empty($row['facultad_otra']) ? $row['facultad_otra'] : '');
+        $carrera = !empty($row['carrera_nombre']) ? $row['carrera_nombre'] : (!empty($row['carrera_otra']) ? $row['carrera_otra'] : '');
+
+        $sheet->setCellValue('A' . $rowNum, $row['nombre'] ?? '');
+        $sheet->setCellValue('B' . $rowNum, $row['apellidos'] ?? '');
+        $sheet->setCellValue('C' . $rowNum, $row['correo'] ?? '');
+        $sheet->setCellValue('D' . $rowNum, $row['campus_nombre']   ?? '');
+        $sheet->setCellValue('E' . $rowNum, $facultad);
+        $sheet->setCellValue('F' . $rowNum, $carrera);
+        $sheet->setCellValue('G' . $rowNum, $row['generacion']      ?? '');
+        $sheet->setCellValue('H' . $rowNum, $row['tipo_asistente']  ?? '');
+        $sheet->setCellValue('I' . $rowNum, $row['evento_nombre']   ?? '');
+        $sheet->setCellValue('J' . $rowNum, $qrEstado);
+        $sheet->setCellValue('K' . $rowNum, $asistenciaEstado);
+
+        $rowNum++;
+    }
+
+    $lastRow = $rowNum - 1;
+
+    if ($lastRow >= 2) {
+        // Bordes para todos los datos
+        $borderStyle = [
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color'       => ['argb' => 'FFE0E0E0'],
+                ],
+            ],
+        ];
+        $sheet->getStyle('A2:K' . $lastRow)->applyFromArray($borderStyle);
+
+        // Formato de filas de datos
+        for ($i = 3; $i <= $lastRow; $i++) {
+            $sheet->getRowDimension($i)->setRowHeight(22);
+            $sheet->getStyle('D' . $i . ':H' . $i)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle('J' . $i . ':K' . $i)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
+            // Fila cebra
+            if ($i % 2 === 0) {
+                $sheet->getStyle('A' . $i . ':K' . $i)->getFill()
+                    ->setFillType(Fill::FILL_SOLID)
+                    ->getStartColor()->setARGB('FFF4F9F5');
+            }
+        }
+
+        // Auto-ajuste de columnas
+        foreach (range('A', 'K') as $columnId) {
+            $sheet->getColumnDimension($columnId)->setAutoSize(true);
+        }
+
+        // Filtros automáticos
+        $sheet->setAutoFilter('A2:K' . $lastRow);
+    }
+
+    // Cabeceras para forzar la descarga de .xlsx
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    header('Content-Disposition: attachment; filename="' . $nombreArchivo . '"');
+    header('Cache-Control: max-age=0');
+
+    $writer = new Xlsx($spreadsheet);
+    $writer->save('php://output');
+    exit;
+
+} catch (Exception $e) {
+    header('Content-Type: text/html; charset=utf-8');
+    echo "Error al generar el reporte Excel: " . htmlspecialchars($e->getMessage());
+    exit;
+}
 ?>

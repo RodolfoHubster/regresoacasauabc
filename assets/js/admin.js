@@ -10,11 +10,30 @@ const sectionTitles = {
 };
 
 function showSection(name) {
+  // ─── 1. CONTROL INTELIGENTE DE CÁMARA ───
+  if (name !== 'qr') {
+      const btnStop = document.getElementById('html5-qrcode-button-camera-stop');
+      if (btnStop && window.getComputedStyle(btnStop).display !== 'none') {
+          btnStop.click();
+      }
+  } else {
+      if (typeof inicializarLectorQR === 'function') {
+          inicializarLectorQR();
+      }
+  }
+
+  // ─── 2. CAMBIO VISUAL DE SECCIONES ───
+  const sec = document.getElementById('section-' + name);
+  if (!sec) {
+      // Estamos en otra página (ej. participantes.php) — ir al panel sin parámetro de sección
+      window.location.href = 'admin.php';
+      return;
+  }
+
   document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
 
-  const sec = document.getElementById('section-' + name);
-  if (sec) sec.classList.add('active');
+  sec.classList.add('active');
 
   const link = document.querySelector('[data-section="' + name + '"]');
   if (link) link.classList.add('active');
@@ -27,7 +46,7 @@ function showSection(name) {
   if (main) main.scrollTop = 0;
 
   if (name === 'registros') {
-      cargarTablaAsistentes(); // Recarga los datos reales al hacer clic en el menú
+      if (typeof cargarTablaAsistentes === 'function') cargarTablaAsistentes();
   }
 }
 
@@ -92,10 +111,30 @@ function openModalEvento(id) {
   openAdminModal('modal-evento');
 }
 
-function openModalRecordatorio(evento) {
-  const label = document.getElementById('modal-rec-evento');
-  if (label) label.textContent = ' ' + evento;
-  openAdminModal('modal-recordatorio');
+function openModalRecordatorio(id, nombre) {
+    const label = document.getElementById('modal-rec-evento');
+    const idInput = document.getElementById('rec-evento-id');
+    if (label) label.textContent = ' ' + nombre;
+    if (idInput) idInput.value = id;
+    openAdminModal('modal-recordatorio');
+}
+
+function abrirRecordatorioDesdeFiltro() {
+    const selectEvento = document.getElementById('filtro-evento');
+    const nombreEvento = selectEvento ? selectEvento.value : "";
+    
+    if (!nombreEvento) {
+        alert("Por favor, primero selecciona un evento específico en el filtro de la izquierda.");
+        return;
+    }
+    
+    // Buscamos el evento en la memoria para sacar su ID
+    const evento = eventosCargados.find(e => e.nombre === nombreEvento);
+    if (evento) {
+        openModalRecordatorio(evento.id, evento.nombre);
+    } else {
+        alert("Error al encontrar el evento.");
+    }
 }
 
 function openModalAsistente(nombre) {
@@ -129,7 +168,7 @@ function showSuccessWithQR(eventId) {
   container.innerHTML = "";
   
   // Forzamos la ruta de tu carpeta específica
-  const eventUrl = `${window.location.origin}/regresoacasauabc/index.html?evento=${soloId}`;
+  const eventUrl = `${window.location.origin}/regresaacasa/index.html?evento=${soloId}`;
   linkInput.value = eventUrl;
 
   new QRCode(container, {
@@ -153,7 +192,7 @@ function verQR(id, nombre) {
   container.innerHTML = "";
   
   // Usamos directamente el ID numérico y la carpeta del proyecto
-  const eventUrl = `${window.location.origin}/regresoacasauabc/index.html?evento=${id}`;
+  const eventUrl = `${window.location.origin}/regresaacasa/index.html?evento=${id}`;
   linkInput.value = eventUrl;
 
   new QRCode(container, {
@@ -217,7 +256,7 @@ function loadEventos() {
                   <button class="btn btn-secondary btn-sm" onclick="openModalEvento(${evento.id})">Editar</button>
                   <button class="btn btn-secondary btn-sm" onclick="verQR(${evento.id}, '${evento.nombre}')">Ver QR</button>
                   <a href="participantes.php?id=${evento.id}" class="btn btn-secondary btn-sm">Participantes</a>
-                  <button class="btn btn-secondary btn-sm" onclick="openModalRecordatorio('${evento.nombre}')">Recordatorio</button>
+                  <button class="btn btn-secondary btn-sm" onclick="openModalRecordatorio(${evento.id}, '${evento.nombre}')">Recordatorio</button>
                   <button class="btn btn-secondary btn-sm btn-delete-hover" onclick="confirmarEliminar(${evento.id}, '${evento.nombre}')">Eliminar</button>
                 </div>
               </div>
@@ -328,8 +367,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });   
 // ─── CARGAR ESTADÍSTICAS DEL DASHBOARD ───
-function cargarDashboardStats() {
-  fetch('php/get_dashboard_stats.php')
+function cargarDashboardStats(campus = '') {
+  let url = 'php/get_dashboard_stats.php';
+  if (campus) {
+      url += '?campus=' + encodeURIComponent(campus);
+  }
+  fetch(url)
     .then(response => response.json())
     .then(result => {
       if (result.status === 'success') {
@@ -349,6 +392,15 @@ function cargarDashboardStats() {
     })
     .catch(error => console.error('Error al cargar stats:', error));
 }
+
+// ─── LÓGICA DE FILTRO DE DASHBOARD ───
+function aplicarFiltroDashboard() {
+    const selectCampus = document.getElementById('filtro-campus-dashboard');
+    const campus = selectCampus ? selectCampus.value : '';
+    cargarDashboardStats(campus);
+    cargarDashboardEventos(campus);
+}
+
 
 // ─── CARGAR TABLA DE ASISTENTES (QR ESCANEADO) ───
 // Variable global para guardar a los asistentes sin tener que consultar la BD a cada rato
@@ -377,7 +429,7 @@ function renderTablaAsistentes(datos) {
   tbody.innerHTML = ''; 
 
   if (datos.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No se encontraron registros para este filtro.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">No se encontraron registros para este filtro.</td></tr>';
       return;
   }
 
@@ -392,15 +444,19 @@ function renderTablaAsistentes(datos) {
           ? '<span class="badge badge--green">Enviado</span>' 
           : '<span class="badge badge--gold">Pendiente</span>';
           
-      const yaAsistio = parseInt(asistente.asistencia) === 1;
-      const badgeEstatus = yaAsistio 
-          ? '<span class="badge badge--success">Asistió</span>' 
-          : '<span class="badge badge--gray">Registrado</span>';
+      let estatus = 'pendiente';
+      if (asistente.asistencia == 1) estatus = 'confirmado';
+      if (asistente.asistencia == 2) estatus = 'cancelado';
+
+      let badgeEstatus = '<span class="badge badge--warning">Pendiente</span>';
+      if (estatus === 'confirmado') badgeEstatus = '<span class="badge badge--success">Confirmado</span>';
+      if (estatus === 'cancelado') badgeEstatus = '<span class="badge badge--gray">Cancelado</span>';
 
       const nombreEvento = asistente.evento_nombre || 'Evento no asignado';
 
-      // NUEVO: Validamos de dónde viene el nombre de la carrera
+      // NUEVO: Validamos de dónde viene el nombre de la carrera y facultad
       const nombreCarrera = asistente.carrera_nombre || asistente.carrera || asistente.carrera_otra || 'No especificada';
+      const nombreFacultad = asistente.facultad_nombre || asistente.facultad_otra || 'No especificada';
 
       tr.innerHTML = `
           <td>
@@ -411,6 +467,7 @@ function renderTablaAsistentes(datos) {
           </td>
           <td>${asistente.correo}</td>
           <td>${asistente.campus || 'N/A'}</td>
+          <td><small>${nombreFacultad}</small></td>
           <td>
              <span style="font-weight: 600;">${nombreCarrera}</span><br>
              <small style="color: #666;">Gen: ${asistente.generacion || 'N/A'}</small>
@@ -419,6 +476,14 @@ function renderTablaAsistentes(datos) {
           <td><small>${nombreEvento}</small></td>
           <td>${badgeQR}</td>
           <td>${badgeEstatus}</td>
+          <td class="table-actions">
+            <button class="btn-icon" title="Editar" onclick="abrirModalParticipante(${asistente.id})">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="btn-icon btn-icon--danger" title="Eliminar" onclick="eliminarParticipante(${asistente.id})">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
+          </td>
       `;
       tbody.appendChild(tr);
   });
@@ -467,6 +532,12 @@ function poblarFiltrosEventos() {
         selectFiltroFaq.addEventListener('change', aplicarFiltrosFAQ);
         if(selectFiltroFaqCampus) selectFiltroFaqCampus.addEventListener('change', aplicarFiltrosFAQ);
     }
+
+    // 4. Filtro de facultad de la tabla de asistentes (carga dinámica según campus)
+    const selectFacultad = document.getElementById('filtro-facultad');
+    if (selectFacultad) {
+        cargarFacultadesPorCampus('');
+    }
 }
 
 // ─── LÓGICA DE MULTI-FILTROS PARA FAQ ───
@@ -498,50 +569,140 @@ function aplicarFiltrosFAQ() {
     renderTablaFAQs(filtradas);
 }
 
-// ─── LÓGICA DE MULTI-FILTROS (EVENTO Y CAMPUS) ───
-document.addEventListener('DOMContentLoaded', () => {
-    const selectEvento = document.getElementById('filtro-evento');
-    const selectCampus = document.getElementById('filtro-campus');
+// ─── CARGA DINÁMICA DE FACULTADES POR CAMPUS ───
+function cargarFacultadesPorCampus(campusNombre) {
+    const selectFacultad = document.getElementById('filtro-facultad');
+    if (!selectFacultad) return;
 
-    // Si cambias cualquiera de los dos, se ejecuta la misma función
-    if (selectEvento) selectEvento.addEventListener('change', aplicarFiltros);
-    if (selectCampus) selectCampus.addEventListener('change', aplicarFiltros);
+    const url = campusNombre
+        ? `php/get_facultades_por_campus.php?campus=${encodeURIComponent(campusNombre)}`
+        : 'php/get_facultades_por_campus.php';
+
+    fetch(url)
+        .then(r => r.json())
+        .then(result => {
+            selectFacultad.innerHTML = '<option value="">Todas las facultades</option>';
+            if (result.status === 'success') {
+                result.data.forEach(fac => {
+                    const opt = document.createElement('option');
+                    opt.value = fac.nombre;
+                    opt.textContent = fac.nombre;
+                    selectFacultad.appendChild(opt);
+                });
+            }
+        })
+        .catch(err => console.error('Error al cargar facultades:', err));
+}
+
+// ─── LÓGICA DE MULTI-FILTROS (EVENTO, CAMPUS Y FACULTAD) ───
+document.addEventListener('DOMContentLoaded', () => {
+    const selectEvento   = document.getElementById('filtro-evento');
+    const selectCampus   = document.getElementById('filtro-campus');
+    const selectFacultad = document.getElementById('filtro-facultad');
+    const selectEstatus  = document.getElementById('filtro-estatus');
+
+    if (selectEvento)   selectEvento.addEventListener('change', aplicarFiltros);
+    if (selectFacultad) selectFacultad.addEventListener('change', aplicarFiltros);
+    if (selectEstatus)  selectEstatus.addEventListener('change', aplicarFiltros);
+
+    // Cuando cambia campus: recargamos las facultades de ese campus Y aplicamos filtros
+    if (selectCampus) {
+        selectCampus.addEventListener('change', () => {
+            const campusVal = selectCampus.value;
+            // Reset facultad al cambiar campus
+            if (selectFacultad) selectFacultad.value = '';
+            cargarFacultadesPorCampus(campusVal);
+            aplicarFiltros();
+        });
+    }
 });
 
 function aplicarFiltros() {
-    const selectEvento = document.getElementById('filtro-evento');
-    const selectCampus = document.getElementById('filtro-campus');
+    const selectEvento   = document.getElementById('filtro-evento');
+    const selectCampus   = document.getElementById('filtro-campus');
+    const selectFacultad = document.getElementById('filtro-facultad');
+    const selectEstatus  = document.getElementById('filtro-estatus'); // <- EL NUEVO FILTRO
     
-    const eventoSeleccionado = selectEvento ? selectEvento.value : "";
-    const campusSeleccionado = selectCampus ? selectCampus.value : "";
+    const eventoSeleccionado   = selectEvento   ? selectEvento.value   : "";
+    const campusSeleccionado   = selectCampus   ? selectCampus.value   : "";
+    const facultadSeleccionada = selectFacultad ? selectFacultad.value : "";
+    const estatusSeleccionado  = selectEstatus  ? selectEstatus.value  : "";
 
     // Empezamos con todos los asistentes
     let filtrados = asistentesCargados;
 
-    // 1. Filtrar por evento (si hay uno seleccionado)
     if (eventoSeleccionado !== "") {
         filtrados = filtrados.filter(a => a.evento_nombre === eventoSeleccionado);
     }
-
-    // 2. Filtrar por campus (si hay uno seleccionado)
     if (campusSeleccionado !== "") {
         filtrados = filtrados.filter(a => a.campus === campusSeleccionado);
     }
+    if (facultadSeleccionada !== "") {
+        filtrados = filtrados.filter(a => (a.facultad_nombre === facultadSeleccionada || a.facultad_otra === facultadSeleccionada));
+    }
+    
+    // 🪄 MAGIA: Filtrar por estatus (Pendiente, Asistió, Cancelado)
+    if (estatusSeleccionado !== "") {
+        filtrados = filtrados.filter(a => parseInt(a.asistencia) === parseInt(estatusSeleccionado));
+    }
 
-    // Dibujamos la tabla con el resultado de los filtros
+    // Dibujamos la tabla filtrada
     renderTablaAsistentes(filtrados);
+    
+    // Dibujamos las gráficas filtradas
+    if (typeof renderGraficas === 'function') renderGraficas(filtrados);
 }
 
-// ─── EXPORTAR A EXCEL: ASISTENTES (Con filtros) ───
-function exportarExcelAsistentes() {
-    const selectEvento = document.getElementById('filtro-evento');
-    const selectCampus = document.getElementById('filtro-campus');
-    
-    const evento = selectEvento ? selectEvento.value : "";
-    const campus = selectCampus ? selectCampus.value : "";
+// Variables para evitar duplicar gráficas
+let chartCampusObj = null;
+let chartFacultadObj = null;
 
-    // Armamos la URL pasándole los filtros seleccionados
-    const url = `php/exportar_asistentes.php?evento=${encodeURIComponent(evento)}&campus=${encodeURIComponent(campus)}`;
+function renderGraficas(asistentes) {
+    const ctxCampus = document.getElementById('chartCampus');
+    const ctxFacultad = document.getElementById('chartFacultad');
+    if (!ctxFacultad) return; // La de campus no la pusiste en el HTML, pero validamos la de facultad
+
+    const conteoFacultad = {};
+
+    asistentes.forEach(a => {
+        // Graficar ASISTENCIAS REALES por facultad
+        if (parseInt(a.asistencia) === 1) {
+            const f = a.facultad_nombre || a.facultad_otra || 'No especificada';
+            conteoFacultad[f] = (conteoFacultad[f] || 0) + 1;
+        }
+    });
+
+    if(chartFacultadObj) chartFacultadObj.destroy();
+
+    // Crear Gráfica de Asistencia por Facultad (Barras)
+    chartFacultadObj = new Chart(ctxFacultad, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(conteoFacultad),
+            datasets: [{
+                label: 'Asistentes Reales',
+                data: Object.values(conteoFacultad),
+                backgroundColor: '#00723F'
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Asistencias Reales por Facultad' } } }
+    });
+}
+
+// ─── EXPORTAR A EXCEL: ASISTENTES (Con filtros: evento, campus, facultad) ───
+function exportarExcelAsistentes() {
+    const selectEvento   = document.getElementById('filtro-evento');
+    const selectCampus   = document.getElementById('filtro-campus');
+    const selectFacultad = document.getElementById('filtro-facultad');
+    const selectEstatus  = document.getElementById('filtro-estatus');
+    
+    const evento   = selectEvento   ? selectEvento.value   : "";
+    const campus   = selectCampus   ? selectCampus.value   : "";
+    const facultad = selectFacultad ? selectFacultad.value : "";
+    const estatus  = selectEstatus  ? selectEstatus.value  : "";
+
+    // Armamos la URL pasándole los tres filtros seleccionados
+    const url = `php/exportar_asistentes.php?evento=${encodeURIComponent(evento)}&campus=${encodeURIComponent(campus)}&facultad=${encodeURIComponent(facultad)}&estatus=${encodeURIComponent(estatus)}`;
     
     // Redirigir inicia la descarga del archivo sin cambiar de página
     window.location.href = url;
@@ -636,6 +797,7 @@ async function ejecutarEliminarEvento() {
 function enviarCorreosRecordatorio() {
     const tipoEnvio = document.querySelector('input[name="rec-tipo"]:checked').value;
     const mensaje = document.getElementById('rec-mensaje').value;
+    const eventoId = document.getElementById('rec-evento-id').value;
     const btn = document.getElementById('btn-enviar-rec');
     
     // Cambiar el botón a estado de carga para que el usuario no le pique dos veces
@@ -647,6 +809,7 @@ function enviarCorreosRecordatorio() {
     const formData = new FormData();
     formData.append('tipo', tipoEnvio);
     formData.append('mensaje', mensaje);
+    formData.append('evento_id', eventoId);
 
     fetch('php/enviar_recordatorio.php', {
         method: 'POST',
@@ -776,16 +939,39 @@ function renderTablaFAQs(datos) {
         return;
     }
 
-    datos.forEach((faq, index) => {
+    const activas = datos.filter(f => f.oculto == 0);
+    const ocultas = datos.filter(f => f.oculto == 1);
+
+    const dibujarFila = (faq, index, array, isOculta) => {
         const tr = document.createElement('tr');
+        if (isOculta) tr.style.opacity = '0.6';
+        
         const nombreEvento = faq.evento_nombre ? `${faq.evento_nombre} (${faq.campus_nombre})` : 'General (Todos)';
         
+        const btnSubir = index > 0 
+            ? `<button class="btn-icon" title="Subir" onclick="moverFaq(${faq.id}, 'subir')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg></button>` 
+            : `<span style="width:28px;display:inline-block"></span>`;
+            
+        const btnBajar = index < array.length - 1 
+            ? `<button class="btn-icon" title="Bajar" onclick="moverFaq(${faq.id}, 'bajar')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>` 
+            : `<span style="width:28px;display:inline-block"></span>`;
+        
+        const btnOcultar = isOculta 
+            ? `<button class="btn-icon" title="Mostrar" onclick="toggleOcultoFaq(${faq.id}, 0)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>`
+            : `<button class="btn-icon" title="Ocultar" onclick="toggleOcultoFaq(${faq.id}, 1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg></button>`;
+
         tr.innerHTML = `
-            <td>${index + 1}</td>
+            <td>
+                <div style="display:flex; gap:4px; align-items:center;">
+                    ${btnSubir}${btnBajar}
+                    <span style="margin-left:8px;">${faq.orden}</span>
+                </div>
+            </td>
             <td><strong>${faq.pregunta}</strong></td>
             <td><span style="display:inline-block; max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${faq.respuesta}">${faq.respuesta}</span></td>
             <td><span class="badge badge--gray">${nombreEvento}</span></td>
             <td class="table-actions">
+                ${btnOcultar}
                 <button class="btn-icon" title="Editar" onclick="openModalFaq(${faq.id})">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 </button>
@@ -795,6 +981,53 @@ function renderTablaFAQs(datos) {
             </td>
         `;
         tbody.appendChild(tr);
+    };
+
+    if (activas.length > 0) {
+        const trHeader = document.createElement('tr');
+        trHeader.innerHTML = '<td colspan="5" style="background:#f0fdf4; font-weight:bold;">Preguntas Activas</td>';
+        tbody.appendChild(trHeader);
+        activas.forEach((faq, idx) => dibujarFila(faq, idx, activas, false));
+    }
+
+    if (ocultas.length > 0) {
+        const trHeader = document.createElement('tr');
+        trHeader.innerHTML = '<td colspan="5" style="background:#fef2f2; font-weight:bold;">Preguntas Ocultas</td>';
+        tbody.appendChild(trHeader);
+        ocultas.forEach((faq, idx) => dibujarFila(faq, idx, ocultas, true));
+    }
+}
+
+function toggleOcultoFaq(id, oculto) {
+    fetch('php/toggle_faq_oculto.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, oculto })
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.status === 'success') {
+            showToast('FAQ actualizada', 'success');
+            cargarFAQs();
+        } else {
+            showToast(res.message, 'error');
+        }
+    });
+}
+
+function moverFaq(id, direccion) {
+    fetch('php/mover_faq.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, direccion })
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.status === 'success') {
+            cargarFAQs();
+        } else {
+            showToast(res.message, 'error');
+        }
     });
 }
 
@@ -876,8 +1109,12 @@ function ejecutarEliminarFaq() {
 }
 
 // ─── CARGAR TABLA RESUMEN EN EL DASHBOARD ───
-function cargarDashboardEventos() {
-    fetch('php/get_dashboard_eventos.php')
+function cargarDashboardEventos(campus = '') {
+    let url = 'php/get_dashboard_eventos.php';
+    if (campus) {
+        url += '?campus=' + encodeURIComponent(campus);
+    }
+    fetch(url)
         .then(response => response.json())
         .then(result => {
             if (result.status === 'success') {
@@ -965,3 +1202,363 @@ function loadCampusForm() {
 document.addEventListener('DOMContentLoaded', () => {
   loadCampusForm();
 });
+
+// ==========================================
+// MÓDULO: GESTIÓN DE USUARIOS
+// ==========================================
+
+function cargarUsuarios() {
+  const tbody = document.getElementById('tabla-usuarios-body');
+  if (!tbody) return;
+  tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Cargando usuarios...</td></tr>';
+
+  fetch('php/get_usuarios.php')
+    .then(r => r.json())
+    .then(res => {
+      if (res.status === 'success') {
+        tbody.innerHTML = '';
+        if (res.data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">No hay usuarios registrados.</td></tr>';
+          return;
+        }
+        res.data.forEach(user => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td><strong>${user.nombre}</strong></td>
+            <td>${user.correo}</td>
+            <td>
+              <button class="btn btn-ghost btn-sm" onclick='openModalUsuario(${JSON.stringify(user)})'>Editar</button>
+              <button class="btn btn-ghost btn-sm" style="color:var(--color-error);" onclick="confirmarEliminarUsuario(${user.id})">Eliminar</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    })
+    .catch(err => console.error(err));
+}
+
+function openModalUsuario(user) {
+  const form = document.getElementById('form-usuario');
+  form.reset();
+  const helpText = document.getElementById('user-password-help');
+  const inputPass = document.getElementById('user-password');
+
+  if (user) {
+    // Modo Edición
+    document.getElementById('modal-usuario-title').textContent = 'Editar Usuario';
+    document.getElementById('user-id').value = user.id;
+    document.getElementById('user-nombre').value = user.nombre;
+    document.getElementById('user-correo').value = user.correo;
+    inputPass.required = false; // No es obligatorio cambiar contraseña
+    helpText.style.display = 'block';
+  } else {
+    // Modo Creación
+    document.getElementById('modal-usuario-title').textContent = 'Nuevo Usuario';
+    document.getElementById('user-id').value = '';
+    inputPass.required = true;
+    helpText.style.display = 'none';
+  }
+  
+  const modal = document.getElementById('modal-usuario');
+  modal.hidden = false;
+}
+
+// Interceptar envío del formulario de Usuario
+const formUsuario = document.getElementById('form-usuario');
+if (formUsuario) {
+  formUsuario.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    
+    // Cambiamos el texto del botón para que se vea que está cargando
+    const btnSubmit = formUsuario.querySelector('button[type="submit"]');
+    const originalText = btnSubmit.textContent;
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = 'Guardando...';
+    
+    fetch('php/guardar_usuario.php', { method: 'POST', body: formData })
+      .then(r => r.json())
+      .then(res => {
+        if (res.status === 'success') {
+          closeAdminModal('modal-usuario');
+          if (typeof cargarUsuarios === 'function') cargarUsuarios(); // Recargamos la tabla
+          
+          // 🟢 LLAMAR AL MODAL ELEGANTE
+          const modalExito = document.getElementById('modal-exito');
+          const modalTitle = modalExito.querySelector('.modal-title');
+          const modalMsg = document.getElementById('mensaje-exito');
+          const modalIconContainer = modalExito.querySelector('div[style*="justify-content: center"]');
+          
+          if(modalTitle) {
+              modalTitle.textContent = "¡Guardado!";
+              modalTitle.style.color = "var(--uabc-verde)";
+          }
+          if(modalIconContainer) {
+              modalIconContainer.style.color = "var(--uabc-verde)";
+              modalIconContainer.innerHTML = '<svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+          }
+          if(modalMsg) modalMsg.textContent = res.message; 
+          
+          if(modalExito) {
+              modalExito.hidden = false;
+              // Se cierra solito a los 2.5 segundos
+              setTimeout(() => { modalExito.hidden = true; }, 2500); 
+          }
+          
+        } else {
+          alert('Error: ' + res.message);
+        }
+      })
+      .catch(err => alert('Error al conectar con el servidor'))
+      .finally(() => {
+         // Devolvemos el botón a la normalidad
+         btnSubmit.disabled = false;
+         btnSubmit.textContent = originalText;
+      });
+  });
+}
+
+let usuarioAEliminar = null;
+function confirmarEliminarUsuario(id) {
+  usuarioAEliminar = id;
+  document.getElementById('modal-confirmar-eliminar-usuario').hidden = false;
+}
+
+function ejecutarEliminarUsuario() {
+  if (!usuarioAEliminar) return;
+  
+  const btn = document.getElementById('btn-confirmar-eliminar-usuario');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = 'Eliminando...';
+  btn.disabled = true;
+
+  const formData = new FormData();
+  formData.append('id', usuarioAEliminar);
+
+  fetch('php/eliminar_usuario.php', { method: 'POST', body: formData })
+    .then(r => r.json())
+    .then(res => {
+      closeAdminModal('modal-confirmar-eliminar-usuario');
+      if (res.status === 'success') {
+        if (typeof cargarUsuarios === 'function') cargarUsuarios();
+        
+        // 🟢 LLAMAR AL MODAL ELEGANTE (ELIMINADO)
+        const modalExito = document.getElementById('modal-exito');
+        const modalTitle = modalExito.querySelector('.modal-title');
+        const modalMsg = document.getElementById('mensaje-exito');
+        const modalIconContainer = modalExito.querySelector('div[style*="justify-content: center"]');
+        
+        if(modalTitle) {
+            modalTitle.textContent = "¡Eliminado!";
+            modalTitle.style.color = "var(--uabc-verde)";
+        }
+        if(modalIconContainer) {
+            modalIconContainer.style.color = "var(--uabc-verde)";
+            modalIconContainer.innerHTML = '<svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+        }
+        if(modalMsg) modalMsg.textContent = res.message; 
+        
+        if(modalExito) {
+            modalExito.hidden = false;
+            // Se cierra solito a los 2.5 segundos
+            setTimeout(() => { modalExito.hidden = true; }, 2500);
+        }
+        
+      } else {
+        alert('Error: ' + res.message);
+      }
+    })
+    .catch(err => alert('Error al eliminar'))
+    .finally(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        usuarioAEliminar = null;
+    });
+}
+
+// Cargar la tabla cuando se le de clic al botón de la sección
+document.addEventListener('DOMContentLoaded', () => {
+  const btnUsuarios = document.querySelector('[data-section="usuarios"]');
+  if (btnUsuarios) {
+    btnUsuarios.addEventListener('click', cargarUsuarios);
+  }
+});
+
+// ==========================================
+// MÓDULO: VALIDACIÓN DE QR Y BÚSQUEDA MANUAL
+// ==========================================
+
+function validarQR(codigoManual = null, idManual = null) {
+  const input = document.getElementById('qr-input');
+  let codigo = (codigoManual || (input ? input.value : '')).trim();
+
+  // LIMPIEZA ROBUSTA: elimina comillas, caracteres de control e invisibles
+  if (codigo) {
+      codigo = codigo
+          .replace(/[\x00-\x1F\x7F]/g, '') // Caracteres de control e invisibles
+          .replace(/['"]/g, '')             // Comillas simples y dobles
+          .replace(/[^a-zA-Z0-9-]/g, '')   // Todo lo que no sea alfanumérico o guion
+          .trim()
+          .toUpperCase();                   // Normalizar a mayúsculas
+  }
+
+  // Algunos scanners eliminan el guion: UABC6A... → restaurar a UABC-6A...
+  if (/^UABC[A-Z0-9]/i.test(codigo) && codigo.charAt(4) !== '-') {
+      codigo = 'UABC-' + codigo.slice(4);
+  }
+
+  // Referencias a la tarjeta rápida en línea
+  const resultDiv = document.getElementById('qr-result');
+  const resultCard = document.getElementById('qr-result-content');
+  const resultStatus = document.getElementById('qr-result-status');
+  const resultName = document.getElementById('qr-result-name');
+  const resultDetail = document.getElementById('qr-result-detail');
+  const resultIcon = document.querySelector('.qr-result-icon');
+
+  // Función interna para mostrar errores rápido en la misma tarjeta
+  function mostrarTarjetaError(mensajeError) {
+    if(resultDiv) resultDiv.hidden = false;
+    if(resultCard) resultCard.style.borderLeft = "4px solid var(--color-error)";
+    if(resultStatus) {
+        resultStatus.textContent = "Error de validación";
+        resultStatus.style.color = "var(--color-error)";
+    }
+    if(resultName) resultName.textContent = "";
+    if(resultDetail) resultDetail.textContent = mensajeError;
+    if(resultIcon) {
+        resultIcon.style.color = "var(--color-error)";
+        resultIcon.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+    }
+    setTimeout(() => { if (resultDiv) resultDiv.hidden = true; }, 3000);
+  }
+
+  // Validar que manden algo
+  if (!codigo && !idManual) {
+    mostrarTarjetaError('Por favor, ingresa un código QR o busca un nombre.');
+    return;
+  }
+
+  const formData = new FormData();
+  if (idManual) formData.append('id', idManual);
+  else formData.append('codigo', codigo);
+
+  fetch('php/validar_qr.php', {
+    method: 'POST',
+    body: formData
+  })
+  .then(res => res.json())
+  .then(result => {
+    
+    if (result.status === 'success') {
+      // 🟢 ÉXITO: Tarjeta en Verde
+      if(resultDiv) resultDiv.hidden = false;
+      if(resultCard) resultCard.style.borderLeft = "4px solid var(--uabc-verde)";
+      if(resultStatus) {
+          resultStatus.textContent = "¡Acceso Concedido!";
+          resultStatus.style.color = "var(--uabc-verde)";
+      }
+      if(resultName) resultName.textContent = `${result.data.nombre} ${result.data.apellidos}`;
+      if(resultDetail) resultDetail.textContent = `${result.data.campus} · ${result.data.carrera || 'Asistente'}`;
+      if(resultIcon) {
+          resultIcon.style.color = "var(--uabc-verde)";
+          resultIcon.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+      }
+
+      // Recargamos datos en silencio
+      if (typeof cargarTablaAsistentes === 'function') cargarTablaAsistentes();
+      if (typeof cargarDashboardStats === 'function') cargarDashboardStats();
+      
+      // Auto-ocultar a los 2.5 segundos
+      setTimeout(() => { if (resultDiv) resultDiv.hidden = true; }, 2500);
+
+    } else if (result.status === 'already_scanned') {
+      // 🟡 ADVERTENCIA: Tarjeta en Dorado
+      if(resultDiv) resultDiv.hidden = false;
+      if(resultCard) resultCard.style.borderLeft = "4px solid #F2A900"; // Dorado UABC
+      if(resultStatus) {
+          resultStatus.textContent = "Código Ya Escaneado";
+          resultStatus.style.color = "#F2A900";
+      }
+      if(resultName) resultName.textContent = `${result.data.nombre} ${result.data.apellidos}`;
+      if(resultDetail) resultDetail.textContent = "Esta persona ya registró su entrada previamente.";
+      if(resultIcon) {
+          resultIcon.style.color = "#F2A900";
+          resultIcon.innerHTML = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+      }
+
+      // Auto-ocultar a los 3 segundos
+      setTimeout(() => { if (resultDiv) resultDiv.hidden = true; }, 3000);
+
+    } else {
+      // 🔴 ERROR (Ej. Código Falso): Tarjeta en Rojo
+      mostrarTarjetaError(result.message || 'Código inválido o no encontrado en el sistema');
+    }
+
+    // Limpiamos los inputs
+    if (input) input.value = '';
+    const searchInput = document.getElementById('search-nombre-qr');
+    if (searchInput) searchInput.value = '';
+    const resultsDiv = document.getElementById('resultados-nombre-qr');
+    if (resultsDiv) resultsDiv.innerHTML = '';
+
+  })
+  .catch(err => {
+    console.error(err);
+    mostrarTarjetaError('Error de conexión con el servidor.');
+  });
+}
+
+function buscarManualQR() {
+  const query = document.getElementById('search-nombre-qr').value.toLowerCase();
+  const container = document.getElementById('resultados-nombre-qr');
+  container.innerHTML = '';
+
+  if (query.length < 3) return; // Esperar a que escriban al menos 3 letras
+
+  // Aprovechamos que la tabla de asistentes ya cargó todos los datos
+  if (!asistentesCargados || asistentesCargados.length === 0) {
+      cargarTablaAsistentes(); // Forzar carga si estaba vacía
+      container.innerHTML = '<small style="color:var(--color-text-muted);">Cargando base de datos...</small>';
+      return;
+  }
+
+  // NUEVO: Agregamos la condición de que la asistencia NO sea 1
+  // Y filtramos para no mostrar de eventos finalizados ("cerrado")
+  const filtrados = asistentesCargados.filter(a => {
+      if (parseInt(a.asistencia) === 1) return false;
+      
+      const eventoAsistente = eventosCargados ? eventosCargados.find(e => e.id == a.evento_id) : null;
+      if (eventoAsistente && eventoAsistente.estado === 'cerrado') return false;
+
+      const fullNombre = `${a.nombre} ${a.apellidos}`.toLowerCase();
+      const correo = (a.correo || '').toLowerCase();
+      return fullNombre.includes(query) || correo.includes(query);
+  }).slice(0, 5);
+
+  if (filtrados.length === 0) {
+      container.innerHTML = '<small style="color:var(--color-text-muted);">No se encontrar coincidencia</small>';
+      return;
+  }
+
+  // Imprimir botones elegantes para dar acceso
+  filtrados.forEach(a => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn-ghost btn-sm';
+      btn.style.justifyContent = 'space-between';
+      btn.style.width = '100%';
+      btn.style.textAlign = 'left';
+      btn.innerHTML = `
+          <div style="line-height: 1.3;">
+              <strong>${a.nombre} ${a.apellidos}</strong><br>
+              <small style="color:var(--color-text-muted);">${a.correo || 'Sin correo'}</small><br>
+              <small style="color:var(--uabc-ocre); font-weight:bold;">Evento: ${a.evento_nombre || 'General'}</small>
+          </div>
+          <span class="badge badge--green">Dar Acceso</span>
+      `;
+      // Al hacer clic, ejecuta la misma función de validar pero usando el ID
+      btn.onclick = () => validarQR(null, a.id);
+      container.appendChild(btn);
+  });
+}

@@ -65,10 +65,8 @@ const REGLAS = {
       regex:  'Formato válido: 2015 o 2015-2020.',
     }
   },
-  'field-tipo': {
-    requerido: true,
-    msgs: { vacio: 'Selecciona el tipo de asistente.' }
-  },
+  // NOTA: field-tipo es un input hidden con valor fijo 'egresado'.
+  // No necesita validación en el formulario — se excluye de REGLAS.
 };
 
 /* ─── VALIDAR UN CAMPO INDIVIDUAL ──────────────────────────────────────── */
@@ -100,7 +98,6 @@ function validarCampo(id) {
   errorEl.textContent = msg;
   input.setAttribute('aria-invalid', String(!esCorrecto));
 
-  // Clases visuales
   input.classList.toggle('input--error', !esCorrecto);
   input.classList.toggle('input--ok',    esCorrecto && (regla.requerido || valor !== ''));
 
@@ -112,19 +109,13 @@ document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('form-registro');
   if (!form) return;
 
-  // Adjuntar listeners de tiempo real a cada campo con regla
   Object.keys(REGLAS).forEach(id => {
     const input = document.getElementById(id);
     if (!input) return;
 
-    // 'input' para texto/email/tel/generacion; 'change' para selects
     const evento = (input.tagName === 'SELECT') ? 'change' : 'input';
-
     input.addEventListener(evento, () => validarCampo(id));
-
-    // También validar al perder el foco (blur) para capturar campos que
-    // el usuario salta sin escribir nada
-    input.addEventListener('blur', () => validarCampo(id));
+    input.addEventListener('blur',  () => validarCampo(id));
   });
 
   // ─── SELECTORES DINÁMICOS: Campus → Facultad → Carrera ───
@@ -153,7 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 opt.textContent = `${f.codigo || ''} - ${f.nombre}`;
                 facultadSelect.appendChild(opt);
               });
-              // ELIMINAMOS LA LÍNEA QUE AGREGABA "OTRA" A LA FACULTAD AQUÍ
             }
           })
           .catch(err => console.error('Error cargando facultades:', err));
@@ -166,7 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const facultadId = this.value;
       carreraSelect.innerHTML = '<option value="">Selecciona tu carrera</option>';
 
-      // Como la facultad ya no puede ser "otra", volvemos a la validación normal
       if (facultadId) {
         carreraSelect.disabled = false;
         fetch(`php/get_carreras.php?facultad_id=${facultadId}`)
@@ -179,7 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 opt.textContent = c.nombre;
                 carreraSelect.appendChild(opt);
               });
-              // SÍ MANTENEMOS LA OPCIÓN "OTRA" EN LA CARRERA
               carreraSelect.insertAdjacentHTML('beforeend', '<option value="otra" style="font-weight: bold; color: var(--uabc-verde);">Otra (Escribir manual)</option>');
             }
           })
@@ -193,11 +181,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // ─── SUBMIT ───
   form.addEventListener('submit', e => {
     e.preventDefault();
-    // Validar todos los campos al enviar (por si el usuario nunca tocó alguno)
     const todosOk = Object.keys(REGLAS).map(id => validarCampo(id)).every(Boolean);
     if (todosOk) enviarRegistro();
     else {
-      // Hacer scroll al primer campo con error
       const primerError = form.querySelector('.input--error');
       if (primerError) primerError.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
@@ -220,18 +206,20 @@ function enviarRegistro() {
       btnSubmit.disabled    = false;
       btnSubmit.textContent = textoOrig;
 
-      if (res.status === 'success') {
+     if (res.status === 'success') {
         closeModal('modal-registro');
         resetFormulario(form);
         setTimeout(() => openModal('modal-confirmacion'), 200);
       } else {
-        alert('Ocurrió un error al guardar: ' + res.message);
+        // Usamos tu sistema de toast para mostrar el error de forma profesional
+        showToast(res.message, 'error'); 
       }
     })
     .catch(() => {
       btnSubmit.disabled    = false;
       btnSubmit.textContent = textoOrig;
-      alert('Error de comunicación con el servidor.');
+      // Usamos tu sistema de toast para el error de red
+      showToast('Error de comunicación con el servidor.', 'error');
     });
 }
 
@@ -239,40 +227,54 @@ function enviarRegistro() {
 function resetFormulario(form) {
   form.reset();
 
-  // Limpiar clases visuales y mensajes de error
   form.querySelectorAll('.form-input, .form-select').forEach(el => {
     el.classList.remove('input--error', 'input--ok');
     el.removeAttribute('aria-invalid');
   });
   form.querySelectorAll('.form-error').forEach(el => el.textContent = '');
 
-  // Resetear selects dependientes
   const fac = document.getElementById('field-facultad');
   const car = document.getElementById('field-carrera');
   if (fac) { fac.innerHTML = '<option value="">Primero selecciona un campus</option>'; fac.disabled = true; }
   if (car) { car.innerHTML = '<option value="">Primero selecciona una facultad</option>'; car.disabled = true; }
+
+  const inputOtra = document.getElementById('field-carrera-otra');
+  if (inputOtra) { inputOtra.style.display = 'none'; inputOtra.required = false; inputOtra.value = ''; }
 }
 
 // Mostrar/Ocultar input de "Otra Carrera"
 const selectCarrera = document.getElementById('field-carrera');
 if (selectCarrera) {
-    selectCarrera.addEventListener('change', function() {
-        const inputOtra = document.getElementById('field-carrera-otra');
-        // Validamos que la caja de texto realmente exista antes de cambiar su estilo
-        if (inputOtra) {
-            if (this.value === 'otra') {
-                inputOtra.style.display = 'block';
-                inputOtra.required = true;
-            } else {
-                inputOtra.style.display = 'none';
-                inputOtra.required = false;
-                inputOtra.value = '';
-            }
-        }
-    });
+  selectCarrera.addEventListener('change', function() {
+    const inputOtra = document.getElementById('field-carrera-otra');
+    if (inputOtra) {
+      if (this.value === 'otra') {
+        inputOtra.style.display = 'block';
+        inputOtra.required = true;
+      } else {
+        inputOtra.style.display = 'none';
+        inputOtra.required = false;
+        inputOtra.value = '';
+      }
+    }
+  });
 }
 
-// Inyectar la opción "Otra" después de cargar datos del servidor (interceptando las peticiones fetch si es necesario)
-// Si ya tienes funciones como cargarFacultades(), asegúrate de agregar esto al final de tu ciclo de llenado:
-// selectFacultad.insertAdjacentHTML('beforeend', '<option value="otra">Otra...</option>');
-// selectCarrera.insertAdjacentHTML('beforeend', '<option value="otra">Otra...</option>');
+// ─── Mostrar/Ocultar input de Necesidad de Movilidad ───
+const radiosMovilidad = document.querySelectorAll('input[name="necesidad_movilidad"]');
+const inputMovilidadOtra = document.getElementById('field-necesidad-especificacion');
+
+if (radiosMovilidad.length > 0 && inputMovilidadOtra) {
+  radiosMovilidad.forEach(radio => {
+    radio.addEventListener('change', function() {
+      if (this.value === 'Si') {
+        inputMovilidadOtra.style.display = 'block';
+        inputMovilidadOtra.required = true; // Lo hacemos obligatorio si marca que Sí
+      } else {
+        inputMovilidadOtra.style.display = 'none';
+        inputMovilidadOtra.required = false;
+        inputMovilidadOtra.value = ''; // Limpiamos el texto si se arrepiente y marca No
+      }
+    });
+  });
+}
