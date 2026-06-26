@@ -34,8 +34,6 @@
 /* ══════════════════════════════
    SIDEBAR
    z-index: 500 → por encima del sidebar-overlay (400)
-   Nota: en desktop el sidebar está en flujo normal (no fixed),
-         por lo que z-index solo aplica cuando es fixed en móvil.
 ══════════════════════════════ */
 .admin-sidebar {
   width: 240px;
@@ -63,7 +61,7 @@
     transform: translateX(0);
     border-right: 3px solid var(--uabc-dorado);
   }
-  .sidebar-close { display: flex; }
+  .sidebar-close  { display: flex; }
   .sidebar-toggle { display: flex !important; }
 }
 
@@ -76,13 +74,15 @@
   gap: var(--space-2);
 }
 
-/* Botón cerrar sidebar (solo móvil) */
 .sidebar-close {
   display: none;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
+  /* Área táctil mínima */
+  min-width: 44px;
+  min-height: 44px;
   background: rgba(255,255,255,0.1);
   border: none;
   border-radius: var(--radius-md);
@@ -125,7 +125,6 @@
   letter-spacing: 0.06em;
 }
 
-/* Nav sidebar */
 .sidebar-nav {
   flex: 1;
   padding: var(--space-4) 0;
@@ -162,18 +161,19 @@
 }
 .sidebar-footer {
   padding: var(--space-4);
+  /* safe-area para home indicator en móvil */
+  padding-bottom: max(var(--space-4), env(safe-area-inset-bottom, var(--space-4)));
   border-top: 1px solid rgba(255,255,255,0.1);
 }
 
 /* ══════════════════════════════
    LAYOUT PRINCIPAL
-   overflow:hidden aquí → no crea stacking context en admin-body
 ══════════════════════════════ */
 .admin-layout {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;   /* ← movido de admin-body a aquí */
+  overflow: hidden;
   min-width: 0;
 }
 
@@ -193,7 +193,6 @@
   z-index: 10;
 }
 
-/* SIDEBAR TOGGLE — oculto en desktop, visible en móvil */
 .sidebar-toggle {
   display: none;
   align-items: center;
@@ -217,9 +216,11 @@
   font-weight: 700;
   color: var(--uabc-blanco);
   flex: 1;
+  /* nowrap + ellipsis para evitar wrap en pantallas pequeñas */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .admin-topbar-actions {
@@ -249,10 +250,11 @@
   flex: 1;
   overflow-y: auto;
   padding: var(--space-6) var(--space-8);
+  /* safe-area para home indicator */
+  padding-bottom: max(var(--space-6), env(safe-area-inset-bottom, var(--space-6)));
   scroll-padding-top: var(--space-4);
 }
 
-/* Secciones */
 .admin-section { display: none; }
 .admin-section.active { display: block; }
 
@@ -284,7 +286,6 @@
   flex-wrap: wrap;
 }
 
-/* Cards */
 .admin-card {
   background: var(--color-surface);
   border-radius: var(--radius-lg);
@@ -342,7 +343,6 @@
   flex-shrink: 0;
 }
 
-/* Fallback Safari < 16.4 */
 .kpi-icon--green { background: rgba(26,107,42,0.12); color: var(--uabc-verde); }
 .kpi-icon--gold  { background: rgba(200,151,43,0.20); color: var(--uabc-dorado-dark, #a07000); }
 
@@ -385,10 +385,9 @@
   max-width: 260px;
 }
 
-/* FAQ filter — fila en desktop, columna en móvil */
 .faq-admin-filter {
-  display: flex;            /* ← flex en lugar de grid */
-  flex-direction: row;      /* ← fila por defecto */
+  display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
   gap: var(--space-4);
   margin-bottom: var(--space-4);
@@ -415,17 +414,15 @@
   overflow-x: auto;
   border-radius: var(--radius-md);
   -webkit-overflow-scrolling: touch;
-  /* Asegura que la tabla use todo el ancho disponible */
   width: 100%;
 }
 .admin-table {
   width: 100%;
   border-collapse: collapse;
   font-size: var(--text-sm);
-  /* min-width evita que las columnas se colapsen en pantallas pequeñas
-     pero la tabla sigue expandiéndose al 100% en pantallas grandes */
-  min-width: 520px;
-  table-layout: auto;   /* ← el navegador distribuye el ancho según contenido */
+  /* Bajado de 520px a 460px para reducir scroll horizontal en móvil chico */
+  min-width: 460px;
+  table-layout: auto;
 }
 .admin-table thead tr {
   background: var(--uabc-verde);
@@ -448,7 +445,6 @@
   vertical-align: middle;
 }
 .admin-table tbody tr { transition: background 140ms ease; }
-/* Fallback hover para Safari < 16.4 */
 .admin-table tbody tr:hover { background: rgba(26,107,42,0.04); }
 @supports (background: color-mix(in oklch, red 10%, blue)) {
   .admin-table tbody tr:hover { background: color-mix(in oklch, var(--uabc-verde) 4%, transparent); }
@@ -456,11 +452,9 @@
 .admin-table tbody tr:last-child td { border-bottom: none; }
 .row--muted td { color: var(--color-text-muted); }
 
-/* Columna Pregunta: ocupa el mayor espacio disponible */
 .admin-table td:first-child,
-.admin-table th:first-child { width: 1%; white-space: nowrap; } /* # */
+.admin-table th:first-child { width: 1%; white-space: nowrap; }
 
-/* Para la tabla FAQ: la columna Pregunta y Respuesta se expanden */
 #tabla-faq-body td:nth-child(2),
 #section-faq .admin-table th:nth-child(2) {
   width: 30%;
@@ -479,7 +473,6 @@
   text-overflow: ellipsis;
 }
 
-/* Acciones */
 .table-actions { display: flex; gap: var(--space-2); align-items: center; }
 .btn-icon {
   display: flex;
@@ -487,6 +480,9 @@
   justify-content: center;
   width: 34px;
   height: 34px;
+  /* Área táctil explícita mayor al elemento visual */
+  min-width: 44px;
+  min-height: 44px;
   border-radius: var(--radius-sm);
   background: none;
   border: 1px solid var(--color-border);
@@ -512,7 +508,6 @@
   font-family: var(--font-display);
   white-space: nowrap;
 }
-/* Fallbacks rgba Safari < 16.4 */
 .badge--green { background: rgba(26,107,42,0.15); color: var(--uabc-verde); }
 .badge--gold  { background: rgba(200,151,43,0.25); color: var(--uabc-dorado-dark, #a07000); }
 .badge--gray  { background: rgba(0,0,0,0.06); color: var(--color-text-muted); }
@@ -540,7 +535,7 @@
 ══════════════════════════════ */
 .events-admin-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
   gap: var(--space-5);
 }
 .event-admin-card {
@@ -559,15 +554,14 @@
 .event-admin-img {
   width: 100%;
   aspect-ratio: 16 / 9;
-  object-fit: cover;        /* ← cubre el área sin deformarse */
+  object-fit: cover;
   display: block;
   background-color: var(--uabc-verde);
   flex-shrink: 0;
 }
 
-/* Soporte para img con background (modo antiguo) */
 .event-admin-img[style*="background-image"] {
-  background-size: cover;   /* ← cover en lugar de contain */
+  background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
 }
@@ -577,7 +571,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  flex: 1;                  /* ← ocupa el espacio restante de la tarjeta */
+  flex: 1;
 }
 .event-admin-top {
   display: flex;
@@ -595,7 +589,6 @@
   font-size: var(--text-xs);
   color: var(--color-text-muted);
   max-width: none;
-  /* Evita que el UUID largo rompa el layout */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -604,7 +597,7 @@
   display: flex;
   gap: var(--space-2);
   flex-wrap: wrap;
-  margin-top: auto;         /* ← empuja los botones al fondo */
+  margin-top: auto;
   padding-top: var(--space-2);
 }
 .event-admin-actions .btn { flex: 1 1 auto; justify-content: center; min-width: 80px; }
@@ -714,7 +707,7 @@
 .reminder-info span { max-width: none; }
 
 /* ══════════════════════════════
-   BOTÓN ELIMINAR (hover rojo)
+   BOTÓN ELIMINAR
 ══════════════════════════════ */
 .btn-delete-hover:hover {
   background-color: #ffebee !important;
@@ -724,52 +717,40 @@
 
 /* ══════════════════════════════
    MODALES EN EL PANEL ADMIN
-   Overrides específicos para los modales dentro del contexto admin.
-   La estructura flex (header / body scroll / footer sticky) viene de
-   components.css — aquí solo ajustamos tamaños y comportamientos propios
-   del panel.
 ══════════════════════════════ */
 
-/* Modal de evento (crear/editar) — más ancho para acomodar form-row de 2 columnas */
 .modal--evento   { max-width: 640px; }
 .modal--faq      { max-width: 600px; }
 .modal--asistente{ max-width: 480px; }
 .modal--reminder { max-width: 440px; }
 
-/* form-row dentro de modales admin: 2 columnas en desktop */
 .modal .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-4);
 }
 
-/* Hijo único en form-row ocupa todo el ancho */
 .modal .form-row > *:only-child,
 .modal .form-row > input[type="hidden"] ~ * {
   grid-column: 1 / -1;
 }
 
-/* form-group: separación label→input consistente */
 .modal .form-group {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
 
-/* Textarea en modales — altura mínima cómoda */
 .modal textarea.form-input {
   min-height: 96px;
   resize: vertical;
 }
 
-/* Inputs y selects en el admin: previene zoom en iOS */
 .admin-body .form-input,
 .admin-body .form-select {
   font-size: 16px;
 }
 
-/* ── Separador visual entre secciones del form ──
-   Útil cuando el modal tiene muchos campos y se agrupan por tema */
 .modal-section-divider {
   border: none;
   border-top: 1px solid var(--color-divider);
@@ -786,11 +767,12 @@
 
 /* ══════════════════════════════
    RESPONSIVE · MÓVIL (≤ 900px)
-   — El sidebar ya se maneja arriba en su bloque propio.
-   — Aquí solo ajustes de layout del contenido principal.
 ══════════════════════════════ */
 @media (max-width: 900px) {
-  .admin-main { padding: var(--space-4) var(--space-4); }
+  .admin-main {
+    padding: var(--space-4) var(--space-4);
+    padding-bottom: max(var(--space-4), env(safe-area-inset-bottom, var(--space-4)));
+  }
 
   .admin-section-header {
     flex-direction: column;
@@ -810,19 +792,16 @@
   .table-filters { flex-direction: column; gap: var(--space-3); }
   .table-filters .form-select { max-width: 100%; flex: 1 1 100%; }
 
-  /* FAQ filter: columna en móvil */
   .faq-admin-filter { flex-direction: column; gap: var(--space-3); }
   .faq-admin-filter > div { max-width: 100%; flex: 1 1 100%; }
 
   .events-admin-grid { grid-template-columns: 1fr; }
   .qr-layout { grid-template-columns: 1fr; gap: var(--space-4); }
 
-  /* form-row en modales admin → columna única en móvil */
   .modal .form-row {
     grid-template-columns: 1fr;
   }
 
-  /* Modales admin: mismas restricciones flotantes que en components.css */
   .modal--evento,
   .modal--faq,
   .modal--asistente,
@@ -850,7 +829,6 @@
   .admin-card-header { flex-direction: column; align-items: flex-start; }
   .admin-card-header .btn { width: 100%; justify-content: center; }
 
-  /* Tabla: reduce padding en celdas para ganar espacio */
   .admin-table th,
   .admin-table td { padding: var(--space-2) var(--space-3); }
 
@@ -863,12 +841,11 @@
   .event-admin-actions { flex-direction: column; }
   .event-admin-actions .btn { width: 100%; }
 
-  /* UUID en tarjetas de evento: se corta con ellipsis */
   .event-admin-meta { max-width: 100%; }
 }
 
 /* ══════════════════════════════
-   RESPONSIVE · 480px — KPI tarjetas en columna
+   RESPONSIVE · 480px — KPI flex compacto
 ══════════════════════════════ */
 @media (max-width: 480px) {
   .kpi-grid {
@@ -890,21 +867,38 @@
 ══════════════════════════════ */
 @media (max-width: 400px) {
   .kpi-grid { grid-template-columns: 1fr; }
-  .admin-main { padding: var(--space-3); }
+  .admin-main {
+    padding: var(--space-3);
+    padding-bottom: max(var(--space-3), env(safe-area-inset-bottom, var(--space-3)));
+  }
 
-  /* Sidebar header: reduce padding para que el título no se corte */
   .sidebar-header {
     padding: var(--space-4) var(--space-3);
     gap: var(--space-2);
   }
   .sidebar-logo { gap: var(--space-2); }
   .sidebar-logo-title { font-size: var(--text-xs); }
-  /* Oculta el subtexto — libera espacio para el título */
   .sidebar-logo-sub { display: none; }
 }
 
 /* ══════════════════════════════
-   RESPONSIVE · 390px — KPI 1 columna
+   RESPONSIVE · 360px — sidebar más compacto
+══════════════════════════════ */
+@media (max-width: 360px) {
+  /* Sidebar más estrecho para dejar contexto del overlay visible */
+  .admin-sidebar { width: 220px; }
+  .admin-topbar-title { font-size: var(--text-xs); }
+  /* KPI en 1 columna con menos padding */
+  .kpi-grid { grid-template-columns: 1fr; gap: var(--space-2); }
+  .kpi-card { padding: var(--space-2); flex-direction: row; }
+  .kpi-value { font-size: var(--text-sm); }
+  /* Tabla: comprime al máximo */
+  .admin-table th,
+  .admin-table td { padding: var(--space-1) var(--space-2); font-size: var(--text-xs); }
+}
+
+/* ══════════════════════════════
+   RESPONSIVE · 390px — KPI 1 columna (legacy)
 ══════════════════════════════ */
 @media (max-width: 390px) {
   .kpi-grid { grid-template-columns: 1fr; }

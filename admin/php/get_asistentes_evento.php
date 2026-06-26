@@ -13,10 +13,18 @@ if (isset($_GET['evento_id'])) {
         $nombreEvento = $evento ? $evento['nombre'] : 'Participantes del Evento';
         
         // 2. OBTENER LOS ASISTENTES (Tu consulta original intacta)
-        $sql = "SELECT r.*, 
-                       cp.nombre as campus_nombre, 
-                       f.nombre as facultad_nombre, 
-                       cr.nombre as carrera_nombre
+        $sql = "SELECT r.id, r.nombre, r.apellidos, r.correo,
+                       cp.nombre AS campus_nombre,
+                       f.nombre  AS facultad_nombre,
+                       cr.nombre AS carrera_nombre,
+                       r.facultad_otra,
+                       r.carrera_otra,
+                       r.generacion,
+                       r.tipo_asistente,
+                       r.correo_enviado,
+                       r.asistencia,
+                       r.necesidad_movilidad,
+                       r.necesidad_especificacion
                 FROM registro_asistente r
                 LEFT JOIN campus cp ON r.campus_id = cp.id
                 LEFT JOIN facultad f ON r.facultad_id = f.id

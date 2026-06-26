@@ -55,7 +55,7 @@
 }
 
 .header-logo-img {
-  height: 95px;
+  height: clamp(56px, 9vw, 95px);
   width: auto;
   object-fit: contain;
   display: block;
@@ -298,7 +298,6 @@
   color: var(--uabc-blanco);
 }
 
-/* Contenedor del hero: columna centrada — texto arriba, imagen abajo */
 .hero-section .container {
   display: flex;
   flex-direction: column;
@@ -320,7 +319,7 @@
 }
 
 .hero-alumni-img {
-  width: clamp(120px, 14vw, 180px);
+  width: clamp(80px, 14vw, 180px);
   height: auto;
   filter: drop-shadow(0px 4px 16px rgba(0,0,0,0.35));
 }
@@ -403,7 +402,7 @@
 
 .events-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(320px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
   gap: var(--space-8);
 }
 
@@ -546,8 +545,8 @@
 .faq-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);          /* espacio entre cada item */
-  background: transparent;      /* sin fondo ni borde en el contenedor */
+  gap: var(--space-3);
+  background: transparent;
   border: none;
   overflow: visible;
 }
@@ -560,7 +559,7 @@
   transition: box-shadow 0.18s, border-color 0.18s;
 }
 .faq-item:last-child {
-  border-bottom: 1px solid var(--color-border); /* ya no necesita resetear nada */
+  border-bottom: 1px solid var(--color-border);
 }
 .faq-item:hover {
   border-color: var(--uabc-verde);
@@ -608,7 +607,7 @@
 }
 
 .faq-trigger[aria-expanded="true"] {
-  background: rgba(26, 107, 42, 0.05); /* fondo muy sutil al abrir */
+  background: rgba(26, 107, 42, 0.05);
   border-bottom: 1px solid var(--color-divider);
 }
 
@@ -663,6 +662,8 @@
   background: var(--uabc-verde-oscuro);
   color: rgba(255,255,255,0.7);
   padding-block: var(--space-8);
+  /* safe-area para dispositivos con home indicator */
+  padding-bottom: calc(var(--space-8) + env(safe-area-inset-bottom, 0px));
   margin-top: var(--space-12);
 }
 
@@ -707,25 +708,9 @@
 
 
 /* =====================================================
-   ██████╗ SISTEMA DE MODALES — v2
-   Filosofía:
-   · Siempre flotantes — nunca full-screen en ningún breakpoint
-   · Backdrop con blur suave para dar profundidad sin abrumar
-   · Animación de escala+opacidad en desktop, deslizamiento sutil en móvil
-   · Header sticky con borde dorado de acento UABC
-   · Scroll interno limpio con fade-out gradiente inferior
-   · Focus trap, aria-modal, Escape para cerrar
-   ·
-   · z-index map (de menor a mayor):
-   ·   .site-header          100   (header del sitio público)
-   ·   .admin-topbar          10   (topbar dentro del flujo normal del admin)
-   ·   .sidebar-overlay      400   (overlay que tapa el contenido al abrir sidebar)
-   ·   .admin-sidebar         500  (sidebar en móvil: fixed encima del overlay)
-   ·   .modal-overlay        1000  (modal siempre encima de TODO)
-   ·   .skip-link            9999  (accesibilidad, siempre al frente)
+   SISTEMA DE MODALES — v2
    ===================================================== */
 
-/* ── Keyframes ── */
 @keyframes modal-in {
   from { opacity: 0; transform: scale(0.96) translateY(8px); }
   to   { opacity: 1; transform: scale(1)    translateY(0); }
@@ -737,12 +722,6 @@
 @keyframes overlay-in  { from { opacity: 0; } to { opacity: 1; } }
 @keyframes overlay-out { from { opacity: 1; } to { opacity: 0; } }
 
-/* ── Overlay ──
-   z-index: 1000 → supera al sidebar (500) y su overlay (400) en todos los casos
-   position: fixed con inset:0 funciona correctamente solo cuando
-   NO hay un ancestro con transform, filter, will-change o perspective.
-   El fix en admin-body (quitar overflow:hidden) garantiza esto.
-*/
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -751,6 +730,9 @@
   align-items: center;
   justify-content: center;
   padding: var(--space-5) var(--space-4);
+  /* safe-area para notch/island en iOS y Android */
+  padding-top: max(var(--space-5), env(safe-area-inset-top, var(--space-5)));
+  padding-bottom: max(var(--space-5), env(safe-area-inset-bottom, var(--space-5)));
   background: rgba(10, 26, 14, 0.62);
   -webkit-backdrop-filter: blur(6px) saturate(1.1);
   backdrop-filter: blur(6px) saturate(1.1);
@@ -760,7 +742,6 @@
 
 .modal-overlay[hidden] { display: none; }
 
-/* Estado de salida — JS agrega .is-closing */
 .modal-overlay.is-closing {
   animation: overlay-out 0.18s ease both;
 }
@@ -768,7 +749,6 @@
   animation: modal-out 0.18s ease both;
 }
 
-/* ── Modal base ── */
 .modal {
   background: var(--color-surface);
   border-radius: var(--radius-xl);
@@ -787,11 +767,9 @@
   border: 1px solid rgba(255,255,255,0.09);
 }
 
-/* Tamaños */
 .modal--sm   { max-width: 420px; }
 .modal--info { max-width: 660px; }
 
-/* ── Header ── */
 .modal-header {
   display: flex;
   align-items: center;
@@ -804,7 +782,6 @@
   background: var(--color-surface);
 }
 
-/* Línea de acento dorado en el borde inferior del header */
 .modal-header::after {
   content: '';
   position: absolute;
@@ -833,13 +810,15 @@
   -webkit-box-orient: vertical;
 }
 
-/* Botón cerrar — circular, elegante */
 .modal-close {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
+  /* Área táctil mínima garantizada aunque el elemento sea 36px */
+  min-width: 44px;
+  min-height: 44px;
   border-radius: var(--radius-full);
   border: none;
   background: transparent;
@@ -863,7 +842,6 @@
   transform: rotate(90deg) scale(0.9);
 }
 
-/* ── Cuerpo scrollable ── */
 .modal-body {
   padding: var(--space-6);
   display: flex;
@@ -887,7 +865,6 @@
   );
 }
 
-/* Si el body tiene footer, quitar el fade inferior del body */
 .modal:has(.modal-footer) .modal-body {
   mask-image: none;
   -webkit-mask-image: none;
@@ -898,7 +875,6 @@
   text-align: center;
 }
 
-/* ── Footer sticky ── */
 .modal-footer {
   display: flex;
   justify-content: flex-end;
@@ -910,7 +886,6 @@
   background: var(--color-surface);
 }
 
-/* ── Contenido específico de modal de evento ── */
 .modal-event-banner {
   width: 100%;
   aspect-ratio: 4 / 1;
@@ -944,10 +919,6 @@
   display: block;
 }
 
-/* ── Highlights: fecha y ubicación ──
-   align-items: stretch → ambas tarjetas crecen a la misma altura
-   aunque una tenga más texto, mantienen simetría visual.
-*/
 .info-highlights {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -983,11 +954,6 @@
   text-overflow: ellipsis;
 }
 
-/* Texto completo — sin truncar.
-   word-break: break-word evita overflow en ubicaciones muy largas.
-   Las dos tarjetas se alinean en altura gracias a align-items: stretch
-   en el grid padre (.info-highlights).
-*/
 .info-highlight-value {
   font-size: var(--text-sm);
   font-weight: 500;
@@ -1088,7 +1054,6 @@
   transition: opacity 0.18s;
 }
 
-/* ── Validación ── */
 .form-input-wrap {
   position: relative;
   display: flex;
@@ -1148,7 +1113,6 @@
 .form-error:not(:empty) + .form-hint,
 .form-group:has(.form-error:not(:empty)) .form-hint { display: none; }
 
-/* ── Confirmación ── */
 .confirm-icon { color: var(--color-success); margin-bottom: var(--space-2); }
 .confirm-msg {
   font-size: var(--text-base);
@@ -1191,7 +1155,7 @@
   .header-center { padding-inline: 180px; }
   .events-grid { gap: var(--space-5); }
   .modal--info { max-width: 600px; }
-  .hero-alumni-img { width: clamp(100px, 12vw, 140px); }
+  .hero-alumni-img { width: clamp(80px, 12vw, 140px); }
 }
 
 /* =====================================================
@@ -1201,8 +1165,9 @@
   .header-inner   { padding: var(--space-2) var(--space-4); min-height: 60px; }
   .header-left    { left: var(--space-4); gap: var(--space-2); }
   .header-right   { right: var(--space-4); gap: var(--space-2); }
-  .header-logo-img { height: 75px; }
-  .header-unisversity { display: none; }
+  .header-logo-img { height: 64px; }
+  /* Fix de typo: era .header-unisversity (erróneo) */
+  .header-university { display: none; }
   .header-center  { padding-inline: 0; }
   .header-dept {
     font-size: var(--text-xs);
@@ -1221,14 +1186,13 @@
   .mobile-nav     { display: block; }
   .container      { padding-inline: var(--space-4); }
 
-  /* Hero en móvil: columna centrada */
   .hero-section   { padding-block: var(--space-12) var(--space-10); }
   .hero-section .container {
     gap: var(--space-6);
   }
   .hero-card      { text-align: center; max-width: 100%; }
-  .hero-desc      { margin-inline: auto; }
-  .hero-alumni-img { width: 100px; }
+  .hero-desc      { margin-inline: auto; max-width: 44ch; }
+  .hero-alumni-img { width: clamp(70px, 18vw, 110px); }
 
   .hero-title     { font-size: var(--text-xl); }
   .hero-desc      { font-size: var(--text-sm); }
@@ -1246,12 +1210,10 @@
   .site-footer    { padding-block: var(--space-5); margin-top: var(--space-8); }
   .footer-copy    { font-size: var(--text-xs); text-align: center; }
 
-  /* ── MODALES EN MÓVIL
-     Siempre flotantes, nunca full-screen.
-     Centrados con margen lateral, máximo 88vh → siempre queda contexto visible detrás.
-  ── */
   .modal-overlay {
-    padding: var(--space-4);
+    padding: var(--space-3);
+    padding-top: max(var(--space-3), env(safe-area-inset-top, var(--space-3)));
+    padding-bottom: max(var(--space-3), env(safe-area-inset-bottom, var(--space-3)));
     align-items: center;
     justify-content: center;
   }
@@ -1268,7 +1230,7 @@
   .modal--info { max-width: 480px; }
 
   .modal-header { padding: var(--space-4) var(--space-5); }
-  .modal-title { font-size: var(--text-base); }
+  .modal-title  { font-size: var(--text-base); }
 
   .modal-body  { padding: var(--space-4) var(--space-5); gap: var(--space-4); }
 
@@ -1279,8 +1241,12 @@
   }
   .modal-footer .btn { width: 100%; justify-content: center; }
 
-  /* En móvil los highlights ya van en columna simple (1fr),
-     así que la simetría no aplica — cada item ocupa todo el ancho */
+  /* Modal con un solo botón: no necesita columna */
+  .modal-footer:has(.btn:only-child) {
+    flex-direction: row;
+  }
+  .modal-footer:has(.btn:only-child) .btn { width: auto; }
+
   .info-highlights { grid-template-columns: 1fr; gap: var(--space-2); align-items: unset; }
   .info-banner { aspect-ratio: 4 / 3; }
   .form-row { grid-template-columns: 1fr; }
@@ -1304,6 +1270,8 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+  /* event-card-img más generosa en portrait para mostrar más contenido */
+  .event-card-img { aspect-ratio: 5 / 2; }
   .hero-title  { font-size: var(--text-lg); }
   .events-empty { padding: var(--space-10) var(--space-4); }
 
@@ -1317,19 +1285,41 @@
    RESPONSIVE – EXTRA PEQUEÑO (≤ 400px)
    ===================================================== */
 @media (max-width: 400px) {
+  .container { padding-inline: var(--space-3); }
   .header-dept { display: flex; }
-  .modal { width: calc(100% - 16px); }
+  .modal {
+    width: calc(100% - 16px);
+  }
+  .modal-overlay {
+    padding: var(--space-2);
+    padding-top: max(var(--space-2), env(safe-area-inset-top, var(--space-2)));
+    padding-bottom: max(var(--space-2), env(safe-area-inset-bottom, var(--space-2)));
+  }
 }
 
 /* =====================================================
-   RESPONSIVE – MUY PEQUEÑO (≤ 320px)
+   RESPONSIVE – MUY PEQUEÑO (≤ 360px)
+   ===================================================== */
+@media (max-width: 360px) {
+  .container { padding-inline: var(--space-3); }
+  .hero-title { font-size: var(--text-base); }
+  .hero-desc  { font-size: var(--text-xs); }
+  .btn-lg { font-size: var(--text-xs); padding: var(--space-3) var(--space-4); }
+  .modal-header { padding: var(--space-3) var(--space-4); }
+  .modal-body  { padding: var(--space-3) var(--space-4); }
+  .modal-footer { padding: var(--space-3) var(--space-4); }
+}
+
+/* =====================================================
+   RESPONSIVE – LEGACY (≤ 320px)
    ===================================================== */
 @media (max-width: 320px) {
   .header-dept { display: none; }
+  .hero-alumni-img { display: none; }
 }
 
 /* =====================================================
-   REDUCED MOTION — Sin animaciones de modal
+   REDUCED MOTION
    ===================================================== */
 @media (prefers-reduced-motion: reduce) {
   .modal, .modal-overlay, .modal-overlay.is-closing, .modal-overlay.is-closing .modal {

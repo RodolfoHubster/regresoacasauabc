@@ -52,7 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
       .then(res => res.json())
       .then(result => {
         if (result.status === 'success') {
-          allFaqsData = result.data;
+          // Filtrar las preguntas ocultas
+          allFaqsData = result.data.filter(f => f.oculto == 0);
           renderMainFaqs('Todos'); // Renderizar todas al inicio
         } else {
           faqListContainer.innerHTML = '<p style="text-align:center; color:var(--color-text-muted);">No se pudieron cargar las preguntas.</p>';

@@ -193,9 +193,10 @@ function openModalInfo(id) {
         fetch(faqApiRuta)
           .then(res => res.json())
           .then(result => {
-            if (result.status === 'success' && result.data && result.data.length > 0) {
+            const activas = result.data ? result.data.filter(f => f.oculto == 0) : [];
+            if (result.status === 'success' && activas.length > 0) {
               faqList.innerHTML = '';
-              result.data.forEach((faq, index) => {
+              activas.forEach((faq, index) => {
                 const faqHtml = `
                   <div class="faq-item">
                     <button class="faq-trigger" aria-expanded="false" onclick="toggleModalFaq('modal-faq-${index}')">

@@ -1,4 +1,15 @@
-<?php include 'php/auth_check.php'; ?>
+<?php 
+include 'php/auth_check.php'; 
+require_once 'php/conexion.php';
+
+try {
+    $stmtEventos = $conexion->query("SELECT id, nombre FROM evento ORDER BY fecha DESC, id DESC");
+    $todosEventos = $stmtEventos->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $todosEventos = [];
+}
+$currentEventoId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+?>
 
 <!DOCTYPE html>
 <html lang="es">
@@ -8,63 +19,68 @@
   <title>Participantes del Evento - UABC</title>
   <link rel="stylesheet" href="../assets/css/base.css">
   <link rel="stylesheet" href="../assets/css/style.css">
+  <link rel="stylesheet" href="../assets/css/components.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
   <link rel="stylesheet" href="../assets/css/participantes.css">
   <link rel="stylesheet" href="../assets/css/toast.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    /* Estilos para el sistema de pestañas y módulo de estadísticas */
-    .tabs-nav { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #e0e0e0; padding-bottom: 10px; }
-    .tab-btn { padding: 10px 20px; border: none; background: #e0e0e0; color: #333; font-weight: 600; border-radius: 6px; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; gap: 8px; }
-    .tab-btn.active { background: #00723F; color: white; }
-    .stats-container { display: flex; flex-direction: column; gap: 20px; }
-    .chart-wrapper { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); height: 450px; display: flex; flex-direction: column; }
-    .chart-scroll-area { flex-grow: 1; width: 100%; overflow-y: auto; overflow-x: hidden; padding-right: 10px; }
-    .faculty-table-wrapper { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .table-scroll-y { max-height: 300px; overflow-y: auto; border: 1px solid #eee; border-radius: 6px; }
-    .search-subgroup { margin-bottom: 15px; display: flex; flex-direction: column; gap: 5px; }
-    .search-subgroup input { padding: 8px 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-    .mini-charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; width: 100%; }
-    .mini-chart { height: 300px; padding: 15px; display: flex; align-items: center; justify-content: center; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-    .mini-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    .mini-table th, .mini-table td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
-    .mini-table th { background-color: #f8f9fa; font-weight: 600; color: #002855; }
-    .mini-table tbody tr:hover { background-color: #f1f5f9; }
-    .badge-count { background: #002855; color: white; padding: 2px 8px; border-radius: 20px; font-weight: bold; font-size: 12px; }
-  </style>
 </head>
-<body class="admin-body">
+<body class="admin-body body-participantes">
+
+  <?php include 'sidebar.php'; ?>
+
+  <div class="admin-layout">
 
   <header class="p-header">
-    <div class="p-container">
-      <a href="admin.php" class="back-link">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    <div class="p-container p-header-inner">
+      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="admin-sidebar" style="background:none;border:none;color:white;cursor:pointer;flex-shrink:0;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <a href="admin.php" class="back-link" aria-label="Volver al Panel">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         Volver al Panel
       </a>
-      <h1 id="event-title">Participantes</h1>
+      <select id="event-title" class="p-header-title event-selector" onchange="if(this.value) window.location.href='participantes.php?id='+this.value" style="flex:1;min-width:0;background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.3); padding: 0.5rem 1rem; font-size: 1.5rem; font-weight: bold; border-radius: var(--radius-md); outline: none; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=\'2\'><polyline points=\'6 9 12 15 18 9\'/></svg>'); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 3rem;">
+        <option value="" style="background: var(--uabc-verde); color: white;">-- Cambiar de Evento --</option>
+        <?php foreach($todosEventos as $ev): ?>
+          <option value="<?= $ev['id'] ?>" style="background: var(--uabc-verde); color: white;" <?= $ev['id'] == $currentEventoId ? 'selected' : '' ?>>
+            <?= htmlspecialchars($ev['nombre']) ?>
+          </option>
+        <?php endforeach; ?>
+      </select>
     </div>
   </header>
 
-  <main class="p-container">
+  <main class="p-container p-main">
 
-    <div class="tabs-nav">
-      <button class="tab-btn active" id="tab-lista" onclick="switchTab('lista')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    <nav class="tabs-nav" role="tablist" aria-label="Secciones">
+      <button class="tab-btn active" id="tab-lista" role="tab" aria-selected="true" aria-controls="content-lista" onclick="switchTab('lista')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
+          <line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
         Lista de Asistentes
       </button>
-      <button class="tab-btn" id="tab-stats" onclick="switchTab('stats')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <button class="tab-btn" id="tab-stats" role="tab" aria-selected="false" aria-controls="content-stats" onclick="switchTab('stats')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <line x1="18" y1="20" x2="18" y2="10"/>
+          <line x1="12" y1="20" x2="12" y2="4"/>
+          <line x1="6" y1="20" x2="6" y2="14"/>
+        </svg>
         Estadísticas y Gráficas
       </button>
-    </div>
+    </nav>
 
+    <!-- ── LISTA ── -->
     <div id="content-lista">
       <div class="filters-bar card">
         <div class="filter-group">
           <label class="filter-label" for="search-nombre">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             Buscar
           </label>
-          <input class="filter-input" type="search" id="search-nombre" placeholder="Nombre o correo..." autocomplete="off">
+          <input class="filter-input" type="search" id="search-nombre" placeholder="Nombre o correo…" autocomplete="off">
         </div>
 
         <div class="filter-group">
@@ -97,20 +113,35 @@
         </div>
 
         <div class="filter-actions">
-          <div class="filter-count"><span id="result-count">0</span> registros visibles &nbsp;|&nbsp; <strong id="total-count">0</strong> total en el evento</div>
+          <div class="filter-count">
+            <span id="result-count">0</span> registros visibles &nbsp;|&nbsp;
+            <strong id="total-count">0</strong> total en el evento
+          </div>
           <div class="filter-buttons">
+            <button class="btn-icon" onclick="abrirModalParticipante()" style="color: var(--uabc-verde); border-color: var(--uabc-verde); font-weight: bold;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+              Nuevo
+            </button>
             <button class="btn-icon" id="btn-exportar-excel" title="Exportar Excel" aria-label="Exportar a Excel">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               Excel
             </button>
             <button class="btn-icon" id="btn-imprimir" title="Imprimir tabla" aria-label="Imprimir">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
               Imprimir
             </button>
           </div>
         </div>
       </div>
 
+      <!-- Empty state fuera de la filters-bar -->
+      <div class="table-empty" id="table-empty" hidden>
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <p>No se encontraron registros con los filtros aplicados.</p>
+        <button class="btn-ghost" id="btn-clear-filters">Limpiar filtros</button>
+      </div>
+
+      <!-- Skeleton -->
       <div class="admin-table-wrapper card" id="skeleton-wrapper">
         <table class="admin-table skeleton-table" aria-hidden="true">
           <thead>
@@ -133,6 +164,7 @@
         </table>
       </div>
 
+      <!-- Tabla real -->
       <div class="admin-table-wrapper card" id="tabla-wrapper" hidden>
         <table class="admin-table" id="tabla-principal">
           <thead>
@@ -145,6 +177,7 @@
               <th class="sortable" data-col="5">Tipo <span class="sort-icon" aria-hidden="true"><svg class="sort-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l4-4 4 4M16 15l-4 4-4-4"/></svg></span></th>
               <th class="sortable" data-col="6">Estatus <span class="sort-icon" aria-hidden="true"><svg class="sort-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l4-4 4 4M16 15l-4 4-4-4"/></svg></span></th>
               <th class="sortable" data-col="7">QR <span class="sort-icon" aria-hidden="true"><svg class="sort-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 9l4-4 4 4M16 15l-4 4-4-4"/></svg></span></th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody id="tabla-asistentes"></tbody>
@@ -152,72 +185,160 @@
       </div>
     </div>
 
-    <div id="content-stats" style="display: none;">
-      <div class="stats-container">
-        
-        <div class="faculty-table-wrapper card">
-          <div class="search-subgroup">
-            <label for="search-facultad-input" style="font-weight: 600; color: #002855;">Filtrar por Facultad:</label>
-            <input type="text" id="search-facultad-input" placeholder="Escribe el nombre de la facultad..." autocomplete="off">
-          </div>
-          
-          <div class="table-scroll-y">
-            <table class="mini-table">
-              <thead>
-                <tr>
-                  <th>Facultad / Unidad Académica</th>
-                  <th style="text-align: center; width: 100px;">Registros</th>
-                </tr>
-              </thead>
-              <tbody id="tabla-resumen-facultades">
-                </tbody>
-            </table>
-          </div>
-        </div>
+    <!-- ── ESTADÍSTICAS ── -->
+    <div id="content-stats" hidden>
+      <div class="card">
+        <div class="stats-container">
 
-        <div class="mini-charts-grid">
-          <div class="mini-chart"><canvas id="chart-estatus"></canvas></div>
-          <div class="mini-chart"><canvas id="chart-qr"></canvas></div>
-        </div>
-
-        <div class="chart-wrapper card">
-          <div class="chart-scroll-area">
-            <div id="chart-container-inner" style="position: relative; width: 100%;">
-              <canvas id="chart-facultades"></canvas>
+          <div class="stats-card-inner">
+            <div class="stats-card-header">
+              <label class="filter-label" for="search-facultad-input">Filtrar por Facultad</label>
+              <input type="text" id="search-facultad-input" class="filter-input" placeholder="Escribe el nombre de la facultad…" autocomplete="off">
+            </div>
+            <div class="table-scroll-y">
+              <table class="mini-table">
+                <thead>
+                  <tr>
+                    <th>Facultad / Unidad Académica</th>
+                    <th class="col-center col-narrow">Registros</th>
+                  </tr>
+                </thead>
+                <tbody id="tabla-resumen-facultades"></tbody>
+              </table>
             </div>
           </div>
+
+          <div class="mini-charts-grid">
+            <div class="card mini-chart"><canvas id="chart-estatus"></canvas></div>
+            <div class="card mini-chart"><canvas id="chart-qr"></canvas></div>
+          </div>
+
+          <div class="chart-wrapper">
+            <div class="chart-scroll-area">
+              <div id="chart-container-inner" style="position:relative;width:100%;">
+                <canvas id="chart-facultades"></canvas>
+              </div>
+            </div>
+          </div>
+
         </div>
-
       </div>
-    </div>
-
-    <div class="table-empty" id="table-empty" hidden>
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-      <p>No se encontraron registros con los filtros aplicados.</p>
-      <button class="btn-ghost" id="btn-clear-filters">Limpiar filtros</button>
     </div>
 
   </main>
 
+    <!-- Modal Participante -->
+    <div class="modal-overlay" id="modal-participante" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-participante" hidden>
+      <div class="modal modal--lg" style="max-width: 600px;">
+        <div class="modal-header">
+          <h3 class="modal-title" id="titulo-modal-participante">Nuevo Participante</h3>
+          <button class="modal-close" aria-label="Cerrar modal" onclick="closeAdminModal('modal-participante')">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="form-participante" class="admin-form">
+            <input type="hidden" id="part-id" name="id" value="">
+            
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label for="part-nombre" class="form-label">Nombre *</label>
+                <input type="text" id="part-nombre" name="nombre" class="form-input" required>
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label for="part-apellidos" class="form-label">Apellidos *</label>
+                <input type="text" id="part-apellidos" name="apellidos" class="form-input" required>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="part-correo" class="form-label">Correo Electrónico *</label>
+              <input type="email" id="part-correo" name="correo" class="form-input" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label for="part-tipo" class="form-label">Tipo Asistente *</label>
+                <select id="part-tipo" name="tipo_asistente" class="form-select" required>
+                  <option value="egresado">Egresado</option>
+                  <option value="estudiante">Estudiante</option>
+                  <option value="docente">Docente</option>
+                  <option value="invitado">Invitado</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label for="part-evento" class="form-label">Evento *</label>
+                <select id="part-evento" name="evento_id" class="form-select" required>
+                  <option value="">Selecciona un evento</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label for="part-campus" class="form-label">Campus</label>
+                <select id="part-campus" name="campus_id" class="form-select">
+                  <option value="">Selecciona campus</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label for="part-facultad" class="form-label">Facultad</label>
+                <select id="part-facultad" name="facultad_id" class="form-select">
+                  <option value="">Selecciona facultad</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group" style="flex:1;">
+                <label for="part-carrera" class="form-label">Carrera</label>
+                <select id="part-carrera" name="carrera_id" class="form-select">
+                  <option value="">Selecciona carrera</option>
+                </select>
+              </div>
+              <div class="form-group" style="flex:1;">
+                <label for="part-generacion" class="form-label">Generación</label>
+                <input type="text" id="part-generacion" name="generacion" class="form-input" placeholder="Ej. 2015-2019">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="part-asistencia" class="form-label">Estatus de Asistencia</label>
+              <select id="part-asistencia" name="asistencia" class="form-select">
+                <option value="0">Pendiente</option>
+                <option value="1">Confirmado (Asistió)</option>
+                <option value="2">Cancelado</option>
+              </select>
+            </div>
+
+            <div class="form-actions" style="margin-top: 20px;">
+              <button type="button" class="btn btn-ghost" onclick="closeAdminModal('modal-participante')">Cancelar</button>
+              <button type="submit" class="btn btn-primary" id="btn-submit-participante">Guardar Participante</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
 <script src="../assets/js/toast.js"></script>
+<script src="../assets/js/admin_participante_crud.js"></script>
 <script>
-// Sistema de cambio de pestañas (Tabs)
 function switchTab(tab) {
-  const tabLista = document.getElementById('tab-lista');
-  const tabStats = document.getElementById('tab-stats');
+  const tabLista    = document.getElementById('tab-lista');
+  const tabStats    = document.getElementById('tab-stats');
   const contentLista = document.getElementById('content-lista');
   const contentStats = document.getElementById('content-stats');
 
   if (tab === 'lista') {
-    tabLista.classList.add('active');
-    tabStats.classList.remove('active');
-    contentLista.style.display = 'block';
-    contentStats.style.display = 'none';
+    tabLista.classList.add('active');    tabStats.classList.remove('active');
+    tabLista.setAttribute('aria-selected', 'true');
+    tabStats.setAttribute('aria-selected', 'false');
+    contentLista.hidden = false;        contentStats.hidden = true;
   } else {
-    tabLista.classList.remove('active');
-    tabStats.classList.add('active');
-    contentLista.style.display = 'none';
-    contentStats.style.display = 'block';
+    tabStats.classList.add('active');   tabLista.classList.remove('active');
+    tabStats.setAttribute('aria-selected', 'true');
+    tabLista.setAttribute('aria-selected', 'false');
+    contentStats.hidden = false;        contentLista.hidden = true;
   }
 }
 
@@ -235,8 +356,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let sortCol = -1;
   let sortDir = 'asc';
   let myChartInstance = null;
-  let chartEstatus = null;
-  let chartQR = null;
+  let chartEstatus    = null;
+  let chartQR         = null;
 
   const skeletonWrapper = document.getElementById('skeleton-wrapper');
   const tablaWrapper    = document.getElementById('tabla-wrapper');
@@ -244,12 +365,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const emptyBox        = document.getElementById('table-empty');
   const countEl         = document.getElementById('result-count');
   const totalCountEl    = document.getElementById('total-count');
-
-  const inputNombre = document.getElementById('search-nombre');
-  const selTipo     = document.getElementById('filter-tipo');
-  const selEstatus  = document.getElementById('filter-estatus');
-  const selQr       = document.getElementById('filter-qr');
-  const inputSearchFacultad = document.getElementById('search-facultad-input');
+  const inputNombre     = document.getElementById('search-nombre');
+  const selTipo         = document.getElementById('filter-tipo');
+  const selEstatus      = document.getElementById('filter-estatus');
+  const selQr           = document.getElementById('filter-qr');
+  const inputSearchFac  = document.getElementById('search-facultad-input');
 
   function showSkeleton() { skeletonWrapper.hidden = false; tablaWrapper.hidden = true;  emptyBox.hidden = true; }
   function showTable()    { skeletonWrapper.hidden = true;  tablaWrapper.hidden = false; emptyBox.hidden = true; }
@@ -263,14 +383,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (result.status === 'success') {
         allData = result.data;
         if (result.evento_nombre) {
-          document.getElementById('event-title').textContent = result.evento_nombre;
+          // document.getElementById('event-title').textContent = result.evento_nombre;
+          document.title = result.evento_nombre + ' - Participantes';
           document.title = result.evento_nombre + ' – Participantes';
         }
         if (totalCountEl) totalCountEl.textContent = allData.length;
-        
         renderTable(allData);
-        renderEstadisticasYGrafica(allData); // Generación automática de gráficas y subtotales
-
+        renderEstadisticasYGrafica(allData);
         showToast(`${allData.length} registro(s) cargados`, 'success');
       } else {
         showEmpty();
@@ -292,7 +411,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const facultad = a.facultad_nombre || a.facultad_otra || 'N/A';
       const carrera  = a.carrera_nombre  || a.carrera_otra  || 'N/A';
       const nombre   = `${a.apellidos || ''}, ${a.nombre || ''}`;
-      const estatus  = a.estatus || 'pendiente';
+      
+      let estatus = 'pendiente';
+      if (a.asistencia == 1) estatus = 'confirmado';
+      if (a.asistencia == 2) estatus = 'cancelado';
+      
       const qr       = a.correo_enviado == 1 ? 'enviado' : 'no_enviado';
       const tipo     = a.tipo_asistente || 'N/A';
 
@@ -312,6 +435,14 @@ document.addEventListener('DOMContentLoaded', () => {
         <td data-label="Tipo">${badgeTipo}</td>
         <td data-label="Estatus">${badgeEstatus}</td>
         <td data-label="QR">${badgeQr}</td>
+        <td data-label="Acciones" class="table-actions">
+           <button class="btn-icon" title="Editar" onclick="abrirModalParticipante(${a.id})">
+             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+           </button>
+           <button class="btn-icon" style="color:#d9534f;" title="Eliminar" onclick="eliminarParticipante(${a.id})">
+             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+           </button>
+        </td>
       `;
       tr.dataset.nombre  = nombre.toLowerCase();
       tr.dataset.correo  = (a.correo || '').toLowerCase();
@@ -322,26 +453,43 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // MÓDULO NUEVO: Agrupamiento por facultad, render de gráfica y buscador por facultad
   function renderEstadisticasYGrafica(data) {
-    const conteoFacultad = {};
-    const conteoEstatus = {};
-    const conteoQR = { 'Enviados': 0, 'No Enviados': 0 };
+    const statsContainer = document.getElementById('content-stats');
 
-    // 1. Contar todos los datos
+    // Estado vacío: sin participantes
+    if (!data || data.length === 0) {
+      statsContainer.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4rem 2rem;text-align:center;gap:1rem;">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#c0c0c0" stroke-width="1.5">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+            <circle cx="18" cy="7" r="3" stroke="#c0c0c0" fill="none"/>
+          </svg>
+          <h3 style="margin:0;color:#999;font-size:1.1rem;font-weight:600;">Sin datos para este evento</h3>
+          <p style="margin:0;color:#bbb;font-size:0.875rem;">Aún no hay participantes registrados.<br>Las estadísticas aparecerán aquí cuando haya registros.</p>
+        </div>`;
+      return;
+    }
+
+    const conteoFacultad = {};
+    const conteoEstatus  = {};
+    const conteoQR       = { 'Enviados': 0, 'No Enviados': 0 };
+
     data.forEach(a => {
       const facultad = a.facultad_nombre || a.facultad_otra || 'No especificada';
-      const estatus = cap(a.estatus) || 'Pendiente';
-      const qr = (a.correo_enviado == 1) ? 'Enviados' : 'No Enviados';
+      
+      let estatus = 'Pendiente';
+      if (a.asistencia == 1) estatus = 'Confirmado';
+      if (a.asistencia == 2) estatus = 'Cancelado';
 
+      const qr       = a.correo_enviado == 1 ? 'Enviados' : 'No Enviados';
       conteoFacultad[facultad] = (conteoFacultad[facultad] || 0) + 1;
-      conteoEstatus[estatus] = (conteoEstatus[estatus] || 0) + 1;
+      conteoEstatus[estatus]   = (conteoEstatus[estatus]   || 0) + 1;
       conteoQR[qr]++;
     });
 
     const facultadesOrdenadas = Object.entries(conteoFacultad).sort((a, b) => b[1] - a[1]);
 
-    // 2. Dibujar la tabla resumen interna de facultades
     const tbodyResumen = document.getElementById('tabla-resumen-facultades');
     tbodyResumen.innerHTML = '';
     facultadesOrdenadas.forEach(([facultad, total]) => {
@@ -350,60 +498,52 @@ document.addEventListener('DOMContentLoaded', () => {
       tr.dataset.facultadName = facultad.toLowerCase();
       tr.innerHTML = `
         <td><strong>${facultad}</strong></td>
-        <td style="text-align: center;"><span class="badge-count">${total}</span></td>
+        <td class="col-center"><span class="badge-count">${total}</span></td>
       `;
       tbodyResumen.appendChild(tr);
     });
 
-    // 3. Destruir gráficas previas para evitar superposiciones
     if (myChartInstance) myChartInstance.destroy();
-    if (chartEstatus) chartEstatus.destroy();
-    if (chartQR) chartQR.destroy();
+    if (chartEstatus)    chartEstatus.destroy();
+    if (chartQR)         chartQR.destroy();
 
-    // 4. GRÁFICA: ESTATUS (Dona)
     chartEstatus = new Chart(document.getElementById('chart-estatus').getContext('2d'), {
       type: 'doughnut',
       data: { labels: Object.keys(conteoEstatus), datasets: [{ data: Object.values(conteoEstatus), backgroundColor: ['#00723F', '#F2A900', '#D0D0D0'] }] },
       options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Estatus de Confirmación' } } }
     });
 
-    // 5. GRÁFICA: CÓDIGOS QR (Dona)
     chartQR = new Chart(document.getElementById('chart-qr').getContext('2d'), {
       type: 'doughnut',
       data: { labels: Object.keys(conteoQR), datasets: [{ data: Object.values(conteoQR), backgroundColor: ['#002855', '#D0D0D0'] }] },
       options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Envío de Códigos QR' } } }
     });
 
-    // 6. GRÁFICA ORIGINAL: FACULTADES (Barras horizontales)
     const canvas = document.getElementById('chart-facultades');
-    const ctx = canvas.getContext('2d');
-    const labels = facultadesOrdenadas.map(f => f[0].substring(0, 35) + (f[0].length > 35 ? '...' : ''));
+    const labels = facultadesOrdenadas.map(f => f[0].substring(0, 35) + (f[0].length > 35 ? '…' : ''));
     const valores = facultadesOrdenadas.map(f => f[1]);
-
     const alturaIdeal = Math.max(350, facultadesOrdenadas.length * 45);
     document.getElementById('chart-container-inner').style.height = alturaIdeal + 'px';
 
-    myChartInstance = new Chart(ctx, {
+    myChartInstance = new Chart(canvas.getContext('2d'), {
       type: 'bar',
       data: {
-        labels: labels,
+        labels,
         datasets: [{ label: 'Registros', data: valores, backgroundColor: '#00723F', borderColor: '#002855', borderWidth: 1, borderRadius: 4 }]
       },
       options: {
         indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, title: { display: true, text: 'Registros Totales por Unidad Académica', color: '#002855', font: { size: 14, weight: 'bold' }, padding: { bottom: 20 } } },
+        plugins: { legend: { display: false }, title: { display: true, text: 'Registros por Unidad Académica', color: '#002855', font: { size: 14, weight: 'bold' }, padding: { bottom: 20 } } },
         scales: { x: { beginAtZero: true, ticks: { stepSize: 1 } } }
       }
     });
   }
 
-  // Buscador interactivo en vivo de la tabla resumen de facultades
-  if (inputSearchFacultad) {
-    inputSearchFacultad.addEventListener('input', () => {
-      const query = inputSearchFacultad.value.trim().toLowerCase();
-      const rows = document.querySelectorAll('.faculty-row-item');
-      rows.forEach(tr => {
-        tr.hidden = query && !tr.dataset.facultadName.includes(query);
+  if (inputSearchFac) {
+    inputSearchFac.addEventListener('input', () => {
+      const q = inputSearchFac.value.trim().toLowerCase();
+      document.querySelectorAll('.faculty-row-item').forEach(tr => {
+        tr.hidden = q && !tr.dataset.facultadName.includes(q);
       });
     });
   }
@@ -429,15 +569,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   inputNombre.addEventListener('input',  applyFilters);
-  selTipo.addEventListener('change',    applyFilters);
-  selEstatus.addEventListener('change', applyFilters);
-  selQr.addEventListener('change',      applyFilters);
+  selTipo.addEventListener('change',     applyFilters);
+  selEstatus.addEventListener('change',  applyFilters);
+  selQr.addEventListener('change',       applyFilters);
   document.getElementById('btn-clear-filters').addEventListener('click', () => {
     inputNombre.value = selTipo.value = selEstatus.value = selQr.value = '';
     applyFilters();
   });
 
-  // Sort
   document.querySelectorAll('th.sortable').forEach(th => {
     th.addEventListener('click', () => {
       const col = parseInt(th.dataset.col);
@@ -455,17 +594,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Exportar Excel (PhpSpreadsheet)
   document.getElementById('btn-exportar-excel').addEventListener('click', () => {
     window.location.href = `php/exportar_participantes_evento.php?evento_id=${eventoId}`;
   });
 
-  // Imprimir
   document.getElementById('btn-imprimir').addEventListener('click', () => window.print());
 
   function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
 
 });
 </script>
+  </div> <!-- fin admin-layout -->
+  <script src="../assets/js/admin.js"></script>
+  <script src="../assets/js/sidebar.js"></script>
 </body>
 </html>

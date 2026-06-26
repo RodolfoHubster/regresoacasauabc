@@ -12,24 +12,28 @@ const sectionTitles = {
 function showSection(name) {
   // ─── 1. CONTROL INTELIGENTE DE CÁMARA ───
   if (name !== 'qr') {
-      // Si salimos de la pestaña, buscamos el botón de Stop y apagamos la cámara
       const btnStop = document.getElementById('html5-qrcode-button-camera-stop');
       if (btnStop && window.getComputedStyle(btnStop).display !== 'none') {
           btnStop.click();
       }
   } else {
-      // Si entramos a la pestaña QR, creamos el escáner (solo la primera vez)
       if (typeof inicializarLectorQR === 'function') {
           inicializarLectorQR();
       }
   }
 
   // ─── 2. CAMBIO VISUAL DE SECCIONES ───
+  const sec = document.getElementById('section-' + name);
+  if (!sec) {
+      // Estamos en otra página (ej. participantes.php) — ir al panel sin parámetro de sección
+      window.location.href = 'admin.php';
+      return;
+  }
+
   document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
 
-  const sec = document.getElementById('section-' + name);
-  if (sec) sec.classList.add('active');
+  sec.classList.add('active');
 
   const link = document.querySelector('[data-section="' + name + '"]');
   if (link) link.classList.add('active');
@@ -363,8 +367,12 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });   
 // ─── CARGAR ESTADÍSTICAS DEL DASHBOARD ───
-function cargarDashboardStats() {
-  fetch('php/get_dashboard_stats.php')
+function cargarDashboardStats(campus = '') {
+  let url = 'php/get_dashboard_stats.php';
+  if (campus) {
+      url += '?campus=' + encodeURIComponent(campus);
+  }
+  fetch(url)
     .then(response => response.json())
     .then(result => {
       if (result.status === 'success') {
@@ -384,6 +392,15 @@ function cargarDashboardStats() {
     })
     .catch(error => console.error('Error al cargar stats:', error));
 }
+
+// ─── LÓGICA DE FILTRO DE DASHBOARD ───
+function aplicarFiltroDashboard() {
+    const selectCampus = document.getElementById('filtro-campus-dashboard');
+    const campus = selectCampus ? selectCampus.value : '';
+    cargarDashboardStats(campus);
+    cargarDashboardEventos(campus);
+}
+
 
 // ─── CARGAR TABLA DE ASISTENTES (QR ESCANEADO) ───
 // Variable global para guardar a los asistentes sin tener que consultar la BD a cada rato
@@ -412,7 +429,7 @@ function renderTablaAsistentes(datos) {
   tbody.innerHTML = ''; 
 
   if (datos.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No se encontraron registros para este filtro.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center;">No se encontraron registros para este filtro.</td></tr>';
       return;
   }
 
@@ -427,15 +444,19 @@ function renderTablaAsistentes(datos) {
           ? '<span class="badge badge--green">Enviado</span>' 
           : '<span class="badge badge--gold">Pendiente</span>';
           
-      const yaAsistio = parseInt(asistente.asistencia) === 1;
-      const badgeEstatus = yaAsistio 
-          ? '<span class="badge badge--success">Asistió</span>' 
-          : '<span class="badge badge--gray">Registrado</span>';
+      let estatus = 'pendiente';
+      if (asistente.asistencia == 1) estatus = 'confirmado';
+      if (asistente.asistencia == 2) estatus = 'cancelado';
+
+      let badgeEstatus = '<span class="badge badge--warning">Pendiente</span>';
+      if (estatus === 'confirmado') badgeEstatus = '<span class="badge badge--success">Confirmado</span>';
+      if (estatus === 'cancelado') badgeEstatus = '<span class="badge badge--gray">Cancelado</span>';
 
       const nombreEvento = asistente.evento_nombre || 'Evento no asignado';
 
-      // NUEVO: Validamos de dónde viene el nombre de la carrera
+      // NUEVO: Validamos de dónde viene el nombre de la carrera y facultad
       const nombreCarrera = asistente.carrera_nombre || asistente.carrera || asistente.carrera_otra || 'No especificada';
+      const nombreFacultad = asistente.facultad_nombre || asistente.facultad_otra || 'No especificada';
 
       tr.innerHTML = `
           <td>
@@ -446,6 +467,7 @@ function renderTablaAsistentes(datos) {
           </td>
           <td>${asistente.correo}</td>
           <td>${asistente.campus || 'N/A'}</td>
+          <td><small>${nombreFacultad}</small></td>
           <td>
              <span style="font-weight: 600;">${nombreCarrera}</span><br>
              <small style="color: #666;">Gen: ${asistente.generacion || 'N/A'}</small>
@@ -454,6 +476,14 @@ function renderTablaAsistentes(datos) {
           <td><small>${nombreEvento}</small></td>
           <td>${badgeQR}</td>
           <td>${badgeEstatus}</td>
+          <td class="table-actions">
+            <button class="btn-icon" title="Editar" onclick="abrirModalParticipante(${asistente.id})">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="btn-icon btn-icon--danger" title="Eliminar" onclick="eliminarParticipante(${asistente.id})">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+            </button>
+          </td>
       `;
       tbody.appendChild(tr);
   });
@@ -864,16 +894,39 @@ function renderTablaFAQs(datos) {
         return;
     }
 
-    datos.forEach((faq, index) => {
+    const activas = datos.filter(f => f.oculto == 0);
+    const ocultas = datos.filter(f => f.oculto == 1);
+
+    const dibujarFila = (faq, index, array, isOculta) => {
         const tr = document.createElement('tr');
+        if (isOculta) tr.style.opacity = '0.6';
+        
         const nombreEvento = faq.evento_nombre ? `${faq.evento_nombre} (${faq.campus_nombre})` : 'General (Todos)';
         
+        const btnSubir = index > 0 
+            ? `<button class="btn-icon" title="Subir" onclick="moverFaq(${faq.id}, 'subir')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"></polyline></svg></button>` 
+            : `<span style="width:28px;display:inline-block"></span>`;
+            
+        const btnBajar = index < array.length - 1 
+            ? `<button class="btn-icon" title="Bajar" onclick="moverFaq(${faq.id}, 'bajar')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg></button>` 
+            : `<span style="width:28px;display:inline-block"></span>`;
+        
+        const btnOcultar = isOculta 
+            ? `<button class="btn-icon" title="Mostrar" onclick="toggleOcultoFaq(${faq.id}, 0)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>`
+            : `<button class="btn-icon" title="Ocultar" onclick="toggleOcultoFaq(${faq.id}, 1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg></button>`;
+
         tr.innerHTML = `
-            <td>${index + 1}</td>
+            <td>
+                <div style="display:flex; gap:4px; align-items:center;">
+                    ${btnSubir}${btnBajar}
+                    <span style="margin-left:8px;">${faq.orden}</span>
+                </div>
+            </td>
             <td><strong>${faq.pregunta}</strong></td>
             <td><span style="display:inline-block; max-width:250px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${faq.respuesta}">${faq.respuesta}</span></td>
             <td><span class="badge badge--gray">${nombreEvento}</span></td>
             <td class="table-actions">
+                ${btnOcultar}
                 <button class="btn-icon" title="Editar" onclick="openModalFaq(${faq.id})">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 </button>
@@ -883,6 +936,53 @@ function renderTablaFAQs(datos) {
             </td>
         `;
         tbody.appendChild(tr);
+    };
+
+    if (activas.length > 0) {
+        const trHeader = document.createElement('tr');
+        trHeader.innerHTML = '<td colspan="5" style="background:#f0fdf4; font-weight:bold;">Preguntas Activas</td>';
+        tbody.appendChild(trHeader);
+        activas.forEach((faq, idx) => dibujarFila(faq, idx, activas, false));
+    }
+
+    if (ocultas.length > 0) {
+        const trHeader = document.createElement('tr');
+        trHeader.innerHTML = '<td colspan="5" style="background:#fef2f2; font-weight:bold;">Preguntas Ocultas</td>';
+        tbody.appendChild(trHeader);
+        ocultas.forEach((faq, idx) => dibujarFila(faq, idx, ocultas, true));
+    }
+}
+
+function toggleOcultoFaq(id, oculto) {
+    fetch('php/toggle_faq_oculto.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, oculto })
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.status === 'success') {
+            showToast('FAQ actualizada', 'success');
+            cargarFAQs();
+        } else {
+            showToast(res.message, 'error');
+        }
+    });
+}
+
+function moverFaq(id, direccion) {
+    fetch('php/mover_faq.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, direccion })
+    })
+    .then(r => r.json())
+    .then(res => {
+        if (res.status === 'success') {
+            cargarFAQs();
+        } else {
+            showToast(res.message, 'error');
+        }
     });
 }
 
@@ -964,8 +1064,12 @@ function ejecutarEliminarFaq() {
 }
 
 // ─── CARGAR TABLA RESUMEN EN EL DASHBOARD ───
-function cargarDashboardEventos() {
-    fetch('php/get_dashboard_eventos.php')
+function cargarDashboardEventos(campus = '') {
+    let url = 'php/get_dashboard_eventos.php';
+    if (campus) {
+        url += '?campus=' + encodeURIComponent(campus);
+    }
+    fetch(url)
         .then(response => response.json())
         .then(result => {
             if (result.status === 'success') {
@@ -1375,15 +1479,20 @@ function buscarManualQR() {
   }
 
   // NUEVO: Agregamos la condición de que la asistencia NO sea 1
-  const filtrados = asistentesCargados.filter(a => 
-      parseInt(a.asistencia) !== 1 && // <-- ESTA LÍNEA ES LA MAGIA QUE LOS OCULTA
-      (`${a.nombre} ${a.apellidos}`.toLowerCase().includes(query) || 
-      (a.correo && a.correo.toLowerCase().includes(query)))
-  ).slice(0, 5);
+  // Y filtramos para no mostrar de eventos finalizados ("cerrado")
+  const filtrados = asistentesCargados.filter(a => {
+      if (parseInt(a.asistencia) === 1) return false;
+      
+      const eventoAsistente = eventosCargados ? eventosCargados.find(e => e.id == a.evento_id) : null;
+      if (eventoAsistente && eventoAsistente.estado === 'cerrado') return false;
+
+      const fullNombre = `${a.nombre} ${a.apellidos}`.toLowerCase();
+      const correo = (a.correo || '').toLowerCase();
+      return fullNombre.includes(query) || correo.includes(query);
+  }).slice(0, 5);
 
   if (filtrados.length === 0) {
-      // Modificamos ligeramente el texto para que el usuario entienda
-      container.innerHTML = '<small style="color:var(--color-text-muted);">No se encontraron coincidencias o ya ingresaron.</small>';
+      container.innerHTML = '<small style="color:var(--color-text-muted);">No se encontrar coincidencia</small>';
       return;
   }
 
@@ -1398,7 +1507,8 @@ function buscarManualQR() {
       btn.innerHTML = `
           <div style="line-height: 1.3;">
               <strong>${a.nombre} ${a.apellidos}</strong><br>
-              <small style="color:var(--color-text-muted);">${a.correo || 'Sin correo'}</small>
+              <small style="color:var(--color-text-muted);">${a.correo || 'Sin correo'}</small><br>
+              <small style="color:var(--uabc-ocre); font-weight:bold;">Evento: ${a.evento_nombre || 'General'}</small>
           </div>
           <span class="badge badge--green">Dar Acceso</span>
       `;
