@@ -16,6 +16,7 @@
   <link rel="stylesheet" href="../assets/css/toast.css">
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="admin-body">
 
@@ -166,12 +167,18 @@
               <select id="filtro-facultad" class="form-select form-select--sm" aria-label="Filtrar por facultad">
                 <option value="">Todas las facultades</option>
               </select>
+              <select id="filtro-estatus" class="form-select form-select--sm" aria-label="Filtrar por estatus">
+                <option value="">Cualquier Estatus</option>
+                <option value="0">Pendiente</option>
+                <option value="1">Asistió</option>
+                <option value="2">Cancelado</option>
+              </select>
             </div>
             
             <div style="display:flex; gap:10px;">
-              <button class="btn btn-primary btn-sm" onclick="abrirModalParticipante()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>
-                Nuevo
+              <button class="btn btn-primary" onclick="openAdminModal('modal-nuevo-asistente')">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Nuevo Asistente
               </button>
               <button class="btn btn-secondary btn-sm" onclick="exportarExcelAsistentes()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -666,7 +673,7 @@
     <div class="modal-overlay" id="modal-participante" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-participante" hidden>
       <div class="modal modal--lg" style="max-width: 600px;">
         <div class="modal-header">
-          <h3 class="modal-title" id="titulo-modal-participante">Nuevo Participante</h3>
+          <h3 class="modal-title" id="titulo-modal-participante">Editar Participante</h3>
           <button class="modal-close" aria-label="Cerrar modal" onclick="closeAdminModal('modal-participante')">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -754,6 +761,20 @@
         </div>
       </div>
     </div>
+
+    <div class="modal-overlay" id="modal-nuevo-asistente" role="dialog" aria-modal="true" hidden>
+    <div class="modal" style="width: 95%; max-width: 900px; height: 90vh; display: flex; flex-direction: column; padding: 0;">
+      <div class="modal-header" style="padding: 15px 20px; border-bottom: 1px solid #eee;">
+        <h2 class="modal-title">Registrar Nuevo Asistente</h2>
+        <button class="modal-close" onclick="closeAdminModal('modal-nuevo-asistente'); cargarTablaAsistentes();">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" style="flex: 1; padding: 0; overflow: hidden;">
+        <iframe src="../index.html" style="width: 100%; height: 100%; border: none;"></iframe>
+      </div>
+    </div>
+  </div>
 
   <script src="../assets/js/toast.js"></script>
   <script src="../assets/js/admin_participante_crud.js"></script>
