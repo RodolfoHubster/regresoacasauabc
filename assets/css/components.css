@@ -1150,7 +1150,7 @@
 /* =====================================================
    RESPONSIVE – TABLET (≤ 900px)
    ===================================================== */
-@media (max-width: 900px) {
+@media (max-width: 959px) {
   .header-university { font-size: var(--text-xs); }
   .header-center { padding-inline: 180px; }
   .events-grid { gap: var(--space-5); }
@@ -1331,4 +1331,37 @@
   }
   .modal-close:hover  { transform: none; }
   .modal-close:active { transform: none; }
+}
+
+/* =====================================================
+   UTILITIES (Extracted from inline styles)
+   ===================================================== */
+
+.modal-centered {
+  text-align: center;
+  padding: 30px 20px;
+}
+.modal-icon-wrapper {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: center;
+}
+.modal-icon-wrapper.success { color: var(--uabc-verde); }
+.modal-icon-wrapper.error { color: var(--color-error); }
+.modal-text-muted {
+  color: var(--color-text-muted);
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+.btn-block {
+  width: 100%;
+  justify-content: center;
+}
+.form-row {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+.form-row > .form-group {
+  flex: 1;
 }

@@ -16,7 +16,6 @@
   <link rel="stylesheet" href="../assets/css/toast.css">
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="admin-body">
 
@@ -61,6 +60,51 @@
           </div>
         </div>
 
+        <!-- Accesos Rápidos -->
+        <h3 style="font-size: var(--text-base); margin-bottom: var(--space-3); color: var(--color-text);">Accesos Rápidos</h3>
+        <div class="quick-access-grid">
+          <a href="participantes.php" class="quick-access-card">
+            <div class="qa-icon" style="background: rgba(0,114,63,0.1); color: var(--uabc-verde);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+            </div>
+            <div class="qa-info">
+              <span class="qa-title">Ver Participantes</span>
+              <span class="qa-desc">Explorar y filtrar todos los registros</span>
+            </div>
+          </a>
+
+          <button type="button" onclick="showSection('registros'); abrirModalParticipante();" class="quick-access-card" style="text-align:left; border:1px solid var(--color-border); background:var(--color-surface); cursor:pointer;">
+            <div class="qa-icon" style="background: rgba(234,171,0,0.1); color: var(--uabc-dorado);">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+            </div>
+            <div class="qa-info">
+              <span class="qa-title">Nuevo Usuario</span>
+              <span class="qa-desc">Registrar asistente a evento</span>
+            </div>
+          </button>
+
+          <button type="button" onclick="showSection('qr');" class="quick-access-card" style="text-align:left; border:1px solid var(--color-border); background:var(--color-surface); cursor:pointer;">
+            <div class="qa-icon" style="background: rgba(59,130,246,0.1); color: #3b82f6;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><rect x="7" y="7" width="3" height="3"></rect><rect x="14" y="7" width="3" height="3"></rect><rect x="7" y="14" width="3" height="3"></rect><rect x="14" y="14" width="3" height="3"></rect></svg>
+            </div>
+            <div class="qa-info">
+              <span class="qa-title">Escanear QR</span>
+              <span class="qa-desc">Registrar asistencia rápida</span>
+            </div>
+          </button>
+
+          <button type="button" onclick="showSection('eventos'); openModalEvento(null);" class="quick-access-card" style="text-align:left; border:1px solid var(--color-border); background:var(--color-surface); cursor:pointer;">
+            <div class="qa-icon" style="background: rgba(168,85,247,0.1); color: #a855f7;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            </div>
+            <div class="qa-info">
+              <span class="qa-title">Nuevo Evento</span>
+              <span class="qa-desc">Crear un evento desde cero</span>
+            </div>
+          </button>
+        </div>
+
+        <h3 style="font-size: var(--text-base); margin-bottom: var(--space-3); color: var(--color-text);">Métricas Globales</h3>
         <!-- KPI Cards -->
         <div class="kpi-grid">
           <div class="kpi-card">
@@ -167,18 +211,12 @@
               <select id="filtro-facultad" class="form-select form-select--sm" aria-label="Filtrar por facultad">
                 <option value="">Todas las facultades</option>
               </select>
-              <select id="filtro-estatus" class="form-select form-select--sm" aria-label="Filtrar por estatus">
-                <option value="">Cualquier Estatus</option>
-                <option value="0">Pendiente</option>
-                <option value="1">Asistió</option>
-                <option value="2">Cancelado</option>
-              </select>
             </div>
             
             <div style="display:flex; gap:10px;">
-              <button class="btn btn-primary" onclick="openAdminModal('modal-nuevo-asistente')">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Nuevo Asistente
+              <button class="btn btn-primary btn-sm" onclick="abrirModalParticipante()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="17" y1="11" x2="23" y2="11"/></svg>
+                Nuevo
               </button>
               <button class="btn btn-secondary btn-sm" onclick="exportarExcelAsistentes()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -568,8 +606,8 @@
 
   <!-- MODAL: ÉXITO GENÉRICO -->
   <div class="modal-overlay" id="modal-exito" role="dialog" aria-modal="true" hidden>
-    <div class="modal modal--sm" style="text-align: center; padding: 30px 20px;">
-      <div style="color: var(--uabc-verde); margin-bottom: 15px; display: flex; justify-content: center;">
+    <div class="modal modal--sm modal-centered">
+      <div class="modal-icon-wrapper success">
         <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
       </div>
       <h2 class="modal-title" style="margin-bottom: 10px;">¡Completado!</h2>
@@ -580,29 +618,29 @@
 
   <!-- MODAL: CONFIRMAR ELIMINAR -->
   <div class="modal-overlay" id="modal-confirmar-eliminar" role="dialog" aria-modal="true" hidden>
-    <div class="modal modal--sm" style="text-align: center; padding: 30px 20px;">
-      <div style="color: var(--color-error); margin-bottom: 15px; display: flex; justify-content: center;">
+    <div class="modal modal--sm modal-centered">
+      <div class="modal-icon-wrapper error">
         <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
       </div>
       <h2 class="modal-title" style="margin-bottom: 10px;">¿Estás seguro?</h2>
-      <p style="color: var(--color-text-muted); margin-bottom: 25px; line-height: 1.5;">Esta acción no se puede deshacer. El registro será eliminado permanentemente de la base de datos.</p>
-      <div style="display: flex; gap: 10px;">
-        <button type="button" class="btn btn-ghost" onclick="closeAdminModal('modal-confirmar-eliminar')" style="flex: 1;">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="btn-confirmar-eliminar" style="flex: 1; background-color: var(--color-error); border-color: var(--color-error);" onclick="ejecutarEliminarFaq()">Eliminar</button>
+      <p class="modal-text-muted">Esta acción no se puede deshacer. El registro será eliminado permanentemente de la base de datos.</p>
+      <div class="form-row">
+        <button type="button" class="btn btn-ghost btn-block" onclick="closeAdminModal('modal-confirmar-eliminar')" style="flex: 1;">Cancelar</button>
+        <button type="button" class="btn btn-primary btn-block" id="btn-confirmar-eliminar" style="flex: 1; background-color: var(--color-error); border-color: var(--color-error);" onclick="ejecutarEliminarFaq()">Eliminar</button>
       </div>
     </div>
   </div>
 
   <div class="modal-overlay" id="modal-confirmar-eliminar-evento" role="dialog" aria-modal="true" hidden>
-    <div class="modal modal--sm" style="text-align: center; padding: 30px 20px;">
-      <div style="color: var(--color-error); margin-bottom: 15px; display: flex; justify-content: center;">
+    <div class="modal modal--sm modal-centered">
+      <div class="modal-icon-wrapper error">
         <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
       </div>
       <h2 class="modal-title" style="margin-bottom: 10px;">¿Eliminar evento?</h2>
       <p id="texto-confirmar-eliminar-evento" style="color: var(--color-text-muted); margin-bottom: 25px; line-height: 1.5;">Esta acción no se puede deshacer. El evento y su imagen asociada serán eliminados permanentemente de la base de datos y de Cloudinary.</p>
-      <div style="display: flex; gap: 10px;">
-        <button type="button" class="btn btn-ghost" onclick="closeAdminModal('modal-confirmar-eliminar-evento')" style="flex: 1;">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="btn-confirmar-eliminar-evento" style="flex: 1; background-color: var(--color-error); border-color: var(--color-error);" onclick="ejecutarEliminarEvento()">Eliminar</button>
+      <div class="form-row">
+        <button type="button" class="btn btn-ghost btn-block" onclick="closeAdminModal('modal-confirmar-eliminar-evento')" style="flex: 1;">Cancelar</button>
+        <button type="button" class="btn btn-primary btn-block" id="btn-confirmar-eliminar-evento" style="flex: 1; background-color: var(--color-error); border-color: var(--color-error);" onclick="ejecutarEliminarEvento()">Eliminar</button>
       </div>
     </div>
   </div>
@@ -636,7 +674,7 @@
           </div>
 
           <div class="modal-footer">
-            <button type="button" class="btn btn-ghost" onclick="closeAdminModal('modal-usuario')">Cancelar</button>
+            <button type="button" class="btn btn-ghost btn-block" onclick="closeAdminModal('modal-usuario')">Cancelar</button>
             <button type="submit" class="btn btn-primary">Guardar Usuario</button>
           </div>
         </form>
@@ -645,15 +683,15 @@
   </div>
   
   <div class="modal-overlay" id="modal-confirmar-eliminar-usuario" role="dialog" aria-modal="true" hidden>
-    <div class="modal modal--sm" style="text-align: center; padding: 30px 20px;">
-      <div style="color: var(--color-error); margin-bottom: 15px; display: flex; justify-content: center;">
+    <div class="modal modal--sm modal-centered">
+      <div class="modal-icon-wrapper error">
         <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
       </div>
       <h2 class="modal-title" style="margin-bottom: 10px;">¿Eliminar usuario?</h2>
-      <p style="color: var(--color-text-muted); margin-bottom: 25px; line-height: 1.5;">Esta acción no se puede deshacer. El administrador perderá el acceso al sistema de inmediato.</p>
-      <div style="display: flex; gap: 10px;">
-        <button type="button" class="btn btn-ghost" onclick="closeAdminModal('modal-confirmar-eliminar-usuario')" style="flex: 1;">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="btn-confirmar-eliminar-usuario" style="flex: 1; background-color: var(--color-error); border-color: var(--color-error);" onclick="ejecutarEliminarUsuario()">Eliminar</button>
+      <p class="modal-text-muted">Esta acción no se puede deshacer. El administrador perderá el acceso al sistema de inmediato.</p>
+      <div class="form-row">
+        <button type="button" class="btn btn-ghost btn-block" onclick="closeAdminModal('modal-confirmar-eliminar-usuario')" style="flex: 1;">Cancelar</button>
+        <button type="button" class="btn btn-primary btn-block" id="btn-confirmar-eliminar-usuario" style="flex: 1; background-color: var(--color-error); border-color: var(--color-error);" onclick="ejecutarEliminarUsuario()">Eliminar</button>
       </div>
     </div>
   </div>
@@ -673,7 +711,7 @@
     <div class="modal-overlay" id="modal-participante" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-participante" hidden>
       <div class="modal modal--lg" style="max-width: 600px;">
         <div class="modal-header">
-          <h3 class="modal-title" id="titulo-modal-participante">Editar Participante</h3>
+          <h3 class="modal-title" id="titulo-modal-participante">Nuevo Participante</h3>
           <button class="modal-close" aria-label="Cerrar modal" onclick="closeAdminModal('modal-participante')">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -683,11 +721,11 @@
             <input type="hidden" id="part-id" name="id" value="">
             
             <div class="form-row">
-              <div class="form-group" style="flex:1;">
+              <div class="form-group">
                 <label for="part-nombre" class="form-label">Nombre *</label>
                 <input type="text" id="part-nombre" name="nombre" class="form-input" required>
               </div>
-              <div class="form-group" style="flex:1;">
+              <div class="form-group">
                 <label for="part-apellidos" class="form-label">Apellidos *</label>
                 <input type="text" id="part-apellidos" name="apellidos" class="form-input" required>
               </div>
@@ -699,7 +737,7 @@
             </div>
 
             <div class="form-row">
-              <div class="form-group" style="flex:1;">
+              <div class="form-group">
                 <label for="part-tipo" class="form-label">Tipo Asistente *</label>
                 <select id="part-tipo" name="tipo_asistente" class="form-select" required>
                   <option value="egresado">Egresado</option>
@@ -708,7 +746,7 @@
                   <option value="invitado">Invitado</option>
                 </select>
               </div>
-              <div class="form-group" style="flex:1;">
+              <div class="form-group">
                 <label for="part-evento" class="form-label">Evento *</label>
                 <select id="part-evento" name="evento_id" class="form-select" required>
                   <option value="">Selecciona un evento</option>
@@ -717,13 +755,13 @@
             </div>
 
             <div class="form-row">
-              <div class="form-group" style="flex:1;">
+              <div class="form-group">
                 <label for="part-campus" class="form-label">Campus</label>
                 <select id="part-campus" name="campus_id" class="form-select">
                   <option value="">Selecciona campus</option>
                 </select>
               </div>
-              <div class="form-group" style="flex:1;">
+              <div class="form-group">
                 <label for="part-facultad" class="form-label">Facultad</label>
                 <select id="part-facultad" name="facultad_id" class="form-select">
                   <option value="">Selecciona facultad</option>
@@ -732,13 +770,13 @@
             </div>
 
             <div class="form-row">
-              <div class="form-group" style="flex:1;">
+              <div class="form-group">
                 <label for="part-carrera" class="form-label">Carrera</label>
                 <select id="part-carrera" name="carrera_id" class="form-select">
                   <option value="">Selecciona carrera</option>
                 </select>
               </div>
-              <div class="form-group" style="flex:1;">
+              <div class="form-group">
                 <label for="part-generacion" class="form-label">Generación</label>
                 <input type="text" id="part-generacion" name="generacion" class="form-input" placeholder="Ej. 2015-2019">
               </div>
@@ -762,24 +800,10 @@
       </div>
     </div>
 
-    <div class="modal-overlay" id="modal-nuevo-asistente" role="dialog" aria-modal="true" hidden>
-    <div class="modal" style="width: 95%; max-width: 900px; height: 90vh; display: flex; flex-direction: column; padding: 0;">
-      <div class="modal-header" style="padding: 15px 20px; border-bottom: 1px solid #eee;">
-        <h2 class="modal-title">Registrar Nuevo Asistente</h2>
-        <button class="modal-close" onclick="closeAdminModal('modal-nuevo-asistente'); cargarTablaAsistentes();">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-      </div>
-      <div class="modal-body" style="flex: 1; padding: 0; overflow: hidden;">
-        <iframe src="../index.html" style="width: 100%; height: 100%; border: none;"></iframe>
-      </div>
-    </div>
-  </div>
-
-  <script src="../assets/js/toast.js"></script>
-  <script src="../assets/js/admin_participante_crud.js"></script>
-  <script src="../assets/js/admin.js"></script>
-  <script src="../assets/js/qr-scanner.js"></script>
+  <script src="../assets/js/toast.js?v=2"></script>
+  <script src="../assets/js/admin_participante_crud.js?v=2"></script>
+  <script src="../assets/js/admin.js?v=2"></script>
+  <script src="../assets/js/qr-scanner.js?v=2"></script>
 
   <script>
     (function () {

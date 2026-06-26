@@ -9,6 +9,9 @@ try {
     $todosEventos = [];
 }
 $currentEventoId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+if ($currentEventoId === 0 && count($todosEventos) > 0) {
+    $currentEventoId = $todosEventos[0]['id'];
+}
 ?>
 
 <!DOCTYPE html>
@@ -17,6 +20,10 @@ $currentEventoId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Participantes del Evento - UABC</title>
+  <link rel="icon" type="image/x-icon" href="../assets/images/Alumni.ico">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/base.css">
   <link rel="stylesheet" href="../assets/css/style.css">
   <link rel="stylesheet" href="../assets/css/components.css">
@@ -38,12 +45,12 @@ $currentEventoId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
       </button>
       <a href="admin.php" class="back-link" aria-label="Volver al Panel">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        Volver al Panel
+        <span class="back-link-text">Volver al Panel</span>
       </a>
-      <select id="event-title" class="p-header-title event-selector" onchange="if(this.value) window.location.href='participantes.php?id='+this.value" style="flex:1;min-width:0;background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.3); padding: 0.5rem 1rem; font-size: 1.5rem; font-weight: bold; border-radius: var(--radius-md); outline: none; cursor: pointer; appearance: none; background-image: url('data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'20\' height=\'20\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=\'2\'><polyline points=\'6 9 12 15 18 9\'/></svg>'); background-repeat: no-repeat; background-position: right 1rem center; padding-right: 3rem;">
-        <option value="" style="background: var(--uabc-verde); color: white;">-- Cambiar de Evento --</option>
+      <select id="event-title" class="p-header-select event-selector" onchange="if(this.value) window.location.href='participantes.php?id='+this.value">
+        <option value="">-- Cambiar de Evento --</option>
         <?php foreach($todosEventos as $ev): ?>
-          <option value="<?= $ev['id'] ?>" style="background: var(--uabc-verde); color: white;" <?= $ev['id'] == $currentEventoId ? 'selected' : '' ?>>
+          <option value="<?= $ev['id'] ?>" <?= $ev['id'] == $currentEventoId ? 'selected' : '' ?>>
             <?= htmlspecialchars($ev['nombre']) ?>
           </option>
         <?php endforeach; ?>
@@ -118,7 +125,7 @@ $currentEventoId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             <strong id="total-count">0</strong> total en el evento
           </div>
           <div class="filter-buttons">
-            <button class="btn-icon" onclick="abrirModalParticipante()" style="color: var(--uabc-verde); border-color: var(--uabc-verde); font-weight: bold;">
+            <button class="btn-icon" onclick="abrirModalParticipante()" title="Registrar nuevo asistente" style="color: var(--uabc-verde); border-color: var(--uabc-verde); font-weight: bold;">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
               Nuevo
             </button>
@@ -215,7 +222,7 @@ $currentEventoId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
           <div class="chart-wrapper">
             <div class="chart-scroll-area">
-              <div id="chart-container-inner" style="position:relative;width:100%;">
+              <div id="chart-container-inner" class="chart-container-inner">
                 <canvas id="chart-facultades"></canvas>
               </div>
             </div>
@@ -241,11 +248,11 @@ $currentEventoId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             <input type="hidden" id="part-id" name="id" value="">
             
             <div class="form-row">
-              <div class="form-group" style="flex:1;">
+              <div class="form-group">
                 <label for="part-nombre" class="form-label">Nombre *</label>
                 <input type="text" id="part-nombre" name="nombre" class="form-input" required>
               </div>
-              <div class="form-group" style="flex:1;">
+              <div class="form-group">
                 <label for="part-apellidos" class="form-label">Apellidos *</label>
                 <input type="text" id="part-apellidos" name="apellidos" class="form-input" required>
               </div>
@@ -257,16 +264,17 @@ $currentEventoId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             </div>
 
             <div class="form-row">
-              <div class="form-group" style="flex:1;">
+              <div class="form-group">
                 <label for="part-tipo" class="form-label">Tipo Asistente *</label>
                 <select id="part-tipo" name="tipo_asistente" class="form-select" required>
-                  <option value="egresado">Egresado</option>
                   <option value="estudiante">Estudiante</option>
+                  <option value="egresado">Egresado</option>
                   <option value="docente">Docente</option>
-                  <option value="invitado">Invitado</option>
+                  <option value="empleado">Empleado Administrativo</option>
+                  <option value="publico">Público en General</option>
                 </select>
               </div>
-              <div class="form-group" style="flex:1;">
+              <div class="form-group">
                 <label for="part-evento" class="form-label">Evento *</label>
                 <select id="part-evento" name="evento_id" class="form-select" required>
                   <option value="">Selecciona un evento</option>
@@ -275,13 +283,13 @@ $currentEventoId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             </div>
 
             <div class="form-row">
-              <div class="form-group" style="flex:1;">
+              <div class="form-group">
                 <label for="part-campus" class="form-label">Campus</label>
                 <select id="part-campus" name="campus_id" class="form-select">
                   <option value="">Selecciona campus</option>
                 </select>
               </div>
-              <div class="form-group" style="flex:1;">
+              <div class="form-group">
                 <label for="part-facultad" class="form-label">Facultad</label>
                 <select id="part-facultad" name="facultad_id" class="form-select">
                   <option value="">Selecciona facultad</option>
@@ -290,13 +298,13 @@ $currentEventoId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
             </div>
 
             <div class="form-row">
-              <div class="form-group" style="flex:1;">
+              <div class="form-group">
                 <label for="part-carrera" class="form-label">Carrera</label>
                 <select id="part-carrera" name="carrera_id" class="form-select">
                   <option value="">Selecciona carrera</option>
                 </select>
               </div>
-              <div class="form-group" style="flex:1;">
+              <div class="form-group">
                 <label for="part-generacion" class="form-label">Generación</label>
                 <input type="text" id="part-generacion" name="generacion" class="form-input" placeholder="Ej. 2015-2019">
               </div>
@@ -311,7 +319,7 @@ $currentEventoId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
               </select>
             </div>
 
-            <div class="form-actions" style="margin-top: 20px;">
+            <div class="form-actions">
               <button type="button" class="btn btn-ghost" onclick="closeAdminModal('modal-participante')">Cancelar</button>
               <button type="submit" class="btn btn-primary" id="btn-submit-participante">Guardar Participante</button>
             </div>
@@ -344,10 +352,9 @@ function switchTab(tab) {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  const params   = new URLSearchParams(window.location.search);
-  const eventoId = params.get('id');
-  if (!eventoId) {
-    showToast('ID de evento no encontrado', 'error');
+  const eventoId = <?= $currentEventoId ?>;
+  if (!eventoId || eventoId === 0) {
+    showToast('No hay eventos disponibles', 'error');
     setTimeout(() => { window.location.href = 'admin.php'; }, 2000);
     return;
   }
@@ -383,8 +390,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (result.status === 'success') {
         allData = result.data;
         if (result.evento_nombre) {
-          // document.getElementById('event-title').textContent = result.evento_nombre;
-          document.title = result.evento_nombre + ' - Participantes';
           document.title = result.evento_nombre + ' – Participantes';
         }
         if (totalCountEl) totalCountEl.textContent = allData.length;
@@ -459,14 +464,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Estado vacío: sin participantes
     if (!data || data.length === 0) {
       statsContainer.innerHTML = `
-        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;padding:4rem 2rem;text-align:center;gap:1rem;">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#c0c0c0" stroke-width="1.5">
-            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/>
-            <line x1="6" y1="20" x2="6" y2="14"/>
-            <circle cx="18" cy="7" r="3" stroke="#c0c0c0" fill="none"/>
+        <div class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="2">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="3" y1="9" x2="21" y2="9"></line>
+            <line x1="9" y1="21" x2="9" y2="9"></line>
           </svg>
-          <h3 style="margin:0;color:#999;font-size:1.1rem;font-weight:600;">Sin datos para este evento</h3>
-          <p style="margin:0;color:#bbb;font-size:0.875rem;">Aún no hay participantes registrados.<br>Las estadísticas aparecerán aquí cuando haya registros.</p>
+          <h3>Sin datos para este evento</h3>
+          <p>Aún no hay participantes registrados.<br>Las estadísticas aparecerán aquí cuando haya registros.</p>
         </div>`;
       return;
     }
@@ -603,16 +608,9 @@ document.addEventListener('DOMContentLoaded', () => {
   function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
 
 });
-
 </script>
-</div> <!-- fin admin-layout -->
-<script>
-    // PASO 1: Definir la variable que espera tu JS
-    const EVENTO_ID = <?php echo $currentEventoId; ?>;
-</script>
-
-<script src="../assets/js/admin_participante_crud.js"></script>
-<script src="../assets/js/admin.js"></script>
-<script src="../assets/js/sidebar.js"></script>
+  </div> <!-- fin admin-layout -->
+  <script src="../assets/js/admin.js?v=2"></script>
+  <script src="../assets/js/sidebar.js?v=2"></script>
 </body>
 </html>
