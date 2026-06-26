@@ -603,9 +603,16 @@ document.addEventListener('DOMContentLoaded', () => {
   function cap(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
 
 });
+
 </script>
-  </div> <!-- fin admin-layout -->
-  <script src="../assets/js/admin.js"></script>
-  <script src="../assets/js/sidebar.js"></script>
+</div> <!-- fin admin-layout -->
+<script>
+    // PASO 1: Definir la variable que espera tu JS
+    const EVENTO_ID = <?php echo $currentEventoId; ?>;
+</script>
+
+<script src="../assets/js/admin_participante_crud.js"></script>
+<script src="../assets/js/admin.js"></script>
+<script src="../assets/js/sidebar.js"></script>
 </body>
 </html>

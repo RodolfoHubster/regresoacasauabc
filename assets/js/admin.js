@@ -599,9 +599,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const selectEvento   = document.getElementById('filtro-evento');
     const selectCampus   = document.getElementById('filtro-campus');
     const selectFacultad = document.getElementById('filtro-facultad');
+    const selectEstatus  = document.getElementById('filtro-estatus');
 
     if (selectEvento)   selectEvento.addEventListener('change', aplicarFiltros);
     if (selectFacultad) selectFacultad.addEventListener('change', aplicarFiltros);
+    if (selectEstatus)  selectEstatus.addEventListener('change', aplicarFiltros);
 
     // Cuando cambia campus: recargamos las facultades de ese campus Y aplicamos filtros
     if (selectCampus) {
@@ -619,31 +621,72 @@ function aplicarFiltros() {
     const selectEvento   = document.getElementById('filtro-evento');
     const selectCampus   = document.getElementById('filtro-campus');
     const selectFacultad = document.getElementById('filtro-facultad');
+    const selectEstatus  = document.getElementById('filtro-estatus'); // <- EL NUEVO FILTRO
     
     const eventoSeleccionado   = selectEvento   ? selectEvento.value   : "";
     const campusSeleccionado   = selectCampus   ? selectCampus.value   : "";
     const facultadSeleccionada = selectFacultad ? selectFacultad.value : "";
+    const estatusSeleccionado  = selectEstatus  ? selectEstatus.value  : "";
 
     // Empezamos con todos los asistentes
     let filtrados = asistentesCargados;
 
-    // 1. Filtrar por evento (si hay uno seleccionado)
     if (eventoSeleccionado !== "") {
         filtrados = filtrados.filter(a => a.evento_nombre === eventoSeleccionado);
     }
-
-    // 2. Filtrar por campus (si hay uno seleccionado)
     if (campusSeleccionado !== "") {
         filtrados = filtrados.filter(a => a.campus === campusSeleccionado);
     }
-
-    // 3. Filtrar por facultad (si hay una seleccionada)
     if (facultadSeleccionada !== "") {
-        filtrados = filtrados.filter(a => a.facultad_nombre === facultadSeleccionada);
+        filtrados = filtrados.filter(a => (a.facultad_nombre === facultadSeleccionada || a.facultad_otra === facultadSeleccionada));
+    }
+    
+    // 🪄 MAGIA: Filtrar por estatus (Pendiente, Asistió, Cancelado)
+    if (estatusSeleccionado !== "") {
+        filtrados = filtrados.filter(a => parseInt(a.asistencia) === parseInt(estatusSeleccionado));
     }
 
-    // Dibujamos la tabla con el resultado de los filtros
+    // Dibujamos la tabla filtrada
     renderTablaAsistentes(filtrados);
+    
+    // Dibujamos las gráficas filtradas
+    if (typeof renderGraficas === 'function') renderGraficas(filtrados);
+}
+
+// Variables para evitar duplicar gráficas
+let chartCampusObj = null;
+let chartFacultadObj = null;
+
+function renderGraficas(asistentes) {
+    const ctxCampus = document.getElementById('chartCampus');
+    const ctxFacultad = document.getElementById('chartFacultad');
+    if (!ctxFacultad) return; // La de campus no la pusiste en el HTML, pero validamos la de facultad
+
+    const conteoFacultad = {};
+
+    asistentes.forEach(a => {
+        // Graficar ASISTENCIAS REALES por facultad
+        if (parseInt(a.asistencia) === 1) {
+            const f = a.facultad_nombre || a.facultad_otra || 'No especificada';
+            conteoFacultad[f] = (conteoFacultad[f] || 0) + 1;
+        }
+    });
+
+    if(chartFacultadObj) chartFacultadObj.destroy();
+
+    // Crear Gráfica de Asistencia por Facultad (Barras)
+    chartFacultadObj = new Chart(ctxFacultad, {
+        type: 'bar',
+        data: {
+            labels: Object.keys(conteoFacultad),
+            datasets: [{
+                label: 'Asistentes Reales',
+                data: Object.values(conteoFacultad),
+                backgroundColor: '#00723F'
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { title: { display: true, text: 'Asistencias Reales por Facultad' } } }
+    });
 }
 
 // ─── EXPORTAR A EXCEL: ASISTENTES (Con filtros: evento, campus, facultad) ───
@@ -651,13 +694,15 @@ function exportarExcelAsistentes() {
     const selectEvento   = document.getElementById('filtro-evento');
     const selectCampus   = document.getElementById('filtro-campus');
     const selectFacultad = document.getElementById('filtro-facultad');
+    const selectEstatus  = document.getElementById('filtro-estatus');
     
     const evento   = selectEvento   ? selectEvento.value   : "";
     const campus   = selectCampus   ? selectCampus.value   : "";
     const facultad = selectFacultad ? selectFacultad.value : "";
+    const estatus  = selectEstatus  ? selectEstatus.value  : "";
 
     // Armamos la URL pasándole los tres filtros seleccionados
-    const url = `php/exportar_asistentes.php?evento=${encodeURIComponent(evento)}&campus=${encodeURIComponent(campus)}&facultad=${encodeURIComponent(facultad)}`;
+    const url = `php/exportar_asistentes.php?evento=${encodeURIComponent(evento)}&campus=${encodeURIComponent(campus)}&facultad=${encodeURIComponent(facultad)}&estatus=${encodeURIComponent(estatus)}`;
     
     // Redirigir inicia la descarga del archivo sin cambiar de página
     window.location.href = url;
