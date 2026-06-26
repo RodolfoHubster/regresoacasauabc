@@ -12,11 +12,13 @@
 */
 .p-main {
   flex: 1;
-  min-height: 0;        /* Sin esto flexbox no activa el scroll interno */
+  min-width: 0;         /* Sin esto flexbox no activa el shrink horizontal */
+  min-height: 0;        /* Sin esto flexbox no activa el scroll interno vertical */
   overflow-y: auto;
   padding-block: var(--space-5);
   display: flex;
   flex-direction: column;
+  align-self: center;   /* Centra todo el bloque main dentro del layout, no a sus hijos */
   gap: var(--space-4);
   scroll-padding-top: var(--space-4);
 }
@@ -32,11 +34,12 @@
   box-shadow: var(--shadow-md);
   border-bottom: 3px solid var(--uabc-dorado);
   flex-shrink: 0;   /* Evita que el header se comprima en flexbox */
+  width: 100%;
 }
 
 .p-container {
+  width: 100%;      /* Clave vital: Forza a que NUNCA sea más grande que la pantalla */
   max-width: var(--content-wide);
-  margin-inline: auto;
   padding-inline: var(--space-4);
 }
 
@@ -225,6 +228,13 @@
   gap: var(--space-2);
 }
 
+/* Solo modificamos estos 3 botones para que el texto quepa, sin romper los botones cuadrados (editar/eliminar) de admin.css */
+.filter-buttons .btn-icon {
+  width: auto;
+  height: auto;
+  min-width: 0;
+}
+
 .btn-icon {
   display: inline-flex;
   align-items: center;
@@ -313,10 +323,17 @@
   color: var(--color-text);
   vertical-align: middle;
   background: var(--color-surface);
-  max-width: 220px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  line-height: 1.4;
+  /* Permitir que el texto largo (carreras, facultades) baje de línea */
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Evitar que las columnas cortas o botones se rompan */
+.admin-table td:last-child,
+.admin-table th:last-child { 
+  white-space: nowrap; 
+  width: 1%; /* Forza a que ocupe lo mínimo posible */
 }
 
 .admin-table tbody tr:last-child td { border-bottom: none; }
@@ -549,21 +566,23 @@ th.sort-desc .sort-svg               { transform: rotate(180deg); }
 @media (min-width: 960px) {
   .p-container { padding-inline: var(--space-8); }
 
-  /* Una sola fila de filtros */
+  /* Filtros arriba, acciones abajo para evitar que desborde la pantalla */
   .filters-bar {
-    grid-template-columns: 2fr 1fr 1fr 1fr auto;
-    grid-template-areas: "search tipo estatus qr actions";
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    grid-template-areas: 
+      "search tipo estatus qr"
+      "actions actions actions actions";
     gap: var(--space-4);
     padding: var(--space-4) var(--space-5);
     align-items: end;
   }
 
   .filter-actions {
-    flex-direction: column;
-    align-items: flex-end;
-    justify-content: flex-start;
-    border-top: none;
-    padding-top: 0;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-3);
   }
 
   /* Sombra de scroll lateral en tabla (scroll indicator) */
@@ -581,10 +600,26 @@ th.sort-desc .sort-svg               { transform: rotate(180deg); }
 }
 
 /* ================================================
-   14. RESPONSIVE — Móvil (≤599px): Tabla → Tarjetas
+   Ajustes intermedios para Laptops (960px - 1300px)
+   Para evitar que la tabla de 9 columnas haga overflow
+   ================================================ */
+@media (min-width: 960px) and (max-width: 1300px) {
+  .admin-table th,
+  .admin-table td {
+    padding: var(--space-2) var(--space-2) !important;
+    font-size: 12px;
+  }
+  .btn-icon {
+    min-height: 30px;
+    padding: 0 var(--space-4); /* Extendido a petición tuya para que no sobresalga el texto */
+  }
+}
+
+/* ================================================
+   14. RESPONSIVE — Tablet/Móvil (≤960px): Tabla → Tarjetas
    ================================================ */
 
-@media (max-width: 599px) {
+@media (max-width: 959px) {
   .p-header { padding-block: var(--space-3); }
 
   /* Tabs apilados */
